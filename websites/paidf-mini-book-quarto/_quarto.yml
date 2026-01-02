@@ -1,0 +1,50 @@
+project:
+  type: book
+  output-dir: docs
+  execute-dir: file
+book:
+  title: Data Flywheels and Public AI
+  author: Nicholas Vincent
+  date: 9/2/2025
+  chapters:
+    - index.qmd
+    - part: Concepts & Rationale
+      chapters:
+        - src/01a_intro.qmd
+        - src/01b_why.qmd
+        - src/01c_pipeworks.qmd
+        - src/01d_leverage.qmd
+        - src/01e_options_for_flywheel.qmd
+        - src/01f_ethics_compliance.qmd
+        - src/01g_upstream.qmd
+        - src/01h_failure_modes.qmd
+        - src/01i_record_generation_model.qmd
+    - part: 'Case Study: Low friction peer production'
+      chapters:
+        - src/2a_mvp.qmd
+        - src/2b_life_of_a_chat.qmd
+        - src/2c_terms.qmd
+        - src/2d_faq.qmd
+        - src/2e_code.qmd
+    - part: Updating this book
+      chapters:
+        - src/3a_contributing.qmd
+        - src/3b_ai_guidelines.qmd
+        - src/3c_future_directions.qmd
+    - discussions.qmd
+    - src/references.qmd
+    - part: Appendices
+      chapters:
+        - src/appendix1_llm_data.qmd
+        - src/appendix2_prefsig.qmd
+        - src/appendix3_example_legalterms.qmd
+        - src/appendix4_diffable_terms.qmd
+bibliography: src/references.bib
+format:
+  html:
+    theme: cosmo
+    page-footer:
+      center: |
+        Related Projects: [Data Licenses](https://datalicenses.org) · [Data Counterfactuals](https://datacounterfactuals.org) · [Data Napkin Math](https://exploringai.org) · [Shared References](https://sharedreferences.pages.dev)
+  pdf:
+    documentclass: scrreprt

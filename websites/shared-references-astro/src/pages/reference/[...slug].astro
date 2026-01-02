@@ -1,0 +1,713 @@
+---
+import { getCollection } from 'astro:content';
+import path from 'node:path';
+import { readdir, readFile } from 'node:fs/promises';
+import matter from 'gray-matter';
+import Layout from '../../layouts/Layout.astro';
+import { generateBibTeX, generateBibTeXFromRemote, getExternalSourceLabel, type CheckLog, type ReferenceData } from '../../lib/bibtex';
+import { parseCitations } from '../../lib/crossref';
+import networkData from '../../data/network.json';
+
+export async function getStaticPaths() {
+  // All helper functions must be inside getStaticPaths - Astro extracts this into a separate module
+  const IGNORED_PROJECTS = new Set(['shared-references', 'discussions']);
+
+  function getProjectLabel(project: string, title?: string): string {
+    if (title) return title;
+    return project;
+  }
+
+  function resolveContentRoot(): string {
+    if (process.env.EXTENOTE_CONTENT_ROOT) {
+      return path.resolve(process.env.EXTENOTE_CONTENT_ROOT);
+    }
+    return path.resolve(process.cwd(), '../../content');
+  }
+
+  const CONTENT_ROOT = resolveContentRoot();
+
+  async function listProjectDirs(): Promise<string[]> {
+    try {
+      const entries = await readdir(CONTENT_ROOT, { withFileTypes: true });
+      return entries
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .filter((name) => !IGNORED_PROJECTS.has(name) && !name.startsWith('.'));
+    } catch {
+      return [];
+    }
+  }
+
+  async function collectMarkdownFiles(dir: string, files: string[] = []): Promise<string[]> {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const entryPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await collectMarkdownFiles(entryPath, files);
+        continue;
+      }
+      if (entry.isFile() && entry.name.endsWith('.md')) {
+        files.push(entryPath);
+      }
+    }
+    return files;
+  }
+
+  async function buildProjectCitationIndex(projects: string[]): Promise<Map<string, Set<string>>> {
+    const index = new Map<string, Set<string>>();
+
+    for (const project of projects) {
+      const projectDir = path.join(CONTENT_ROOT, project);
+      let files: string[] = [];
+      try {
+        files = await collectMarkdownFiles(projectDir);
+      } catch {
+        continue;
+      }
+
+      for (const filePath of files) {
+        const raw = await readFile(filePath, 'utf-8');
+        const { content } = matter(raw);
+        const citations = parseCitations(content);
+        for (const citation of citations) {
+          const citationKey = citation.targetId;
+          const entry = index.get(citationKey);
+          if (entry) {
+            entry.add(project);
+          } else {
+            index.set(citationKey, new Set([project]));
+          }
+        }
+      }
+    }
+
+    return index;
+  }
+
+  const references = await getCollection('shared-references');
+  const projectDirs = await listProjectDirs();
+  const projectCitationIndex = await buildProjectCitationIndex(projectDirs);
+  const projectInfo = new Map(
+    (networkData.relatedProjects ?? []).map((project) => [project.name, project])
+  );
+
+  // Build citation key lookup
+  const refLookup = new Map(references.map(r => [r.data.citation_key || r.id, r]));
+
+  // Parse citations from body text and build indexes
+  // citedByIndex: citation_key -> papers that cite it
+  // citesIndex: paper id -> citation keys it cites
+  const citedByIndex: Record<string, Array<{ id: string; title: string; citationKey: string }>> = {};
+  const citesIndex: Record<string, string[]> = {};
+
+  for (const ref of references) {
+    // Parse [@citation_key] patterns from markdown body
+    const body = ref.body || '';
+    const citations = parseCitations(body);
+    const citedKeys = citations.map(c => c.targetId);
+
+    citesIndex[ref.id] = citedKeys;
+
+    // Build reverse index (who cites what)
+    for (const citedKey of citedKeys) {
+      if (!citedByIndex[citedKey]) {
+        citedByIndex[citedKey] = [];
+      }
+      citedByIndex[citedKey].push({
+        id: ref.id,
+        title: ref.data.title as string,
+        citationKey: ref.data.citation_key as string || ref.id,
+      });
+    }
+  }
+
+  return references.map((ref) => {
+    const citationKey = ref.data.citation_key || ref.id;
+    const citedBy = citedByIndex[citationKey] || [];
+    const citedProjectNames = Array.from(projectCitationIndex.get(citationKey) ?? []);
+    const citedInProjects = citedProjectNames
+      .map((project) => {
+        const info = projectInfo.get(project);
+        return {
+          name: project,
+          title: getProjectLabel(project, info?.title),
+          website: info?.website,
+        };
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
+
+    // Get papers this paper cites (from parsed body text)
+    const citedKeys = citesIndex[ref.id] || [];
+    const citesRefs = citedKeys
+      .map(key => refLookup.get(key))
+      .filter(Boolean)
+      .map(r => ({
+        id: r!.id,
+        title: r!.data.title as string,
+        citationKey: r!.data.citation_key as string || r!.id,
+      }));
+
+    return {
+      params: { slug: ref.id },
+      props: { reference: ref, citedBy, citesRefs, citedInProjects },
+    };
+  });
+}
+
+const { reference, citedBy, citesRefs, citedInProjects } = Astro.props;
+const data = reference.data;
+
+// Normalize fields
+const citationKey = data.citation_key || data.citekey || reference.id;
+const entryType = data.entry_type || data.type || 'misc';
+const authors = data.authors || (data.author ? [data.author] : []);
+const displayVenue = data.venue || data.journal;
+const keywords = Array.isArray(data.keywords) ? data.keywords : (data.keywords ? [data.keywords] : []);
+
+// Filter out collection tags for display
+const isCollectionTag = (tag: string) => tag.startsWith('dc:') || tag.startsWith('collection:');
+const displayTags = (data.tags || []).filter(tag => !isCollectionTag(tag));
+
+// Generate BibTeX
+const localBibTeX = generateBibTeX(data as ReferenceData, reference.id);
+const checkLog = data.check_log as CheckLog | undefined;
+const externalBibTeX = generateBibTeXFromRemote(checkLog, citationKey, entryType);
+const externalSourceLabel = getExternalSourceLabel(checkLog);
+
+// Verification status - support both old and new formats
+const verificationLog = data.verification_log;
+const verifiedManual = data.verified_manual;
+
+const getVerificationBadge = () => {
+  if (verifiedManual) {
+    return {
+      class: 'verified-manual',
+      text: `Manually verified ${verifiedManual}`,
+      icon: '✓',
+      description: 'A human reviewer confirmed this entry matches an authoritative source.'
+    };
+  }
+  if (verificationLog) {
+    const date = verificationLog.verified_at?.split('T')[0];
+    const sources = verificationLog.matches?.map(m => m.source).filter((v, i, a) => a.indexOf(v) === i).join(', ') || '';
+    switch (verificationLog.status) {
+      case 'valid':
+        return { class: 'verified-valid', text: `Verified ${date} (${sources})`, icon: '✓', description: 'Metadata matches external academic databases.' };
+      case 'mismatch':
+        return { class: 'verified-mismatch', text: `Needs review - ${verificationLog.mismatches?.length} issue(s)`, icon: '⚠', description: 'Some fields differ from external sources and need human review.' };
+      case 'outdated':
+        return { class: 'verified-outdated', text: `Has published version: ${verificationLog.published_venue}`, icon: '↑', description: 'A newer published version of this work exists.' };
+      case 'not_found':
+        return { class: 'verified-notfound', text: 'Not found in databases', icon: '?', description: 'Not indexed in OpenAlex or Semantic Scholar.' };
+      case 'unverifiable':
+        return { class: 'verified-unknown', text: 'Not verifiable (non-academic)', icon: '○', description: 'This entry type cannot be verified via academic databases.' };
+    }
+  }
+  // Use check_log if available
+  if (checkLog) {
+    const date = checkLog.checked_at?.split('T')[0];
+    const source = checkLog.checked_with?.split(':')[1] || checkLog.checked_with;
+
+    // Count mismatched fields for display
+    const mismatchedFields = checkLog.fields
+      ? Object.entries(checkLog.fields).filter(([_, v]: [string, any]) => v && v.match === false).map(([k]) => k)
+      : [];
+    const mismatchCount = mismatchedFields.length;
+
+    switch (checkLog.status) {
+      case 'confirmed':
+        return { class: 'verified-valid', text: `Confirmed ${date} (${source})`, icon: '✓', description: 'All fields match the external database.' };
+      case 'mismatch':
+        return {
+          class: 'verified-mismatch',
+          text: `Needs review - ${mismatchCount} field${mismatchCount !== 1 ? 's' : ''} differ`,
+          icon: '⚠',
+          description: `Fields with differences: ${mismatchedFields.join(', ') || 'unknown'}. Compare local vs external BibTeX below.`
+        };
+      case 'not_found':
+        return { class: 'verified-notfound', text: `Not found (${source})`, icon: '?', description: 'Not indexed in the checked database. May be too new, non-academic, or use a different identifier.' };
+      case 'error':
+        return { class: 'verified-error', text: 'Check failed', icon: '✗', description: 'An error occurred during verification. Try re-checking later.' };
+      case 'stale':
+        return { class: 'verified-stale', text: `Stale (checked ${date})`, icon: '↻', description: 'Verification is older than 30 days. Consider re-checking for fresh data.' };
+      case 'unchecked':
+        return { class: 'verified-unknown', text: 'Not yet checked', icon: '○', description: 'This entry has not been verified against external databases.' };
+      case 'unverifiable':
+        return { class: 'verified-unknown', text: 'Not verifiable', icon: '○', description: 'This entry type cannot be verified via academic databases.' };
+    }
+  }
+  // Legacy format fallback
+  if (data.verified_status === 'valid') {
+    return { class: 'verified-valid', text: `Auto-verified ${data.verified_auto}`, icon: '✓', description: 'Metadata matches external databases.' };
+  }
+  if (data.verified_status === 'mismatch') {
+    return { class: 'verified-mismatch', text: `Needs review`, icon: '⚠', description: 'Some fields differ from external sources.' };
+  }
+  return { class: 'verified-unknown', text: 'Not yet verified', icon: '○', description: 'Verification pending.' };
+};
+
+const badge = getVerificationBadge();
+---
+
+<Layout title={data.title}>
+  <a href="/" class="back-link">← Back to browse</a>
+
+  <article class="reference-detail">
+    <h1>{data.title}</h1>
+    <div class="title-divider"></div>
+
+    <div class="meta-row">
+      {data.year && <span class="year">{data.year}</span>}
+      <span class="entry-type">{entryType}</span>
+      <code class="citation-key">{citationKey}</code>
+      <span class={`verification-badge ${badge.class}`} title={badge.description}>
+        <span class="icon">{badge.icon}</span>
+        <span class="text">{badge.text}</span>
+      </span>
+    </div>
+    {badge.description && (
+      <p class="verification-description">{badge.description}</p>
+    )}
+
+    {authors.length > 0 && (
+      <div class="field">
+        <div class="field-label">Authors</div>
+        <div class="field-value authors-value">{authors.join(', ')}</div>
+      </div>
+    )}
+
+    {displayVenue && (
+      <div class="field">
+        <div class="field-label">Venue</div>
+        <div class="field-value">{displayVenue}</div>
+      </div>
+    )}
+
+    {data.abstract && (
+      <div class="field abstract-field">
+        <div class="field-label">Abstract</div>
+        <div class="field-value drop-cap">{data.abstract}</div>
+      </div>
+    )}
+
+    {displayTags.length > 0 && (
+      <div class="field">
+        <div class="field-label">Tags</div>
+        <div class="tags">
+          {displayTags.map((tag) => (
+            <a href={`/tags/${tag}`} class="tag">{tag}</a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {keywords.length > 0 && (
+      <div class="field">
+        <div class="field-label">Keywords</div>
+        <div class="field-value keywords-value">{keywords.join(', ')}</div>
+      </div>
+    )}
+
+    {(data.url || data.doi || data.eprint) && (
+      <div class="field links-field">
+        <div class="field-label">Links</div>
+        <div class="field-value external-links">
+          {data.url && (
+            <a href={data.url} target="_blank" rel="noopener" class="external-link">
+              <span class="link-icon">🔗</span> Source
+            </a>
+          )}
+          {data.doi && (
+            <a href={`https://doi.org/${data.doi}`} target="_blank" rel="noopener" class="external-link">
+              <span class="link-icon">📄</span> DOI: {data.doi}
+            </a>
+          )}
+          {data.eprint && (
+            <a href={`https://arxiv.org/abs/${data.eprint}`} target="_blank" rel="noopener" class="external-link">
+              <span class="link-icon">📑</span> arXiv: {data.eprint}
+            </a>
+          )}
+        </div>
+      </div>
+    )}
+
+    {data.institution && (
+      <div class="field">
+        <div class="field-label">Institution</div>
+        <div class="field-value">{data.institution}</div>
+      </div>
+    )}
+
+    {data.note && (
+      <div class="field note-field">
+        <div class="field-label">Note</div>
+        <div class="field-value note-value">{data.note}</div>
+      </div>
+    )}
+
+    {(citedBy.length > 0 || citesRefs.length > 0 || citedInProjects.length > 0) && (
+      <section class="citations-section">
+        <h2 class="citations-heading">Citations</h2>
+        <div class="citations-ornament"></div>
+
+        {citedInProjects.length > 0 && (
+          <div class="field">
+            <div class="field-label">Cited in projects ({citedInProjects.length})</div>
+            <ul class="citation-list">
+              {citedInProjects.map((project) => (
+                <li>
+                  {project.website ? (
+                    <a href={project.website} target="_blank" rel="noopener">
+                      {project.title}
+                    </a>
+                  ) : (
+                    <span>{project.title}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {citedBy.length > 0 && (
+          <div class="field">
+            <div class="field-label">Cited by ({citedBy.length})</div>
+            <ul class="citation-list">
+              {citedBy.map((paper) => (
+                <li>
+                  <a href={`/reference/${paper.id}`}>{paper.title}</a>
+                  <code class="citation-key-small">{paper.citationKey}</code>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {citesRefs.length > 0 && (
+          <div class="field">
+            <div class="field-label">References ({citesRefs.length})</div>
+            <ul class="citation-list">
+              {citesRefs.map((paper) => (
+                <li>
+                  <a href={`/reference/${paper.id}`}>{paper.title}</a>
+                  <code class="citation-key-small">{paper.citationKey}</code>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+    )}
+
+    <section class="bibtex-section">
+      <h2 class="bibtex-heading">BibTeX</h2>
+      <div class="bibtex-ornament"></div>
+
+      <div class="bibtex-tabs">
+        <div class="bibtex-tab-group">
+          <div class="bibtex-tab-header">
+            <span class="bibtex-tab-label">Local Entry</span>
+            <button class="copy-button" data-bibtex="local" title="Copy to clipboard">
+              <span class="copy-icon">⎘</span>
+              <span class="copy-text">Copy</span>
+            </button>
+          </div>
+          <pre class="bibtex-code" id="bibtex-local">{localBibTeX}</pre>
+        </div>
+
+        <div class="bibtex-tab-group external">
+          <div class="bibtex-tab-header">
+            <span class="bibtex-tab-label">
+              {externalBibTeX ? `From ${externalSourceLabel}` : 'External Source'}
+            </span>
+            {externalBibTeX && (
+              <button class="copy-button" data-bibtex="external" title="Copy to clipboard">
+                <span class="copy-icon">⎘</span>
+                <span class="copy-text">Copy</span>
+              </button>
+            )}
+          </div>
+          {externalBibTeX ? (
+            <pre class="bibtex-code" id="bibtex-external">{externalBibTeX}</pre>
+          ) : (
+            <div class="bibtex-pending">
+              {checkLog?.status === 'not_found' ? (
+                <p class="bibtex-note">Not found in external databases.</p>
+              ) : checkLog?.status === 'unverifiable' ? (
+                <p class="bibtex-note">Not available for this entry type.</p>
+              ) : (
+                <p class="bibtex-note">
+                  Syncing with external sources in progress.
+                  <span class="bibtex-note-muted">Check back soon for verified metadata.</span>
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  </article>
+</Layout>
+
+<script>
+  // Copy to clipboard functionality
+  document.querySelectorAll('.copy-button').forEach(button => {
+    button.addEventListener('click', async () => {
+      const target = button.getAttribute('data-bibtex');
+      const preElement = document.getElementById(`bibtex-${target}`);
+      if (preElement) {
+        try {
+          await navigator.clipboard.writeText(preElement.textContent || '');
+          const textEl = button.querySelector('.copy-text');
+          if (textEl) {
+            const original = textEl.textContent;
+            textEl.textContent = 'Copied!';
+            setTimeout(() => {
+              textEl.textContent = original;
+            }, 2000);
+          }
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .title-divider {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.8rem;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .title-divider::before {
+    content: '─── ✦ ───';
+  }
+
+  .authors-value {
+    font-style: italic;
+  }
+
+  .keywords-value {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  .abstract-field {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .external-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .link-icon {
+    font-size: 0.9rem;
+  }
+
+  .note-field {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-inset);
+    border-left: 3px solid var(--border-ornate);
+  }
+
+  .note-value {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  /* Citations Section Styles */
+  .citations-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .citations-heading {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--text);
+    margin: 0 0 0.25rem 0;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .citations-ornament {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.7rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .citations-ornament::before {
+    content: '─── ◇ ───';
+  }
+
+  .citation-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+  }
+
+  .citation-list li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  .citation-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--border-ornate);
+  }
+
+  .citation-key-small {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.3rem;
+    background: var(--bg-inset);
+    border-radius: 2px;
+  }
+
+  /* BibTeX Section Styles */
+  .bibtex-section {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border);
+  }
+
+  .bibtex-heading {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--text);
+    margin: 0 0 0.25rem 0;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .bibtex-ornament {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.7rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .bibtex-ornament::before {
+    content: '─── ◆ ───';
+  }
+
+  .bibtex-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .bibtex-tab-group {
+    background: var(--bg-inset, #f8f6f2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bibtex-tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bibtex-tab-label {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .copy-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-family: var(--font-body);
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .copy-button:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .copy-icon {
+    font-size: 0.9rem;
+  }
+
+  .bibtex-code {
+    margin: 0;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+    background: transparent;
+    overflow-x: auto;
+  }
+
+  .bibtex-pending {
+    padding: 1rem;
+  }
+
+  .bibtex-note {
+    margin: 0;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .bibtex-note-muted {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--border-ornate);
+  }
+
+  .bibtex-tab-group.external .bibtex-tab-header {
+    background: linear-gradient(to right, var(--bg-card), var(--bg-inset, #f8f6f2));
+  }
+
+  @media (min-width: 768px) {
+    .bibtex-tabs {
+      flex-direction: row;
+    }
+
+    .bibtex-tab-group {
+      flex: 1;
+    }
+  }
+</style>

@@ -1,0 +1,267 @@
+---
+type: book_chapter
+title: The Ranking Mechanism
+visibility: public
+---
+# The Ranking Mechanism {#sec-ranking-mechanism}
+
+This chapter establishes that "ranking" is not merely a useful metaphor for what language models do—it's a mechanistically accurate description. We walk through the technical details at an accessible level, with full mathematical treatment in Appendix A.
+
+## The Core Claim
+
+**Claim**: Autoregressive language models, at each generation step, produce a ranking over all possible next tokens. The output is sampled from this ranked distribution. This is not analogous to ranking—it *is* ranking.
+
+**Scope**: We make no claims about whether this ranking constitutes "understanding," "intelligence," or any other cognitive property. The ranking framing is a description of mechanism, not phenomenology.
+
+::: {.callout-important}
+## A Note on What We're Not Claiming
+
+We are not making the ideological claim that "everything is literally ranking" or that ranking is the *only* useful lens for understanding AI. We acknowledge that:
+
+- Many AI systems don't have an explicit ranking objective (e.g., some autoencoders, generative adversarial networks)
+- The latent space and continuous representations are also valid and useful descriptions
+- "Ranking" doesn't explain *why* systems work well, only *what* they do at the output stage
+
+What we *are* claiming is that **two critical use cases for LLMs and related technologies as they exist right now** involve:
+
+1. **Outputs that effectively rank chunks** — The softmax over vocabulary produces a ranking of tokens
+2. **Outputs that rank decisions** — Agents using LLMs rank possible actions via the same mechanism
+
+And in **both cases**, there is **always causal dependence on data**: some shift in training data could cause a re-ranking. This causal dependence is central to policy, especially to setting new kinds of collective contracts around data.
+:::
+
+
+## How Token Prediction Works
+
+### The Setup
+
+A language model operates over a **vocabulary** $V$—the set of all tokens the model knows. Modern models have vocabularies of 50,000 to 150,000 tokens. Each token is a word, subword, or character sequence.
+
+When you give the model a **context** (your prompt plus any previous output), the model must decide: what token comes next?
+
+### The Forward Pass
+
+The model performs these steps:
+
+1. **Embed the context**: Convert each token in the context to a numerical vector (a point in a high-dimensional space)
+
+2. **Process through layers**: Pass these vectors through dozens of transformer layers, where tokens "attend" to each other and build up increasingly abstract representations
+
+3. **Project to vocabulary**: Take the final representation and project it back to vocabulary space—producing a score for each of the ~100,000 possible next tokens
+
+4. **Normalize via softmax**: Convert these scores to probabilities that sum to one
+
+The result: A **probability distribution over the entire vocabulary**.
+
+### This Is Literally a Ranking
+
+Step 4 produces a complete ordering. Every possible next token receives a probability. The token with probability 0.15 is ranked higher than the token with probability 0.08, which is ranked higher than the token with probability 0.003.
+
+The model has ranked all ~100,000 options.
+
+### Sampling From the Ranking
+
+To generate a token, we sample from this distribution. Different **sampling strategies** use the ranking differently:
+
+**Greedy decoding**: Always pick the highest-ranked token. Deterministic, but often repetitive.
+
+**Temperature sampling**: Adjust how "peaked" the distribution is.
+
+- Low temperature: The ranking becomes more extreme (top options dominate)
+- High temperature: The ranking becomes flatter (more random selection)
+- Temperature = 1: Use the ranking as-is
+
+**Top-k sampling**: Only consider the $k$ highest-ranked tokens. Zero out everything else.
+
+**Top-p (nucleus) sampling**: Only consider the smallest set of tokens whose probabilities sum to at least $p$. Adapts to how confident the model is.
+
+All of these strategies **operate on the ranking**. They differ only in how they use it.
+
+### Full Sequences as Iterated Rankings
+
+A complete generated response is the result of many ranking operations in sequence:
+
+1. Given context $c$, rank all tokens, sample token $t_1$
+2. Given context $c + t_1$, rank all tokens, sample token $t_2$
+3. Given context $c + t_1 + t_2$, rank all tokens, sample token $t_3$
+4. ... and so on until reaching a stopping condition
+
+A 500-token response required 500 separate rankings, each over the entire vocabulary.
+
+## Evidence From Inside the Model
+
+Recent interpretability research reveals that transformers don't just output rankings—they compute rankings through an ordered internal process.
+
+### The Logit Lens
+
+Researchers discovered you can "peek inside" the model at intermediate layers. By projecting layer-by-layer representations back to vocabulary space, you can see what the model would predict at each stage of processing.
+
+**Key finding**: Predictions often "crystallize" at intermediate layers. The top-ranked token becomes fixed well before the final layer. Later layers refine the ranking of lower-ranked options or add nuance.
+
+### Ordered Saturation
+
+Recent work by Lioubashevski and colleagues (2024) shows that models determine their top predictions in order:
+
+1. Early layers determine the top-1 token
+2. Later layers determine the top-2 token
+3. Even later layers determine top-3, top-4, etc.
+
+This "ordered saturation" is consistent with the model literally computing a ranking through an ordered internal process.
+
+### Feed-Forward Layers as Concept Promotion
+
+Geva and colleagues (2022) show that transformer feed-forward layers "promote concepts in the vocabulary space." Individual neurons contribute to increasing or decreasing the probability (rank) of specific tokens.
+
+The model builds its ranking incrementally: some neurons push "Paris" up, others push "London" down, and the final ranking emerges from this competition.
+
+## RLHF: Ranking Made Explicit
+
+If base language models rank implicitly (through next-token prediction), Reinforcement Learning from Human Feedback (RLHF) makes ranking explicit.
+
+### How RLHF Works
+
+1. **Collect preferences**: Humans compare pairs of model outputs for the same prompt. "Response A is better than Response B."
+
+2. **Train a reward model**: Learn a function that predicts which response humans will prefer. This function assigns a quality score to any (prompt, response) pair.
+
+3. **Optimize the language model**: Fine-tune the model to produce responses that score highly according to the reward model.
+
+### The Bradley-Terry Model
+
+The preference data is modeled using the Bradley-Terry framework, which assumes:
+
+- Each response has a latent "quality score"
+- The probability of preferring A over B depends on the difference in their quality scores
+
+Mathematically:
+$$P(A \succ B) = \frac{\exp(r(A))}{\exp(r(A)) + \exp(r(B))}$$
+
+This is a **ranking model**. It assumes responses have underlying quality scores and preferences arise from comparing (ranking) these scores.
+
+### RLHF Optimizes Rankings
+
+The reward model learns to rank responses by quality. Then the language model is optimized to produce high-ranking responses.
+
+The entire post-training pipeline is ranking optimization:
+
+- Humans rank outputs (pairwise comparisons)
+- The reward model learns to reproduce this ranking
+- The language model is tuned to rank highly according to the reward model
+
+### Direct Preference Optimization (DPO)
+
+Recent methods like DPO skip the explicit reward model but are still fundamentally ranking-based. DPO directly adjusts the model to increase the probability of preferred outputs relative to dispreferred ones—still optimizing a ranking.
+
+## Connections to Information Retrieval
+
+The generation process has deep structural similarities to classic information retrieval:
+
+| Information Retrieval | Language Generation |
+|----------------------|---------------------|
+| Query | Context/prompt |
+| Document collection | Vocabulary |
+| Relevance score | Token probability |
+| Ranked list of documents | Probability distribution over tokens |
+| Top-k retrieval | Top-k sampling |
+
+This isn't coincidence. Both are ranking problems over discrete candidates given a query.
+
+The key difference: IR ranks fixed documents; LLMs rank at the token level, allowing novel combinations. But the mechanism—scoring discrete options and selecting from the ranking—is shared.
+
+## The Weighted Combination Interpretation
+
+A more aggressive version of the ranking claim: each AI output represents a **weighted combination** of all possibilities in the vocabulary, where the weights are the model's probability assignments.
+
+### The Expected Token (An Interpretation, Not the Mechanism)
+
+We can *interpret* the probability distribution as defining an "expected" position in embedding space:
+
+$$\text{Expected embedding} = \sum_{v \in V} P(v | \text{context}) \times \text{embedding}(v)$$
+
+This is a weighted average of all token embeddings, weighted by the ranking probabilities.
+
+**Important clarification**: This is an interpretation for analysis, not the actual generation mechanism. In practice, a single discrete token is sampled from the distribution—we don't generate the "expected" token. However, this interpretation can be useful for understanding what the model "represents" before discretization occurs.
+
+### Beam Search Makes This Explicit
+
+Beam search—a common generation strategy—maintains multiple candidate sequences and their cumulative probabilities. At each step, it:
+
+1. Extends each candidate with all possible next tokens
+2. Ranks all extensions by cumulative probability
+3. Keeps the top $k$
+
+This makes explicit that generation is search over a ranked space of possible continuations.
+
+## Retrieval-Augmented Generation: Re-establishing Bundles
+
+Many recent AI systems use **Retrieval-Augmented Generation (RAG)**: first retrieve relevant documents (bundles), then generate based on them.
+
+RAG is a hybrid:
+
+1. **Retrieval stage**: Rank bundles (documents, chunks) by relevance to the query
+2. **Generation stage**: Rank tokens given the retrieved bundles as context
+
+This is an attempt to re-establish bundling within a chunk-based system. By grounding generation in retrieved sources, RAG:
+
+- Improves factuality (can cite sources)
+- Enables attribution (we know which documents contributed)
+- Partially restores economic arrangements (can potentially compensate source creators)
+
+Many "fixes" for LLM weaknesses—citations, tool use, grounding—can be understood as re-establishing bundling within the ranking framework.
+
+## What the Ranking Frame Does and Doesn't Explain
+
+### What It Explains
+
+1. **Why models are sensitive to training data**: The ranking over tokens is learned from training data. What's ranked highly is what was common/predicted in training.
+
+2. **Why RLHF works**: It explicitly optimizes the ranking to match human preferences.
+
+3. **Why outputs are probabilistic**: Generation samples from a ranking, so different samples yield different outputs.
+
+4. **Why AI competes with search/recommendation**: They're all ranking systems competing for the same user attention.
+
+### What It Doesn't Explain
+
+1. **Why models produce coherent outputs**: Ranking tokens doesn't obviously yield coherent paragraphs. Something in the learned representations makes coherent sequences rank highly—but "ranking" doesn't explain what.
+
+2. **Why emergent capabilities arise**: Chain-of-thought reasoning, few-shot learning, and other emergent capabilities aren't explained by the ranking mechanism. They emerge from it somehow.
+
+3. **Whether models "understand"**: The ranking frame is silent on whether there's understanding, intention, or consciousness. It describes mechanism, not phenomenology.
+
+## Addressing the "It's Just Statistics" Objection
+
+Some might say: "Calling it 'ranking' is misleading. It's just statistics—predicting the next token based on patterns."
+
+We agree it's statistics. But "statistics" and "ranking" aren't in tension:
+
+- Statistics: How the probabilities are computed (learned patterns from training data)
+- Ranking: What the probabilities represent (an ordering over options)
+
+Saying "it's just statistics" doesn't make the ranking frame wrong. The model statistically learns to produce rankings. Both descriptions are accurate.
+
+The ranking frame is useful because it:
+
+- Connects LLMs to prior systems (search, recommendation)
+- Identifies the intervention point (training data that shapes the ranking)
+- Clarifies what evaluation measures (ranking quality)
+
+## Summary
+
+The technical evidence supports the ranking framing:
+
+1. **Mechanistically**: LLMs produce probability distributions over vocabularies via softmax. This is, by definition, a ranking.
+
+2. **Internally**: Interpretability work shows ordered saturation—the model computes rankings sequentially across layers.
+
+3. **In training**: Both next-token prediction and RLHF optimize ranking quality.
+
+4. **In generation**: All decoding strategies operate on the ranking.
+
+The ranking frame doesn't explain *why* models produce good rankings or *whether* they "understand." It explains *what* they do—and for governance, economics, and collective action, that's what we need.
+
+## Further Reading
+
+For full mathematical treatment, see Appendix A.
+
+For counterarguments to the ranking frame and our responses, see Appendix C, Section C.1.

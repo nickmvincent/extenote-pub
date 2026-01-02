@@ -1,0 +1,7 @@
+.quarto/
+_book/
+src/
+discussions.qmd
+index.qmd
+
+/.quarto/

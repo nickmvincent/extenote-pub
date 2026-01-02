@@ -1,0 +1,457 @@
+---
+type: book_appendix
+title: The Data Pipeworks in Three Formalisms
+visibility: public
+---
+# The Data Pipeworks in Three Formalisms {#sec-appendix-formalisms}
+
+This appendix presents the Data Pipeworks model through three disciplinary lenses: machine learning, information theory, and signal processing/control theory. Each formalism illuminates different aspects of how human knowledge flows to AI systems.
+
+## B.1 Overview: The Five Stages
+
+Recall the five stages of the Data Pipeworks:
+
+| Stage | Name | Description |
+|-------|------|-------------|
+| 1 | Knowledge & Values | The "reality signal"—facts and preferences from human activity |
+| 2 | Records | Signals transformed into structured data via interfaces/sensors |
+| 3 | Datasets | Records aggregated by organizations under constraints |
+| 4 | Models | Datasets compressed into input-output mappings |
+| 5 | Deployed Systems | Models embedded in products affecting the world |
+
+We now formalize each stage from three perspectives.
+
+## B.2 Machine Learning Formalism
+
+### B.2.1 Stage 1: The Data Generating Process
+
+In ML, we typically posit an unknown data generating distribution $P_{data}$ over some space $\mathcal{X}$. The Data Pipeworks makes this more concrete:
+
+$$P_{data} = f(\text{Knowledge}, \text{Values}, \text{Context})$$
+
+where:
+- **Knowledge**: Facts about the world (can be modeled as a knowledge graph $G = (E, R)$ with entities $E$ and relations $R$)
+- **Values**: Preferences over states of the world (can be modeled as utility functions $u: \mathcal{S} \rightarrow \mathbb{R}$)
+- **Context**: Situational factors determining what knowledge/values are expressed
+
+**Key insight**: $P_{data}$ is not fixed—it's shaped by Stage 2 (what interfaces exist) and Stage 5 (how deployed systems change behavior).
+
+### B.2.2 Stage 2: Observation Process
+
+Records are observations from $P_{data}$, but the observation process introduces distortion:
+
+$$x_i = g(s_i) + \epsilon_i$$
+
+where:
+- $s_i \sim P_{data}$ is the latent signal
+- $g: \mathcal{S} \rightarrow \mathcal{X}$ is the sensor/interface transformation
+- $\epsilon_i$ is observation noise
+- $x_i$ is the recorded observation
+
+The function $g$ is crucial and undertheorized in ML:
+- Interface design determines $g$'s domain (what *can* be recorded)
+- Incentives determine which $s_i$ get sampled (who contributes, when)
+- Technical constraints determine noise $\epsilon$
+
+**Example**: Twitter's character limit shapes $g$ differently than a blog platform. A survey form with checkboxes shapes $g$ differently than free-text entry.
+
+### B.2.3 Stage 3: Dataset Construction
+
+A dataset $D = \{x_1, ..., x_n\}$ is not an i.i.d. sample from $P_{data}$. It's a filtered, selected subset:
+
+$$D = \text{Filter}(\{x_i\}_{i=1}^N; \theta_{org})$$
+
+where $\theta_{org}$ represents organizational constraints:
+- Legal constraints (copyright, privacy law)
+- Economic constraints (licensing costs, compute for storage)
+- Social constraints (content policies, community norms)
+- Technical constraints (data format compatibility, quality filters)
+
+The filtering function is typically:
+1. **Selection**: Which records to include
+2. **Transformation**: How to preprocess (tokenization, normalization)
+3. **Labeling**: Adding annotations (for supervised learning)
+
+**Distribution shift**: The dataset distribution $P_D$ generally differs from $P_{data}$:
+
+$$P_D(x) \neq P_{data}(x)$$
+
+This shift is not random—it's systematic, determined by $\theta_{org}$.
+
+### B.2.4 Stage 4: Model Training
+
+Given dataset $D$, training finds parameters $\theta^*$ minimizing empirical risk:
+
+$$\theta^* = \arg\min_\theta \frac{1}{|D|} \sum_{x \in D} \mathcal{L}(f_\theta(x), y_x)$$
+
+For language models, this is typically:
+
+$$\theta^* = \arg\min_\theta -\frac{1}{|D|} \sum_{(c,t) \in D} \log P_\theta(t | c)$$
+
+**The ranking connection**: This objective makes the model's ranking over tokens match the empirical distribution in $D$.
+
+**Compression interpretation**: The model $f_\theta$ compresses $D$:
+- Model size: $|\theta|$ parameters
+- Dataset size: $|D|$ records
+- Compression ratio: $|D| / |\theta|$
+
+Modern LLMs have compression ratios of $10^3$ to $10^5$ (trillions of tokens, billions of parameters).
+
+### B.2.5 Stage 5: Deployment and Feedback
+
+A deployed system is a function:
+
+$$\text{System}: \text{User Input} \times \text{Context} \rightarrow \text{Output}$$
+
+that incorporates $f_\theta$ along with:
+- Retrieval components (RAG)
+- Tool use (APIs, code execution)
+- Safety filters
+- User interface
+
+**Feedback loops**: The system affects future data:
+
+$$P_{data}^{(t+1)} = h(P_{data}^{(t)}, \text{System}^{(t)})$$
+
+Examples:
+- Model outputs become training data (synthetic data)
+- Model outputs replace human content (reduced incentive to create)
+- Model outputs change user behavior (what questions people ask)
+
+### B.2.6 ML Formalism Summary
+
+$$\text{Knowledge/Values} \xrightarrow{g} \text{Records } \{x_i\} \xrightarrow{\text{Filter}} D \xrightarrow{\text{Train}} f_\theta \xrightarrow{\text{Deploy}} \text{System} \xrightarrow{\text{Feedback}} \text{Knowledge/Values}$$
+
+The ML lens emphasizes:
+- Distribution shift at each stage
+- The training objective's relationship to ranking
+- Feedback loops through synthetic data and behavioral change
+
+## B.3 Information Theory Formalism
+
+### B.3.1 Stage 1: The Source
+
+Human knowledge and values can be modeled as a source $S$ with entropy:
+
+$$H(S) = -\sum_s P(s) \log P(s)$$
+
+This represents the total information content of human knowledge—a theoretical upper bound.
+
+In practice, $H(S)$ is:
+- Extremely large (all human knowledge)
+- Not directly measurable
+- Constantly changing (new knowledge created)
+
+### B.3.2 Stage 2: Channel Encoding
+
+Recording transforms signals through a noisy channel:
+
+$$S \xrightarrow{\text{Interface}} X \xrightarrow{\text{Storage}} \hat{X}$$
+
+The interface acts as an encoder with capacity constraints:
+- Character limits → capacity constraint
+- Format restrictions → codebook constraint
+- Bandwidth limits → rate constraint
+
+Information loss:
+
+$$I(S; X) \leq H(S)$$
+
+with equality only if the interface captures all information (impossible in practice).
+
+Additional loss in storage:
+
+$$I(S; \hat{X}) \leq I(S; X)$$
+
+### B.3.3 Stage 3: Source Coding
+
+Dataset construction is a form of source coding—representing the records efficiently:
+
+$$\hat{X}^n \xrightarrow{\text{Aggregate}} D$$
+
+Information-theoretic quantities:
+- **Mutual information** $I(D; S)$: How much the dataset tells us about the source
+- **Redundancy**: Information repeated across records
+- **Irrelevance**: Information in records not relevant to downstream tasks
+
+The dataset captures at most:
+
+$$I(D; S) \leq \sum_i I(\hat{X}_i; S)$$
+
+with equality only if records are conditionally independent given $S$.
+
+### B.3.4 Stage 4: Rate-Distortion
+
+Model training is lossy compression, governed by rate-distortion theory.
+
+The model $f_\theta$ represents the dataset $D$ using $R$ bits (the description length of $\theta$). The distortion is the expected loss:
+
+$$\mathbb{E}[\mathcal{L}(f_\theta, D)]$$
+
+Rate-distortion function:
+
+$$R(d) = \min_{P(\hat{D}|D): \mathbb{E}[d(D, \hat{D})] \leq d} I(D; \hat{D})$$
+
+This lower-bounds the model size needed to achieve distortion level $d$.
+
+**Scaling laws through this lens**: Empirical scaling laws like:
+
+$$\mathcal{L} \propto N^{-\alpha}$$
+
+where $N$ is parameters, can be understood as approaching the rate-distortion bound.
+
+### B.3.5 Stage 5: Channel to Users
+
+Deployment is a channel from model to user:
+
+$$f_\theta \xrightarrow{\text{Query}} \text{Output} \xrightarrow{\text{User}} \text{Decision}$$
+
+Channel capacity limits:
+- Context window limits query information
+- Output length limits response information
+- User attention limits information absorption
+
+**Effective information transfer**:
+
+$$I(\text{User Decision}; S) \leq I(\text{Output}; S) \leq I(f_\theta; S) \leq I(D; S) \leq H(S)$$
+
+Each stage loses information. The deployed system can never convey more information about reality than was captured in training data.
+
+### B.3.6 Information Theory Summary
+
+$$H(S) \xrightarrow{-\text{loss}} I(X;S) \xrightarrow{-\text{loss}} I(D;S) \xrightarrow{-\text{compression}} I(f_\theta; S) \xrightarrow{-\text{channel}} I(\text{User}; S)$$
+
+The information theory lens emphasizes:
+- Fundamental limits on what models can "know"
+- Inevitable information loss at each stage
+- Compression as the core operation of Stage 4
+
+## B.4 Signal Processing and Control Theory Formalism
+
+### B.4.1 The System View
+
+The Data Pipeworks can be modeled as a feedback control system:
+
+```
+                    +------------------+
+                    |                  |
+    +-------+       |    +--------+    |    +---------+
+    |       |       v    |        |    |    |         |
+--->| Stage |------>+--->| Stages |----+--->| Stage 5 |---> Outputs
+    |   1   |            |  2-4   |         |         |
+    +-------+            +--------+         +---------+
+        ^                                        |
+        |                                        |
+        +----------------------------------------+
+                    Feedback Loop
+```
+
+### B.4.2 Stage 1: The Plant
+
+In control terminology, Stage 1 is the "plant"—the system being observed/controlled:
+
+$$\frac{dx}{dt} = f(x, u) + w$$
+
+where:
+- $x$ is the state (knowledge, values, behaviors)
+- $u$ is the control input (how the deployed system affects the world)
+- $w$ is process noise (exogenous changes to knowledge/values)
+
+### B.4.3 Stage 2: Sensors
+
+Recording is sensing with observation equation:
+
+$$y = h(x) + v$$
+
+where:
+- $y$ is the observation (record)
+- $h$ is the sensor function (interface design)
+- $v$ is measurement noise
+
+**Sensor design choices**:
+- What to measure (state coverage)
+- How often to measure (sampling rate)
+- Measurement precision (quantization)
+
+### B.4.4 Stage 3: Filtering
+
+Dataset construction is state estimation—filtering observations to estimate the underlying state:
+
+$$\hat{x} = \text{Filter}(y_1, ..., y_n)$$
+
+Classic filters:
+- **Kalman filter**: Optimal for linear Gaussian systems
+- **Particle filter**: For nonlinear/non-Gaussian systems
+
+In the Data Pipeworks, filtering includes:
+- Denoising (quality filtering)
+- Deduplication (removing redundancy)
+- Aggregation (combining related observations)
+
+### B.4.5 Stage 4: System Identification
+
+Model training is system identification—learning a model of the plant from observations:
+
+$$\hat{f}, \hat{h} = \text{SysID}(D)$$
+
+This is the "inverse problem" of control: given input-output data, infer system dynamics.
+
+For LLMs, we're identifying a model of "what text comes next given context"—a model of how humans produce language.
+
+### B.4.6 Stage 5: Control
+
+The deployed system acts as a controller:
+
+$$u = g(\hat{x}, r)$$
+
+where:
+- $\hat{x}$ is the estimated state (model's "understanding")
+- $r$ is the reference/goal (user query)
+- $u$ is the control action (model output)
+
+**Feedback types**:
+
+1. **Direct feedback**: User reactions (thumbs up/down, continued conversation)
+2. **Indirect feedback**: Behavioral changes detected through future observations
+3. **Adversarial feedback**: Users manipulating the system
+
+### B.4.7 Stability Analysis
+
+A critical question: Is the feedback system stable?
+
+**Stable**: Small perturbations decay over time
+$$\lim_{t \rightarrow \infty} ||x(t) - x^*|| = 0$$
+
+**Unstable**: Perturbations grow
+$$||x(t) - x^*|| \rightarrow \infty$$
+
+Potential instabilities in AI systems:
+- **Model collapse**: Training on synthetic data degrades quality [@shumailov2024]
+- **Filter bubbles**: Recommendations narrow user interests
+- **Arms races**: Adversarial content and detection escalate
+
+### B.4.8 Controllability and Observability
+
+**Controllability**: Can we steer the system to any desired state?
+
+In the Data Pipeworks: Can we influence AI development to achieve desired outcomes?
+
+- Fully controllable: Any training distribution achievable through interface/incentive design
+- Not controllable: Some states unreachable due to structural constraints
+
+**Observability**: Can we determine system state from observations?
+
+In the Data Pipeworks: Can we know what knowledge/values are encoded in a model?
+
+- Fully observable: Complete transparency about training data and model internals
+- Not observable: Proprietary data, uninterpretable models
+
+Current AI ecosystem: Low observability (proprietary training data) limits governance.
+
+### B.4.9 Cybernetics and Data Leverage
+
+The cybernetic perspective emphasizes feedback as a governance mechanism.
+
+**Data leverage** is a feedback control strategy:
+
+1. **Observation**: Monitor AI system behavior
+2. **Comparison**: Compare to desired behavior
+3. **Action**: Adjust data flow (contribute, withhold, poison)
+4. **Effect**: Change future AI system behavior
+
+This positions data contributors as part of the control loop, not just passive data sources.
+
+$$u_{data} = g(\text{Observed AI Behavior}, \text{Desired AI Behavior})$$
+
+### B.4.10 Control Theory Summary
+
+```
+Knowledge/Values ←──────────────────────┐
+      │                                  │
+      v                                  │
+    Sensors (Interfaces)                 │
+      │                                  │
+      v                                  │
+    Filter (Dataset Construction)        │
+      │                                  │
+      v                                  │
+    System ID (Model Training)           │
+      │                                  │
+      v                                  │
+    Controller (Deployed System)         │
+      │                                  │
+      └──────────────────────────────────┘
+```
+
+The control theory lens emphasizes:
+- Feedback loops as fundamental
+- Stability concerns (model collapse, filter bubbles)
+- Data leverage as a control mechanism
+- Observability as prerequisite for governance
+
+## B.5 Cross-Formalism Insights
+
+Each formalism illuminates different aspects:
+
+| Aspect | ML Lens | Info Theory Lens | Control Lens |
+|--------|---------|------------------|--------------|
+| Stage 1 | Data generating process | Source entropy | Plant state |
+| Stage 2 | Observation process | Channel encoding | Sensors |
+| Stage 3 | Dataset construction | Source coding | Filtering |
+| Stage 4 | Empirical risk minimization | Rate-distortion | System identification |
+| Stage 5 | Deployment | Channel to user | Control action |
+| Core concern | Distribution shift | Information loss | Stability |
+| Key limit | Generalization bounds | Capacity limits | Controllability |
+| Intervention | Training objective | Compression scheme | Control law |
+
+## B.6 Implications for Governance
+
+The formalisms suggest different governance priorities:
+
+**From ML**: Address distribution shift—ensure training data represents desired population, audit for systematic biases in filtering.
+
+**From Information Theory**: Address information loss—invest in richer interfaces, better compression (more efficient models), wider channels (longer context).
+
+**From Control Theory**: Address feedback stability—monitor for instabilities, ensure observability (transparency), design control mechanisms (data leverage).
+
+A comprehensive governance framework draws on all three:
+
+1. **Documentation** (ML): What's the data generating process? What filtering occurred?
+2. **Measurement** (Info Theory): How much information is captured? Lost?
+3. **Monitoring** (Control): Is the system stable? What feedback loops exist?
+4. **Intervention** (All): How can we adjust data flow, compression, or control laws?
+
+## B.7 Formal Specification (Sketch)
+
+For computational modeling, we sketch a formal specification combining all three views:
+
+**State space**:
+- $\mathcal{K}$: Space of possible knowledge configurations
+- $\mathcal{V}$: Space of possible value configurations  
+- $\mathcal{R}$: Space of possible record sets
+- $\mathcal{D}$: Space of possible datasets
+- $\mathcal{M}$: Space of possible models
+- $\mathcal{S}$: Space of possible deployed systems
+
+**Transition functions**:
+- $T_1: \mathcal{K} \times \mathcal{V} \times \mathcal{S} \rightarrow \mathcal{K} \times \mathcal{V}$ (feedback from deployment)
+- $T_2: \mathcal{K} \times \mathcal{V} \times \Theta_{\text{interface}} \rightarrow \mathcal{R}$ (recording)
+- $T_3: \mathcal{R} \times \Theta_{\text{org}} \rightarrow \mathcal{D}$ (dataset construction)
+- $T_4: \mathcal{D} \times \Theta_{\text{train}} \rightarrow \mathcal{M}$ (training)
+- $T_5: \mathcal{M} \times \Theta_{\text{deploy}} \rightarrow \mathcal{S}$ (deployment)
+
+**Dynamics**:
+$$\begin{aligned}
+(K_{t+1}, V_{t+1}) &= T_1(K_t, V_t, S_t) \\
+R_t &= T_2(K_t, V_t, \theta_{\text{interface}}) \\
+D_t &= T_3(R_t, \theta_{\text{org}}) \\
+M_t &= T_4(D_t, \theta_{\text{train}}) \\
+S_t &= T_5(M_t, \theta_{\text{deploy}})
+\end{aligned}$$
+
+This provides a framework for agent-based modeling of the Data Pipeworks, with parameters for interface design, organizational filtering, training choices, and deployment decisions.
+
+## References for Appendix B
+
+::: {#refs-appendix-b}
+:::

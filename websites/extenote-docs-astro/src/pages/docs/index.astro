@@ -1,0 +1,211 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from "../../layouts/Base.astro";
+import Nav from "../../components/Nav.astro";
+import Footer from "../../components/Footer.astro";
+
+const allDocs = await getCollection('docs');
+const sortedDocs = allDocs
+  .filter(doc => doc.data.visibility !== 'private')
+  .filter(doc => doc.id !== 'index' && doc.id !== 'narratives/index') // Exclude index pages
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout
+  title="Documentation"
+  description="Extenote documentation - learn how to use extenote for content management."
+>
+
+<style>
+  .docs-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 2.5rem 4rem;
+  }
+
+  .docs-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .docs-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.4rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  [data-aesthetic="futuristic"] .docs-header h1 {
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .docs-header h1 {
+    text-shadow: 0 0 20px var(--accent);
+  }
+
+  .docs-header p {
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  [data-aesthetic="classic"] .docs-header p {
+    font-style: italic;
+  }
+
+  .docs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .doc-card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-ornate);
+    padding: 1.125rem 1.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+
+  [data-aesthetic="futuristic"] .doc-card {
+    border-left: none;
+    border: 1px solid var(--border);
+  }
+
+  .doc-card:hover {
+    border-left-color: var(--accent);
+    text-decoration: none;
+  }
+
+  [data-aesthetic="futuristic"] .doc-card:hover {
+    border-color: var(--accent);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .doc-card:hover {
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  }
+
+  .doc-card h3 {
+    font-family: var(--font-heading);
+    color: var(--text);
+    font-size: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+  }
+
+  [data-aesthetic="futuristic"] .doc-card h3 {
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+
+  .doc-card h3::after {
+    content: '→';
+    color: var(--text-muted);
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  [data-aesthetic="futuristic"] .doc-card h3::after {
+    content: '>';
+  }
+
+  .doc-card:hover h3::after {
+    transform: translateX(4px);
+    color: var(--accent);
+  }
+
+  .section-title {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.625rem;
+    border-bottom: 1px dotted var(--border);
+    font-weight: 500;
+  }
+
+  [data-aesthetic="futuristic"] .section-title {
+    border-bottom: 1px solid var(--border-ornate);
+    letter-spacing: 0.2em;
+  }
+
+  .section-title:first-of-type {
+    margin-top: 0;
+  }
+
+  @media (max-width: 600px) {
+    .docs-container {
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    .docs-header h1 {
+      font-size: 1.8rem;
+    }
+  }
+</style>
+
+<Nav />
+
+<main class="docs-container">
+  <header class="docs-header">
+    <h1>Documentation</h1>
+    <p>Everything you need to know about using Extenote.</p>
+  </header>
+
+  <h2 class="section-title">Getting Started</h2>
+  <div class="docs-grid">
+    {sortedDocs.filter(d => [0, 1].includes(d.data.order ?? 99)).map(doc => (
+      <a href={`${base}/docs/${doc.id}`} class="doc-card">
+        <h3>{doc.data.title}</h3>
+      </a>
+    ))}
+  </div>
+
+  <h2 class="section-title">Reference</h2>
+  <div class="docs-grid">
+    {sortedDocs.filter(d => [2, 3, 4, 5].includes(d.data.order ?? 99)).map(doc => (
+      <a href={`${base}/docs/${doc.id}`} class="doc-card">
+        <h3>{doc.data.title}</h3>
+      </a>
+    ))}
+  </div>
+
+  <h2 class="section-title">Features</h2>
+  <div class="docs-grid">
+    {sortedDocs.filter(d => [6, 7, 8].includes(d.data.order ?? 99)).map(doc => (
+      <a href={`${base}/docs/${doc.id}`} class="doc-card">
+        <h3>{doc.data.title}</h3>
+      </a>
+    ))}
+  </div>
+
+  <h2 class="section-title">Other</h2>
+  <div class="docs-grid">
+    {sortedDocs.filter(d => [9, 10].includes(d.data.order ?? 99)).map(doc => (
+      <a href={`${base}/docs/${doc.id}`} class="doc-card">
+        <h3>{doc.data.title}</h3>
+      </a>
+    ))}
+  </div>
+
+  <h2 class="section-title">Narrative Tests</h2>
+  <div class="docs-grid">
+    {sortedDocs.filter(d => (d.data.order ?? 99) >= 20).map(doc => (
+      <a href={`${base}/docs/${doc.id}`} class="doc-card">
+        <h3>{doc.data.title}</h3>
+      </a>
+    ))}
+  </div>
+</main>
+
+<Footer />
+
+</Layout>

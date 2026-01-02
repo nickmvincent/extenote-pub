@@ -1,0 +1,22 @@
+project:
+  type: website
+  output-dir: docs
+website:
+  title: Data Leverage Blog
+  navbar:
+    left:
+      - text: Home
+        href: index.qmd
+      - text: Archive
+        href: archive.qmd
+      - text: Discussions
+        href: discussions.qmd
+  page-footer:
+    center: |
+      Related Projects: [Data Licenses](https://datalicenses.org) · [Data Counterfactuals](https://datacounterfactuals.org) · [Data Napkin Math](https://exploringai.org) · [Shared References](https://shared-references.pages.dev)
+bibliography: references.bib
+format:
+  html:
+    theme: cosmo
+    toc: true
+    css: custom.css

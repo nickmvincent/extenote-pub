@@ -1,0 +1,103 @@
+---
+type: paidf_chapter
+title: A Record-Generation Model
+slug: 01i_record_generation_model
+visibility: public
+---
+Status: first draft complete.
+
+This section defines a compact model for how interactions become public records. The goal is a small, measurable pipeline you can use for product design and metrics without locking into a single implementation.
+
+## Notation and Objects
+
+We define symbols once and reuse them:
+
+| Symbol | Meaning |
+| --- | --- |
+| `X` | system or deployment where interactions happen; time is discrete by event |
+| `i` | interaction index |
+| `x_i` | interaction context (agent, UI, model, route, timestamp) |
+| `o_i` | origin in `{natural, prompted}` |
+| `r_i` | record type in `R` (e.g., `chat`, `feedback`, `label`, `summary`) |
+| `K` | publish channels (e.g., `git`, `huggingface`, `bluesky`, `site`) |
+
+## Pipeline States (per interaction)
+
+Each interaction can move through a simple chain. Most variables are binary.
+
+- `E_i`: eligible under policy (type, scope, age).
+- `C_i`: captured locally (structured log or draft exists).
+- `S_i`: share prompt shown (only if the product prompts).
+- `A_i`: authorization or consent to publish (may include license + name).
+- `T_i`: transform or sanitize succeeded (PII checks, schema, hashing).
+- `P_i^k`: published to channel `k ∈ K` (accepted or merged state).
+- `M_i`: workflow state for PR-style channels in `{open, merged, closed, tombstoned}`.
+
+Reading left to right, the pipeline is: `E -> C -> S -> A -> T -> P`.
+If any stage is 0, the record cannot be published for that channel.
+
+## Record Metadata
+
+When an interaction is publishable, attach:
+
+- `ψ(x_i)` (psi): schema mapping from interaction to structured payload.
+- `L_i`: license (e.g., CC0, CC-BY, CC-BY-SA).
+- `U_i`: AI-use preference (e.g., `train-genai=n;exceptions=cc-cr`).
+- `name_i`: attribution string (username, pseudonym, anonymous).
+- `uid_i`: stable contribution id.
+
+## Policy Knobs and Rates
+
+Let `θ` collect product and policy settings (logging mode, prompt rules, defaults). Define rates:
+
+- `q_i = Pr[S_i=1 | x_i, θ]`: prompt rate.
+- `p_c(i) = Pr[C_i=1 | x_i, θ]`: capture rate.
+- `p_a(i) = Pr[A_i=1 | x_i, S_i, θ]`: consent rate.
+- `p_t(i) = Pr[T_i=1 | x_i, θ]`: transform success.
+- `p_k(i) = Pr[P_i^k=1 | x_i, θ]`: channel acceptance or merge.
+
+## Publish Probability
+
+For a single channel `k`:
+
+`Pr[P_i^k=1] = 1[E_i] · p_c(i) · p_a(i) · p_t(i) · p_k(i)`
+
+Here, `1[E_i]` is an indicator: it is 1 when the interaction is eligible and 0 otherwise.
+
+For multiple channels, the publish vector is `P_i = (P_i^k)_{k∈K}`.
+
+## Retraction and Lifecycle
+
+After publication, items can be retracted. Model this with:
+
+- `D_i^k(t) ∈ {0,1}`: item `i` is withdrawn from channel `k` at time `t`.
+- `h_d(i,k)`: hazard of retraction.
+- `M_i`: tracks the visible lifecycle state.
+
+## Prompted vs. Natural
+
+Origin affects consent. When `o_i=prompted`, the product increases `q_i` and typically increases `p_a(i)` by surfacing consent at the right time. Natural interactions can still be captured (`C_i=1`) without publishing (`A_i=0`).
+
+## Minimal Schema
+
+`ψ(x_i)` should at least include:
+
+- `uid`, `type`, `created_at`, `route`, `model`.
+- `content` (messages or summary) and optional `feedback`.
+- `license=L_i`, `ai_use=U_i`, `attribution=name_i`.
+- provenance: `source=o_i`, `prompt_shown=S_i`, `checks` (PII flags), `hashes`.
+
+## Metrics and Levers
+
+- Throughput for window `W`: expected published count `Λ_k = E[∑_{i∈W} P_i^k]`.
+- Stage yield: estimate `p_c, p_a, p_t, p_k` from logs to locate bottlenecks.
+- Quality gates: raise or lower `p_t` with validators; adjust `p_k` via review policy.
+- UX levers: adjust `q_i` (when to prompt) to change `p_a(i)` without spamming.
+
+## Practical Mapping
+
+- OpenWebUI action: sets `S_i=1`, collects `A_i`, builds `ψ(x_i)` with `L_i, U_i, name_i`.
+- Git PR: `P_i^git=1` iff merged; otherwise `M_i ∈ {open, closed}`.
+- Bluesky or microblog: optional `P_i^bsky` with a short preview and `uid` link.
+
+This model is intentionally small: a staged Bernoulli chain with explicit metadata. It is sufficient to reason about product changes, consent flows, and publishing policies, and it is easy to compute stage-level rates from operational logs.

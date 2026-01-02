@@ -1,0 +1,9 @@
+---
+type: book_references
+title: References
+visibility: public
+---
+# References {.unnumbered}
+
+::: {#refs}
+:::

@@ -1,0 +1,19 @@
+---
+title: "Discussions & Network"
+---
+
+## Join the Discussion
+
+- [GitHub Discussions](https://github.com/nickmvincent/extenote-content-public/discussions/2) — Threaded conversations with markdown support, reactions, and notifications.
+- [WhiteWind](https://whtwnd.com/nickmvincent.bsky.social/mjkkj1hx) — Long-form posts on the ATProto/Bluesky network.
+
+## Related Projects
+
+- [Shared References](https://shared-references.pages.dev)
+- [Data Licenses](https://datalicenses.org)
+- [Data Counterfactuals](https://datacounterfactuals.org)
+- [Data Napkin Math](https://exploringai.org)
+
+---
+
+*Generated on 2026-01-01*

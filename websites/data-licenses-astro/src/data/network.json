@@ -1,0 +1,29 @@
+{
+  "projectName": "data-licenses",
+  "projectTitle": "Data Licenses",
+  "links": {
+    "website": "https://datalicenses.org"
+  },
+  "relatedProjects": [
+    {
+      "name": "shared-references",
+      "title": "Shared References",
+      "website": "https://shared-references.pages.dev"
+    }
+  ],
+  "discussions": [
+    {
+      "provider": "github",
+      "url": "https://github.com/nickmvincent/extenote-content-public/discussions/3",
+      "label": "GitHub Discussions",
+      "description": "Threaded conversations with markdown support, reactions, and notifications."
+    },
+    {
+      "provider": "whitewind",
+      "url": "https://whtwnd.com/nickmvincent.bsky.social/mjlht883",
+      "label": "WhiteWind",
+      "description": "Long-form posts on the ATProto/Bluesky network."
+    }
+  ],
+  "generatedAt": "2026-01-01T16:14:41.468Z"
+}

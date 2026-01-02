@@ -1,0 +1,93 @@
+---
+type: book_index
+title: Preface
+visibility: public
+---
+# Preface {.unnumbered}
+
+## What This Book Is About
+
+This book advances a simple claim with far-reaching implications: AI systems—from Google Search to TikTok to ChatGPT to autonomous agents—are all performing variations on the same fundamental task. They rank information and deliver it to users, or they rank possible actions and take them on behalf of users.
+
+What varies is the *granularity* of information being ranked and *what the ranking leads to*. We identify two critical use cases:
+
+1. **Ranking chunks for output**: Search engines rank *bundles*—discrete webpages, songs, videos. Generative AI ranks *chunks*—individual tokens, drawn from patterns learned across billions of human-created documents. The output is information delivered to users.
+
+2. **Ranking decisions for action**: AI agents—from coding assistants to autonomous research tools—rank possible *actions* (which tool to call, what code to execute, what API to invoke). The output is an intervention in the world.
+
+In **both** cases, there is always **causal dependence on data**: a shift in training data could cause a re-ranking of outputs or a re-ranking of decisions. This is the central insight for policy. If we want different outputs or different decisions, we must attend to the data that shapes the ranking.
+
+This shift from bundles to chunks, and from passive outputs to active decisions, explains:
+
+- **Why generative AI disrupts existing economic arrangements**: Copyright, attribution, and compensation systems were designed for bundles. When AI ranks chunks, these systems break.
+
+- **Why AI evaluation is so hard**: We're not sure what "good" means when the output is a weighted combination of all possible tokens.
+
+- **Where governance interventions should target**: The information being ranked—and the people who created it.
+
+## The Core Framework
+
+The book develops two interlocking frameworks:
+
+**The Ranking Framework** (Chapters 1-2) establishes that generative AI is mechanistically—not metaphorically—a ranking system. At each generation step, the model produces a probability distribution over its entire vocabulary. This is, by definition, a ranking. The output emerges from sampling this ranking iteratively.
+
+**The Data Pipeworks** (Chapter 3) describes how human knowledge flows to AI systems through five stages: Knowledge and Values → Records → Datasets → Models → Deployed Systems. Each stage filters and transforms information. Feedback loops from deployed systems affect future knowledge creation.
+
+## The Evidence
+
+The book grounds these frameworks in empirical evidence (Chapter 4):
+
+- Stack Overflow activity declined 25% within six months of ChatGPT's release
+- Membership inference attacks demonstrate the coupling between training data and outputs
+- Labor market exposure studies show 80%+ of US workers have some task exposure to LLMs
+
+## The Implications
+
+We draw out implications for:
+
+- **Evaluation** (Chapter 5): The "double-check" paradox, benchmark gaming, and dataset documentation as quality signal
+- **Economic disruption** (Chapter 6): The simple model of workers as information sequence producers, the "capital singularity" feedback loop, and why "just make augmenting AI" isn't a solution
+- **Governance** (Chapters 7-8): Collective bargaining for information, standardized contract templates, and balancing data markets with open knowledge commons
+
+## What This Book Is Not
+
+This book is not a comprehensive theory of AI capabilities, cognition, or safety. The ranking framework describes *what* AI systems do (rank information), not *why* they sometimes do it remarkably well.
+
+We take no position on whether LLMs "understand" language or are "stochastic parrots." For our purposes—analyzing governance, economics, and collective bargaining—the mechanism description suffices.
+
+We also don't claim to predict outcomes with confidence. Economic disruption from AI is plausible, concerning, and worth governing—but not certain. Our proposals are worth attempting, not guaranteed to succeed.
+
+## Who Should Read This
+
+- **AI researchers and practitioners** seeking a framework that connects technical systems to broader social dynamics
+- **Policy makers** looking for tractable intervention points in AI governance
+- **Data contributors**—writers, artists, coders, researchers—considering their relationship to AI systems
+- **Anyone** trying to understand why generative AI feels both continuous with and different from previous technologies
+
+## Acknowledgments
+
+This book synthesizes ideas developed across several papers and collaborators, including [names]. The Data Pipeworks model draws on discussions with [names]. The collective bargaining framework was developed with Matt Prewitt and Hanlin Li. 
+
+All errors remain my own.
+
+## How to Read This Book
+
+The chapters are designed to be read in order, but can also be approached selectively:
+
+- For the **technical argument**: Start with Chapter 2 and Appendix A
+- For the **mechanistic model**: Read Chapter 3 and Appendix B
+- For the **empirical evidence**: See Chapter 4 and Appendix D
+- For the **policy proposals**: Jump to Chapters 7-8
+- For **engagement with objections**: Appendix C addresses counterarguments in depth
+- For **key terms and definitions**: See the [Glossary](appendices/f-glossary.qmd) in the Appendices
+
+::: {.callout-tip}
+## Terminology
+This book introduces several technical terms and frameworks. If you encounter unfamiliar concepts like "pipeworks," "data valuation," or "Shapley values," consult the [Glossary](appendices/f-glossary.qmd).
+:::
+
+Code, data, and additional materials are available at [URL].
+
+---
+
+*This book is available under [license]. Cite as: [citation].*

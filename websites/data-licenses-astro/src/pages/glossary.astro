@@ -1,0 +1,267 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const terms = [
+  {
+    term: 'Preference Signal',
+    definition: 'A machine-readable hint that tells AI agents or web crawlers how content may or may not be used. Examples include robots.txt directives, ai.txt files, and HTTP headers. These rely on voluntary compliance by the crawler.',
+    related: ['robots.txt', 'ai.txt', 'TDMRep'],
+  },
+  {
+    term: 'robots.txt',
+    definition: 'A text file placed at the root of a website that instructs web crawlers which pages they may or may not access. Originally designed for search engines, now being extended for AI training crawlers with user-agent specific rules.',
+    related: ['Preference Signal'],
+  },
+  {
+    term: 'ai.txt',
+    definition: 'A proposed standard (similar to robots.txt) specifically for communicating AI-related permissions. Allows site owners to express preferences about AI training, retrieval, and generation uses of their content.',
+    related: ['Preference Signal', 'robots.txt'],
+  },
+  {
+    term: 'TDMRep',
+    definition: 'Text and Data Mining Reservation Protocol. A W3C community standard for expressing rights reservations about text and data mining, including AI training. Uses HTTP headers or HTML meta tags.',
+    related: ['Preference Signal', 'W3C'],
+  },
+  {
+    term: 'Licensing Collective',
+    definition: 'An organization that manages rights on behalf of multiple creators, negotiating licenses and distributing payments. Examples include ASCAP for music and new AI-focused collectives like Fairly Trained.',
+    related: ['RSL', 'Compensation'],
+  },
+  {
+    term: 'RSL (Really Simple Licensing)',
+    definition: 'A machine-readable licensing format that allows content creators to specify terms for AI use of their work. Designed to be easily parsed by automated systems for compliance checking.',
+    related: ['Licensing Collective', 'Preference Signal'],
+  },
+  {
+    term: 'Tollgate',
+    definition: 'A technical mechanism that requires payment, authentication, or rate limiting for automated access to content. Allows monetization of bot traffic while maintaining control over access.',
+    related: ['Technical Control', 'API'],
+  },
+  {
+    term: 'Technical Control',
+    definition: 'Measures that detect, limit, or block unwanted automated access to content. Includes rate limiting, CAPTCHAs, bot detection, and fingerprinting. Unlike preference signals, these are enforced rather than advisory.',
+    related: ['Tollgate', 'Scraping'],
+  },
+  {
+    term: 'Scraping',
+    definition: 'The automated extraction of content from websites. AI companies scrape the web to collect training data. May violate terms of service or copyright depending on jurisdiction and use.',
+    related: ['Technical Control', 'Training Data'],
+  },
+  {
+    term: 'Training Data',
+    definition: 'The collection of text, images, code, or other content used to train machine learning models. The provenance, licensing, and consent around training data is a central issue in AI governance.',
+    related: ['Scraping', 'Pipeline Stage'],
+  },
+  {
+    term: 'Pipeline Stage',
+    definition: 'A phase in the AI data lifecycle. Common stages include: Collect/Scrape (gathering data), Train (initial model training), Fine-tune (specialization), Retrieve (RAG lookups), and Generate (output creation).',
+    related: ['Training Data', 'RAG'],
+  },
+  {
+    term: 'RAG (Retrieval-Augmented Generation)',
+    definition: 'A technique where AI models retrieve relevant documents at inference time to augment their responses. Raises different licensing questions than training since content is accessed dynamically.',
+    related: ['Pipeline Stage', 'Generate'],
+  },
+  {
+    term: 'Data Provenance',
+    definition: 'The documented history of a piece of data: where it came from, how it was processed, and what permissions apply. Critical for compliance and attribution in AI systems.',
+    related: ['Training Data', 'Attribution'],
+  },
+  {
+    term: 'Opt-out',
+    definition: 'A mechanism allowing content creators to indicate they do not want their work used for AI training. May be technical (robots.txt) or legal (GDPR rights). Effectiveness depends on crawler compliance.',
+    related: ['Preference Signal', 'Consent'],
+  },
+  {
+    term: 'Opt-in',
+    definition: 'A consent model where explicit permission is required before content can be used. More protective than opt-out but harder to scale. Some licensing collectives operate on opt-in basis.',
+    related: ['Licensing Collective', 'Consent'],
+  },
+  {
+    term: 'IETF AIPref',
+    definition: 'A proposed Internet Engineering Task Force standard for AI preference signaling. Aims to create a standardized, extensible format for expressing AI-related permissions across the internet.',
+    related: ['Preference Signal', 'ai.txt'],
+  },
+  {
+    term: 'Fairly Trained',
+    definition: 'A certification program that verifies AI models were trained with proper consent and licensing. Provides third-party validation that a model meets ethical training criteria.',
+    related: ['Certification', 'Licensing Collective'],
+  },
+  {
+    term: 'Status: WIP',
+    definition: 'Work in Progress. The initiative is under active development and details may change. Not yet ready for production use.',
+    related: ['Status: Usable'],
+  },
+  {
+    term: 'Status: Usable',
+    definition: 'The initiative can be used today. May have varying levels of evidence of adoption, from "new" (limited evidence) to "strong evidence" (broad, documented adoption).',
+    related: ['Status: WIP'],
+  },
+];
+
+// Sort alphabetically
+terms.sort((a, b) => a.term.localeCompare(b.term));
+
+// Group by first letter
+const grouped = terms.reduce((acc, t) => {
+  const letter = t.term[0].toUpperCase();
+  if (!acc[letter]) acc[letter] = [];
+  acc[letter].push(t);
+  return acc;
+}, {} as Record<string, typeof terms>);
+const letters = Object.keys(grouped).sort();
+---
+
+<Layout>
+  <main class="wrap">
+    <header class="page-header">
+      <h1>Glossary</h1>
+      <p class="intro-text">
+        Key terms and concepts used throughout the data licensing landscape.
+      </p>
+    </header>
+
+    <nav class="letter-nav">
+      {letters.map(letter => (
+        <a href={`#letter-${letter}`} class="letter-link">{letter}</a>
+      ))}
+    </nav>
+
+    <div class="glossary">
+      {letters.map(letter => (
+        <section id={`letter-${letter}`} class="letter-section">
+          <h2 class="letter-heading">{letter}</h2>
+          <div class="terms">
+            {grouped[letter].map(item => (
+              <article class="term-card" id={item.term.toLowerCase().replace(/[^a-z0-9]+/g, '-')}>
+                <h3 class="term-name">{item.term}</h3>
+                <p class="term-definition">{item.definition}</p>
+                {item.related && item.related.length > 0 && (
+                  <div class="term-related">
+                    <span class="related-label">Related:</span>
+                    {item.related.map((r, i) => (
+                      <span>
+                        <a href={`#${r.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} class="related-link">{r}</a>
+                        {i < item.related.length - 1 && ', '}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .intro-text {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .letter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .letter-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+
+  .letter-link:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .letter-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .letter-heading {
+    font-size: 1.25rem;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 0.25rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+
+  .terms {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .term-card {
+    padding: 1rem 1.25rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .term-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+
+  .term-definition {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .term-related {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .related-label {
+    margin-right: 0.25rem;
+  }
+
+  .related-link {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .related-link:hover {
+    text-decoration: underline;
+  }
+</style>

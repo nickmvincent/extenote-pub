@@ -1,0 +1,59 @@
+{
+  "projectName": "shared-references",
+  "projectTitle": "Shared References",
+  "links": {
+    "website": "https://shared-references.pages.dev"
+  },
+  "relatedProjects": [
+    {
+      "name": "personal-website",
+      "title": "Personal Website",
+      "website": "https://nickmvincent.com"
+    },
+    {
+      "name": "data-leverage-blogs",
+      "title": "Data Leverage Blogs",
+      "website": "https://data-leverage-blogs-quarto.pages.dev"
+    },
+    {
+      "name": "data-counterfactuals",
+      "title": "Data Counterfactuals",
+      "website": "https://datacounterfactuals.org"
+    },
+    {
+      "name": "data-napkin-math",
+      "title": "Data Napkin Math",
+      "website": "https://exploringai.org"
+    },
+    {
+      "name": "data-licenses",
+      "title": "Data Licenses",
+      "website": "https://datalicenses.org"
+    },
+    {
+      "name": "paidf-mini-book",
+      "title": "Paidf Mini Book",
+      "website": "https://nickmvincent.github.io/paidf_consultation"
+    },
+    {
+      "name": "ranking-book",
+      "title": "Ranking Book",
+      "website": "https://ranking-book.pages.dev"
+    }
+  ],
+  "discussions": [
+    {
+      "provider": "github",
+      "url": "https://github.com/nickmvincent/extenote-content-public/discussions/5",
+      "label": "GitHub Discussions",
+      "description": "Threaded conversations with markdown support, reactions, and notifications."
+    },
+    {
+      "provider": "whitewind",
+      "url": "https://whtwnd.com/nickmvincent.bsky.social/mjlnzbof",
+      "label": "WhiteWind",
+      "description": "Long-form posts on the ATProto/Bluesky network."
+    }
+  ],
+  "generatedAt": "2026-01-02T17:25:05.357Z"
+}

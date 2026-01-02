@@ -1,0 +1,702 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getSiteData } from '../lib/contentLoader';
+import { formatMonthYear, formatYear, truncateText } from '../lib/formatters';
+
+const { personalInfo, cv } = await getSiteData();
+const cvName = (personalInfo.title ?? 'Academic CV').split(' - ')[0];
+const generatedDate = new Date().toISOString().slice(0, 10);
+const invitedTalks = cv.talks.filter((item) =>
+	['talk', 'guest lecture', 'keynote', 'panel'].includes(
+		String(item.metadata.type ?? '').toLowerCase()
+	)
+);
+
+const menteeGroups: { level: string; items: typeof cv.mentees }[] = [];
+const levelMap = new Map<string, number>();
+for (const mentee of cv.mentees) {
+	const level = String(mentee.metadata.level ?? 'Other');
+	if (!levelMap.has(level)) {
+		levelMap.set(level, menteeGroups.length);
+		menteeGroups.push({ level, items: [] });
+	}
+	menteeGroups[levelMap.get(level)!].items.push(mentee);
+}
+
+const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+const formatGrantAmount = (amount: unknown, currency: unknown) => {
+	const value =
+		typeof amount === 'number'
+			? amount
+			: typeof amount === 'string'
+				? Number(amount)
+				: NaN;
+	if (Number.isNaN(value)) return null;
+	const currencyCode = typeof currency === 'string' && currency ? currency : 'USD';
+	return `${numberFormatter.format(value)} ${currencyCode}`;
+};
+
+const joinWithComma = (...parts: unknown[]) =>
+	parts
+		.map((part) => {
+			if (Array.isArray(part)) return joinWithComma(...part);
+			return typeof part === 'string' ? part.trim() : part;
+		})
+		.filter((part): part is string | number => part !== undefined && part !== null && `${part}`.length > 0)
+		.join(', ');
+
+const cleanNotes = (value: unknown) =>
+	typeof value === 'string' ? value.replace(/\n+/g, ' ') : '';
+
+const mediaLabel = (value: unknown) => {
+	if (typeof value !== 'string' || !value) return 'Coverage';
+	return value.charAt(0).toUpperCase() + value.slice(1);
+};
+---
+
+<Layout title={`${cvName} - CV`} description={`Curriculum vitae for ${cvName}`}>
+	<div class="cv-container">
+		<header>
+			<h1>{cvName}</h1>
+			{(personalInfo.position || personalInfo.university) && (
+				<p>{joinWithComma(personalInfo.position, personalInfo.university)}</p>
+			)}
+			{personalInfo.email && (
+				<p>
+					<a href={`mailto:${personalInfo.email}`}>{personalInfo.email}</a>
+				</p>
+			)}
+			{personalInfo.web_link && (
+				<p>
+					<a href={personalInfo.web_link as string} target="_blank" rel="noopener noreferrer">
+						{personalInfo.web_link}
+					</a>
+				</p>
+			)}
+		</header>
+
+		{cv.appointments.length > 0 && (
+			<section id="academic-appointments">
+				<h2>Academic Appointments</h2>
+				{cv.appointments.map((item) => {
+					const start = item.metadata.start_date ?? item.metadata.date;
+					const end = item.metadata.end_date;
+					const startLabel = formatYear(start) || '—';
+					const endLabel = end ? formatYear(end) : 'Present';
+					return (
+						<div class="item item-with-date">
+							<span class="item-date">
+								{startLabel}–{endLabel}
+							</span>
+							<span class="item-title">{item.metadata.position}</span>
+							<span class="item-subtitle">
+								{joinWithComma(item.metadata.institution, item.metadata.department)}
+							</span>
+							{item.metadata.notes && (
+								<div class="item-details" set:html={item.metadata.notes} />
+							)}
+							{Array.isArray(item.metadata.related_affiliations) && (
+								<div class="item-details">
+									Related Affiliations:
+									<ul>
+										{item.metadata.related_affiliations.map((aff) => (
+											<li>
+												{joinWithComma(aff.affiliation_title || 'Member', aff.organization)} ({formatYear(aff.start_date)}–
+												{aff.end_date ? formatYear(aff.end_date) : 'Present'})
+											</li>
+										))}
+									</ul>
+								</div>
+							)}
+						</div>
+					);
+				})}
+			</section>
+		)}
+
+		{cv.education.length > 0 && (
+			<section id="education">
+				<h2>Education</h2>
+				{cv.education.map((item) => {
+					const start = formatMonthYear(item.metadata.date) || 'Start';
+					const end = formatMonthYear(item.metadata.end_date) || 'End';
+					return (
+						<div class="item item-with-date">
+							<span class="item-date">
+								{start}–{end}
+							</span>
+							<span class="item-title">
+								{joinWithComma(item.metadata.degree, item.metadata.area)}
+							</span>
+							<span class="item-subtitle">{item.metadata.institution}</span>
+							{Array.isArray(item.metadata.highlights) && item.metadata.highlights.length > 0 && (
+								<div class="item-details">
+									<ul>
+										{item.metadata.highlights.map((bullet) => (
+											<li set:html={bullet} />
+										))}
+									</ul>
+								</div>
+							)}
+						</div>
+					);
+				})}
+			</section>
+		)}
+
+		{(cv.peerReviewedPubs.length || cv.workshopPubs.length || cv.otherPubs.length) > 0 && (
+			<section id="publications">
+				<h2>Publications</h2>
+				{cv.peerReviewedPubs.length > 0 && (
+					<>
+						<h3 class="subsection-heading">Peer Reviewed</h3>
+						{cv.peerReviewedPubs.map((item, index) => (
+							<div class="pub-item">
+								<span class="pub-number">[P{cv.peerReviewedPubs.length - index}]</span>
+								<div class="pub-body">
+									<span class="pub-title">{item.metadata.title}</span>
+									{Array.isArray(item.metadata.authors) && (
+										<span class="pub-authors">
+											{item.metadata.authors.map((author, idx) => (
+												<>
+													{author === cvName ? <span class="author-self">{author}</span> : author}
+													{idx < item.metadata.authors.length - 1 && ', '}
+												</>
+											))}
+										</span>
+									)}
+									<div class="pub-meta">
+										<span class="pub-venue">
+											{joinWithComma(item.metadata.conference || item.metadata.journal, formatYear(item.metadata.date))}
+										</span>
+										{item.metadata.notes && (
+											<span class="inline-note">({item.metadata.notes})</span>
+										)}
+									</div>
+								</div>
+							</div>
+						))}
+					</>
+				)}
+
+				{cv.workshopPubs.length > 0 && (
+					<>
+						<h3 class="subsection-heading">Workshop Papers & Posters</h3>
+						{cv.workshopPubs.map((item, index) => (
+							<div class="pub-item">
+								<span class="pub-number">[W{cv.workshopPubs.length - index}]</span>
+								<div class="pub-body">
+									<span class="pub-title">{item.metadata.title}</span>
+									{Array.isArray(item.metadata.authors) && (
+										<span class="pub-authors">
+											{item.metadata.authors.map((author, idx) => (
+												<>
+													{author === cvName ? <span class="author-self">{author}</span> : author}
+													{idx < item.metadata.authors.length - 1 && ', '}
+												</>
+											))}
+										</span>
+									)}
+									<div class="pub-meta">
+										<span class="pub-venue">
+											{joinWithComma(item.metadata.conference || item.metadata.journal, formatYear(item.metadata.date))}
+										</span>
+										{item.metadata.notes && (
+											<span class="inline-note">({item.metadata.notes})</span>
+										)}
+									</div>
+								</div>
+							</div>
+						))}
+					</>
+				)}
+
+				{cv.otherPubs.length > 0 && (
+					<>
+						<h3 class="subsection-heading">Other Publications</h3>
+						{cv.otherPubs.map((item, index) => (
+							<div class="pub-item">
+								<span class="pub-number">[O{cv.otherPubs.length - index}]</span>
+								<div class="pub-body">
+									<span class="pub-title">{item.metadata.title}</span>
+									<div class="pub-meta">
+										<span class="pub-venue">
+											{joinWithComma(item.metadata.conference || item.metadata.journal, formatYear(item.metadata.date))}
+										</span>
+										{item.metadata.notes && (
+											<span class="inline-note">({item.metadata.notes})</span>
+										)}
+									</div>
+								</div>
+							</div>
+						))}
+					</>
+				)}
+			</section>
+		)}
+
+		{cv.grants.length > 0 && (
+			<section id="grants">
+				<h2>Grants</h2>
+				{cv.grants.map((item) => {
+					const amount = formatGrantAmount(item.metadata.amount, item.metadata.currency);
+					const coInvestigators =
+						Array.isArray(item.metadata.co_investigators) && item.metadata.co_investigators.length > 0
+							? item.metadata.co_investigators.join(', ')
+							: null;
+					const grantDetails = [
+						item.metadata.role ? `Role: ${item.metadata.role}` : null,
+						amount ? `Amount: ${amount}` : null,
+						coInvestigators ? `With: ${coInvestigators}` : null,
+					].filter(Boolean);
+					return (
+						<div class="item item-with-date">
+							<span class="item-date">
+								{formatYear(item.metadata.start_date)}–{formatYear(item.metadata.end_date)}
+							</span>
+							<span class="item-title">{item.metadata.title}</span>
+							<span class="item-subtitle">{item.metadata.agency}</span>
+							{grantDetails.length > 0 && (
+								<div class="item-details">{grantDetails.join(' | ')}</div>
+							)}
+						</div>
+					);
+				})}
+			</section>
+		)}
+
+		{cv.awards.length > 0 && (
+			<section id="awards">
+				<h2>Awards and Honors</h2>
+				<ul class="compact-list">
+					{cv.awards.map((item) => (
+						<li>
+							{formatYear(item.metadata.date)}: {item.metadata.title}
+							{item.metadata.organization && `, ${item.metadata.organization}`}
+							{item.metadata.url && (
+								<span class="inline-note">
+									(<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">details</a>)
+								</span>
+							)}
+						</li>
+					))}
+				</ul>
+			</section>
+		)}
+
+		{cv.teaching.length > 0 && (
+			<section id="teaching-experience">
+				<h2>Teaching Experience</h2>
+				{cv.teaching.map((item) => {
+					const courseLabel = item.metadata.course_number
+						? `${item.metadata.course_number} ${item.metadata.course_title ?? ''}`.trim()
+						: item.metadata.course_title;
+					const enrollment = item.metadata.students ? `~${item.metadata.students} students` : null;
+					return (
+						<div class="item item-with-date">
+							<span class="item-date">{item.metadata.term ?? formatMonthYear(item.metadata.date)}</span>
+							<span class="item-title">
+								{joinWithComma(item.metadata.role, courseLabel)}
+							</span>
+							<span class="item-subtitle">
+								{joinWithComma(item.metadata.institution, enrollment)}
+								{item.metadata.url && item.metadata.url !== 'todo' && (
+									<span class="inline-note">
+										[<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">outline</a>]
+									</span>
+								)}
+							</span>
+							{item.metadata.highlights && item.metadata.highlights[0] && (
+								<div class="item-details" set:html={item.metadata.highlights[0]} />
+							)}
+						</div>
+					);
+				})}
+			</section>
+		)}
+
+		{menteeGroups.length > 0 && (
+			<section id="mentoring">
+				<h2>Research Mentoring</h2>
+				{menteeGroups.map((group) => (
+					<>
+						<h3 class="subsection-heading">{group.level}</h3>
+						<ul class="compact-list">
+							{group.items.map((item) => {
+								const menteeYears = `${formatYear(item.metadata.start_date)}–${
+									item.metadata.end_date ? formatYear(item.metadata.end_date) : 'Present'
+								}`;
+								return (
+									<li>
+										{item.metadata.webpage_url ? (
+											<a href={item.metadata.webpage_url as string} class="item-title">
+												{item.metadata.name}
+											</a>
+										) : (
+											<span class="item-title">{item.metadata.name}</span>
+										)}
+										<span class="mentee-meta">
+											({joinWithComma(menteeYears, item.metadata.institution)})
+										</span>
+										{item.metadata.current_position && (
+											<span class="inline-note">Current: {item.metadata.current_position}</span>
+										)}
+										{Array.isArray(item.metadata.outputs) && item.metadata.outputs.length > 0 && (
+											<div class="item-details mentee-extra">{item.metadata.outputs.join('; ')}</div>
+										)}
+										{item.metadata.notes && (
+											<div class="item-details mentee-extra">Notes: {item.metadata.notes}</div>
+										)}
+									</li>
+								);
+							})}
+						</ul>
+					</>
+				))}
+			</section>
+		)}
+
+		{cv.industryExperience.length > 0 && (
+			<section id="professional-experience">
+				<h2>Industry Experience</h2>
+				{cv.industryExperience.map((item) => (
+					<div class="item item-with-date">
+						<span class="item-date">
+							{formatMonthYear(item.metadata.date)}–{formatMonthYear(item.metadata.end_date)}
+						</span>
+						<span class="item-title">{item.metadata.position}</span>
+						<span class="item-subtitle">
+							{joinWithComma(item.metadata.institution, item.metadata.department, item.metadata.location)}
+						</span>
+					</div>
+				))}
+			</section>
+		)}
+
+		{(cv.reviewingSummary || cv.serviceItems.length > 0) && (
+			<section id="academic-service">
+				<h2>Academic Service</h2>
+				{cv.reviewingSummary && (
+					<>
+						<h3 class="subsection-heading">Reviewing</h3>
+						<ul class="compact-list compact-list--indented">
+							{cv.reviewingSummary.meta_reviews && (
+								<li>
+									<strong>Meta-reviews / Program Committee:</strong> {cv.reviewingSummary.meta_reviews.join('; ')}
+								</li>
+							)}
+							{cv.reviewingSummary.hci_conference_individual_reviews && (
+								<li>
+									<strong>HCI/Social Computing Conference Reviews:</strong>
+									{cv.reviewingSummary.hci_conference_individual_reviews.join('; ')}
+								</li>
+							)}
+							{cv.reviewingSummary.ml_conference_individual_reviews && (
+								<li>
+									<strong>ML Conference Reviews:</strong>
+									{cv.reviewingSummary.ml_conference_individual_reviews.join('; ')}
+								</li>
+							)}
+							{cv.reviewingSummary.journals && (
+								<li>
+									<strong>Journal Reviews:</strong> {cv.reviewingSummary.journals.join('; ')}
+								</li>
+							)}
+							{cv.reviewingSummary.grants && (
+								<li>
+									<strong>Grant Reviews:</strong> {cv.reviewingSummary.grants.join('; ')}
+								</li>
+							)}
+							{cv.reviewingSummary.commendations && (
+								<li>
+									<strong>Commendations:</strong> {cv.reviewingSummary.commendations.join('; ')}
+								</li>
+							)}
+						</ul>
+					</>
+				)}
+
+				{cv.serviceItems.length > 0 && (
+					<>
+						<h3 class="subsection-heading">Committee & Organizing Roles</h3>
+						<ul class="compact-list">
+							{cv.serviceItems.map((item) => {
+								const start = item.metadata.date ? String(item.metadata.date).slice(0, 4) : '';
+								const end = item.metadata.end_date ? String(item.metadata.end_date).slice(0, 4) : '';
+								return (
+									<li>
+										{start && end && start !== end
+											? `${start}–${end}`
+											: start || 'Date N/A'}
+										: {item.metadata.role || 'Member'}, {item.metadata.name}
+										{item.metadata.organization && `, ${item.metadata.organization}`}
+										{(item.metadata.notes || item.metadata.bullet) && (
+											<span class="inline-note">({cleanNotes(item.metadata.notes || item.metadata.bullet)})</span>
+										)}
+									</li>
+								);
+							})}
+						</ul>
+					</>
+				)}
+			</section>
+		)}
+
+		{invitedTalks.length > 0 && (
+			<section id="selected-talks">
+				<h2>Selected Talks & Panels</h2>
+				{invitedTalks.map((item) => (
+					<div class="item item-with-date">
+						<span class="item-date">{formatMonthYear(item.metadata.date)}</span>
+						<span class="item-title">
+							{item.metadata.title} {String(item.metadata.type).toLowerCase() === 'panel' && '(Panel)'}
+						</span>
+						<span class="item-subtitle">{item.metadata.location}</span>
+					</div>
+				))}
+			</section>
+		)}
+
+		{cv.newsCoverage.length > 0 && (
+			<section id="news-coverage">
+				<h2>Selected Media Coverage</h2>
+				<ul class="compact-list">
+					{cv.newsCoverage.map((item) => (
+						<li>
+							{formatMonthYear(item.metadata.date)}: {truncateText(String(item.metadata.title ?? ''), 80)},
+							<i>{item.metadata.source}</i>. ({mediaLabel(item.metadata.media_type)})
+							{item.metadata.url && (
+								<span class="inline-note">
+									(<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">Link</a>)
+								</span>
+							)}
+						</li>
+					))}
+				</ul>
+			</section>
+		)}
+
+		<footer>
+			<p>Last updated: {personalInfo.date_updated ?? generatedDate}</p>
+		</footer>
+	</div>
+</Layout>
+
+<style is:global>
+	:root {
+		--main-color: #333;
+		--link-color: #4682b4;
+		--section-border-color: #ccc;
+		--body-font-size: 10.5pt;
+		--line-height: 1.35;
+		--page-margin: 1.1cm;
+	}
+
+	@page {
+		margin: var(--page-margin);
+	}
+
+	.cv-container {
+		max-width: 980px;
+		margin: 0.75rem auto;
+		font-family: 'Crimson Pro', Georgia, serif;
+		font-size: var(--body-font-size);
+		line-height: var(--line-height);
+		color: var(--main-color);
+		background-color: #fff;
+	}
+
+	header,
+	section,
+	footer {
+		padding: 0 0.75rem;
+		margin-bottom: 1.2em;
+	}
+
+	header {
+		text-align: center;
+		padding-bottom: 0.8em;
+		border-bottom: 1px solid var(--main-color);
+	}
+
+	header h1 {
+		font-size: 1.8em;
+		font-weight: 600;
+		margin: 0 0 0.1em 0;
+	}
+
+	header p {
+		font-size: 0.9em;
+		margin: 0.05em 0;
+	}
+
+	header a {
+		color: var(--link-color);
+		text-decoration: none;
+	}
+
+	header a {
+		color: var(--link-color);
+		text-decoration: none;
+	}
+
+	h2 {
+		font-size: 1.3em;
+		font-weight: 600;
+		border-bottom: 1px solid var(--section-border-color);
+		padding-bottom: 0.2em;
+		margin: 0 0 0.6em 0;
+	}
+
+	h3.subsection-heading {
+		font-size: 1.1em;
+		font-style: italic;
+		font-weight: 600;
+		margin: 0.6em 0 0.3em 1em;
+	}
+
+	.item {
+		margin-bottom: 0.6em;
+		padding-left: 0.8em;
+		position: relative;
+	}
+
+	.item-with-date {
+		padding-left: 5.5em;
+	}
+
+	.item-date {
+		position: absolute;
+		left: 0;
+		top: 0.1em;
+		width: 5em;
+		text-align: right;
+		font-size: 0.9em;
+		color: #555;
+	}
+
+	.item-title {
+		font-weight: 600;
+		display: inline;
+	}
+
+	.item-subtitle {
+		display: block;
+		font-size: 0.95em;
+		color: #333;
+	}
+
+	.item-details {
+		font-size: 0.9em;
+		color: #555;
+		margin-top: 0.2em;
+	}
+
+	.item-details ul {
+		list-style: disc;
+		padding-left: 1.5em;
+		margin-top: 0.3em;
+	}
+
+	.pub-item {
+		display: flex;
+		gap: 0.5em;
+		align-items: flex-start;
+		margin-bottom: 0.6em;
+		padding-left: 0.6em;
+	}
+
+	.pub-number {
+		font-weight: normal;
+		font-size: 0.9em;
+		color: #555;
+		min-width: 3.2em;
+		text-align: right;
+		margin-top: 0.2em;
+	}
+
+	.pub-body {
+		flex: 1;
+	}
+
+	.pub-title {
+		font-weight: 600;
+	}
+
+	.pub-authors {
+		display: block;
+		margin: 0.1em 0;
+		font-size: 0.95em;
+	}
+
+	.pub-venue {
+		font-style: italic;
+		font-size: 0.95em;
+	}
+
+	.pub-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.35em;
+		margin-top: 0.1em;
+	}
+
+	.author-self {
+		font-weight: 600;
+	}
+
+	ul.compact-list {
+		list-style: none;
+		padding-left: 0.8em;
+		margin: 0;
+	}
+
+	ul.compact-list li {
+		margin-bottom: 0.3em;
+	}
+
+	.compact-list--indented {
+		padding-left: 2em;
+	}
+
+	.inline-note {
+		display: inline-block;
+		margin-left: 0.35em;
+		font-size: 0.9em;
+		color: #555;
+	}
+
+	.mentee-meta {
+		font-size: 0.9em;
+		color: #555;
+		margin-left: 0.35em;
+	}
+
+	.mentee-extra {
+		margin-left: 1.5em;
+	}
+
+	footer {
+		text-align: center;
+		margin-top: 2em;
+		font-size: 0.8em;
+		color: #777;
+		border-top: 1px solid var(--section-border-color);
+		padding-top: 0.5em;
+	}
+
+	@media print {
+		.cv-container {
+			max-width: none;
+			margin: 0;
+		}
+
+		header,
+		section,
+		footer {
+			padding: 0;
+			margin-bottom: 1em;
+		}
+	}
+</style>

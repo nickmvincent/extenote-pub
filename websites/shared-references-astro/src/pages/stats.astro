@@ -1,0 +1,501 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const rawReferences = await getCollection('shared-references');
+
+// Filter to only bibtex entries (have a title)
+const references = rawReferences.filter(r => r.data.title);
+
+// Define status categories
+type StatusCategory = 'confirmed' | 'mismatch' | 'not_found' | 'error' | 'stale' | 'unchecked' | 'unverifiable' | 'manually_verified';
+
+interface StatusInfo {
+  label: string;
+  icon: string;
+  class: string;
+  description: string;
+}
+
+const statusInfo: Record<StatusCategory, StatusInfo> = {
+  confirmed: { label: 'Confirmed', icon: '✓', class: 'verified-valid', description: 'All fields match external database' },
+  mismatch: { label: 'Needs Review', icon: '⚠', class: 'verified-mismatch', description: 'Fields differ from external source' },
+  not_found: { label: 'Not Found', icon: '?', class: 'verified-notfound', description: 'Not indexed in checked databases' },
+  error: { label: 'Check Failed', icon: '✗', class: 'verified-error', description: 'Error during verification' },
+  stale: { label: 'Stale', icon: '↻', class: 'verified-stale', description: 'Check older than 30 days' },
+  unchecked: { label: 'Not Checked', icon: '○', class: 'verified-unknown', description: 'Not yet verified' },
+  unverifiable: { label: 'Unverifiable', icon: '○', class: 'verified-unknown', description: 'Cannot be verified (non-academic)' },
+  manually_verified: { label: 'Manually Verified', icon: '✓', class: 'verified-manual', description: 'Verified by human reviewer' },
+};
+
+// Count entries by status
+const statusCounts: Record<StatusCategory, number> = {
+  confirmed: 0,
+  mismatch: 0,
+  not_found: 0,
+  error: 0,
+  stale: 0,
+  unchecked: 0,
+  unverifiable: 0,
+  manually_verified: 0,
+};
+
+// Track provider usage
+const providerCounts: Record<string, number> = {};
+
+// Staleness threshold (30 days)
+const STALE_THRESHOLD_MS = 30 * 24 * 60 * 60 * 1000;
+const now = Date.now();
+
+for (const ref of references) {
+  const data = ref.data;
+  const checkLog = data.check_log as any;
+  const manuallyVerified = data.manually_verified || data.verified_manual;
+
+  // Manual verification takes precedence
+  if (manuallyVerified) {
+    statusCounts.manually_verified++;
+    continue;
+  }
+
+  // Use check_log status
+  if (checkLog) {
+    let status = checkLog.status as StatusCategory;
+
+    // Check for staleness
+    if (checkLog.checked_at && status !== 'error') {
+      const checkedAt = new Date(checkLog.checked_at).getTime();
+      if (now - checkedAt > STALE_THRESHOLD_MS && status !== 'not_found' && status !== 'unverifiable') {
+        status = 'stale';
+      }
+    }
+
+    if (status && statusCounts[status] !== undefined) {
+      statusCounts[status]++;
+    } else {
+      statusCounts.unchecked++;
+    }
+
+    // Track provider
+    if (checkLog.checked_with) {
+      const provider = checkLog.checked_with.includes(':')
+        ? checkLog.checked_with.split(':')[1]
+        : checkLog.checked_with;
+      providerCounts[provider] = (providerCounts[provider] || 0) + 1;
+    }
+  } else {
+    statusCounts.unchecked++;
+  }
+}
+
+// Calculate totals and percentages
+const total = references.length;
+const checked = total - statusCounts.unchecked;
+const verified = statusCounts.confirmed + statusCounts.manually_verified;
+const needsReview = statusCounts.mismatch;
+const checkRate = total > 0 ? Math.round((checked / total) * 100) : 0;
+const verifiedRate = total > 0 ? Math.round((verified / total) * 100) : 0;
+
+// Prepare sorted status list for display
+const statusOrder: StatusCategory[] = ['confirmed', 'manually_verified', 'mismatch', 'not_found', 'stale', 'unchecked', 'unverifiable', 'error'];
+const displayStatuses = statusOrder.filter(s => statusCounts[s] > 0);
+
+// Sort providers by count
+const sortedProviders = Object.entries(providerCounts).sort((a, b) => b[1] - a[1]);
+---
+
+<Layout title="Reference Check Stats">
+  <a href="/" class="back-link">← Back to browse</a>
+
+  <article class="stats-page">
+    <h1>Reference Verification Stats</h1>
+    <div class="title-divider"></div>
+
+    <p class="stats-intro">
+      Overview of bibliographic validation across <strong>{total}</strong> references.
+    </p>
+
+    <section class="summary-section">
+      <h2>Summary</h2>
+      <div class="summary-ornament"></div>
+
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-value">{total}</div>
+          <div class="summary-label">Total References</div>
+        </div>
+        <div class="summary-card highlight">
+          <div class="summary-value">{checkRate}%</div>
+          <div class="summary-label">Check Coverage</div>
+          <div class="summary-detail">{checked} of {total} checked</div>
+        </div>
+        <div class="summary-card success">
+          <div class="summary-value">{verifiedRate}%</div>
+          <div class="summary-label">Verified</div>
+          <div class="summary-detail">{verified} confirmed</div>
+        </div>
+        {needsReview > 0 && (
+          <div class="summary-card warning">
+            <div class="summary-value">{needsReview}</div>
+            <div class="summary-label">Need Review</div>
+            <div class="summary-detail">fields differ</div>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <section class="breakdown-section">
+      <h2>Status Breakdown</h2>
+      <div class="breakdown-ornament"></div>
+
+      <div class="status-list">
+        {displayStatuses.map(status => {
+          const info = statusInfo[status];
+          const count = statusCounts[status];
+          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          return (
+            <div class="status-row">
+              <div class={`status-badge ${info.class}`}>
+                <span class="icon">{info.icon}</span>
+                <span class="label">{info.label}</span>
+              </div>
+              <div class="status-bar-container">
+                <div class="status-bar" style={`width: ${pct}%`}></div>
+              </div>
+              <div class="status-count">
+                <strong>{count}</strong>
+                <span class="pct">({pct}%)</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+
+    {sortedProviders.length > 0 && (
+      <section class="providers-section">
+        <h2>Providers Used</h2>
+        <div class="providers-ornament"></div>
+
+        <div class="provider-list">
+          {sortedProviders.map(([provider, count]) => (
+            <div class="provider-row">
+              <code class="provider-name">{provider}</code>
+              <span class="provider-count">{count} entries</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <section class="legend-section">
+      <h2>Status Legend</h2>
+      <div class="legend-ornament"></div>
+
+      <dl class="legend-list">
+        {statusOrder.map(status => {
+          const info = statusInfo[status];
+          return (
+            <div class="legend-item">
+              <dt>
+                <span class={`mini-badge ${info.class}`}>{info.icon}</span>
+                {info.label}
+              </dt>
+              <dd>{info.description}</dd>
+            </div>
+          );
+        })}
+      </dl>
+    </section>
+  </article>
+</Layout>
+
+<style>
+  .title-divider {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.8rem;
+    margin: 0.5rem 0 1.5rem;
+  }
+
+  .title-divider::before {
+    content: '─── ◈ ───';
+  }
+
+  .stats-intro {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  /* Summary Section */
+  .summary-section h2,
+  .breakdown-section h2,
+  .providers-section h2,
+  .legend-section h2 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--text);
+    margin: 0 0 0.25rem 0;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .summary-ornament,
+  .breakdown-ornament,
+  .providers-ornament,
+  .legend-ornament {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.7rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .summary-ornament::before { content: '─── ◇ ───'; }
+  .breakdown-ornament::before { content: '─── ◆ ───'; }
+  .providers-ornament::before { content: '─── ○ ───'; }
+  .legend-ornament::before { content: '─── ● ───'; }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .summary-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1rem;
+    text-align: center;
+    border-radius: 4px;
+  }
+
+  .summary-card.highlight {
+    border-color: var(--accent);
+  }
+
+  .summary-card.success {
+    border-color: var(--verified-valid-border, #4a7c59);
+  }
+
+  .summary-card.warning {
+    border-color: var(--verified-mismatch-border, #d4a84b);
+  }
+
+  .summary-value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .summary-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .summary-detail {
+    font-size: 0.75rem;
+    color: var(--border-ornate);
+    margin-top: 0.25rem;
+  }
+
+  /* Breakdown Section */
+  .breakdown-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .status-row {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .status-badge .icon {
+    font-size: 0.9rem;
+  }
+
+  .status-bar-container {
+    height: 8px;
+    background: var(--bg-inset);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .status-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  .status-count {
+    font-size: 0.9rem;
+    min-width: 80px;
+    text-align: right;
+  }
+
+  .status-count .pct {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-left: 0.25rem;
+  }
+
+  /* Provider Section */
+  .providers-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .provider-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .provider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .provider-name {
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+
+  .provider-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* Legend Section */
+  .legend-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .legend-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.75rem 2rem;
+  }
+
+  .legend-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .legend-item dt {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .legend-item dd {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding-left: 1.75rem;
+  }
+
+  .mini-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    font-size: 0.75rem;
+  }
+
+  /* Badge colors - using the same variables from global.css */
+  .verified-valid {
+    background: var(--verified-valid-bg);
+    color: var(--verified-valid-text);
+    border: 1px solid var(--verified-valid-border);
+  }
+
+  .verified-mismatch {
+    background: var(--verified-mismatch-bg);
+    color: var(--verified-mismatch-text);
+    border: 1px solid var(--verified-mismatch-border);
+  }
+
+  .verified-notfound {
+    background: var(--verified-notfound-bg);
+    color: var(--verified-notfound-text);
+    border: 1px solid var(--verified-notfound-border);
+  }
+
+  .verified-error {
+    background: var(--verified-error-bg);
+    color: var(--verified-error-text);
+    border: 1px solid var(--verified-error-border);
+  }
+
+  .verified-stale {
+    background: var(--verified-stale-bg);
+    color: var(--verified-stale-text);
+    border: 1px solid var(--verified-stale-border);
+  }
+
+  .verified-unknown {
+    background: var(--verified-unknown-bg);
+    color: var(--verified-unknown-text);
+    border: 1px solid var(--verified-unknown-border);
+  }
+
+  .verified-manual {
+    background: var(--verified-manual-bg, var(--verified-valid-bg));
+    color: var(--verified-manual-text, var(--verified-valid-text));
+    border: 1px solid var(--verified-manual-border, var(--verified-valid-border));
+  }
+
+  @media (max-width: 600px) {
+    .status-row {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .status-badge {
+      width: fit-content;
+    }
+
+    .status-count {
+      text-align: left;
+    }
+  }
+</style>

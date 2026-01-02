@@ -1,0 +1,18 @@
+---
+type: paidf_chapter
+title: 'Appendix 3: LLM Policy Docs'
+slug: appendix3_example_legalterms
+visibility: public
+---
+Status: needs contributions - expand provider list and add last-checked dates.
+
+This Appendix contains a list of links to various live Terms of Service, Privacy Policy, and related docs for major LLM providers, including both private players like frontier labs and public AI-adjacent actors like AI2, Mozilla.
+
+
+- AI2: [ToS](https://allenai.org/terms/2024-09-25) | [Privacy](https://allenai.org/privacy-policy/2025-02-19)
+- Mozilla Common Voice: [ToS](https://commonvoice.mozilla.org/en/terms) | [Privacy](https://commonvoice.mozilla.org/en/privacy)
+- OpenAI: [Terms of Use](https://openai.com/policies/row-terms-of-use/) | [Privacy Policy](https://openai.com/policies/row-privacy-policy/)
+- Anthropic: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://www.anthropic.com/legal/privacy)
+- Alibaba Cloud (Qwen): [Terms of Service](https://www.alibabacloud.com/help/en/legal/latest/Chinese-Mainland-Chinese-Hong-Kong-Chinese-Macao-Chinese-Taiwan-Chinese-Thailand-Chinese-Japan-Chinese-Korea-Chinese-Malaysia-Chinese-Indonesia-Chinese-Singapore-Chinese-Philippines) | [Privacy Policy](https://www.alibabacloud.com/help/en/legal/latest/alibaba-cloud-international-website-privacy-policy)
+- Google (Gemini): [Terms of Service](https://policies.google.com/terms) | [Privacy Policy](https://policies.google.com/privacy)
+- Meta (Llama): [Terms of Use](https://www.meta.com/legal/quest/meta-platforms-technologies-terms-of-service/) | [Llama License](https://www.llama.com/llama3_2/license/)

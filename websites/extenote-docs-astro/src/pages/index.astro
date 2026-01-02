@@ -1,0 +1,632 @@
+---
+import Layout from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout
+  title="Extenote"
+  description="Content management for structured Markdown. Write once, validate everywhere, publish anywhere."
+>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 3rem 2rem 2rem;
+  }
+
+  .hero h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  [data-aesthetic="futuristic"] .hero h1 {
+    font-size: 2.2rem;
+    letter-spacing: 0.2em;
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .hero h1 {
+    text-shadow: 0 0 30px var(--accent), 0 0 60px rgba(0, 212, 255, 0.3);
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+  }
+
+  [data-aesthetic="classic"] .hero-subtitle {
+    font-style: italic;
+  }
+
+  [data-aesthetic="futuristic"] .hero-subtitle {
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-note {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    max-width: 550px;
+    margin: 0 auto 1.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+  }
+
+  .hero-note strong {
+    color: var(--text);
+  }
+
+  [data-aesthetic="futuristic"] .hero-note {
+    border-left: none;
+    border: 1px solid var(--border-ornate);
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 0.6rem 1.5rem;
+    border: 1px solid var(--border-ornate);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  [data-aesthetic="classic"] .btn {
+    border-radius: 2px;
+  }
+
+  [data-aesthetic="futuristic"] .btn {
+    border-radius: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+  }
+
+  .btn:hover {
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--text-light);
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .btn-primary {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .btn-primary:hover {
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text);
+  }
+
+  .btn-secondary:hover {
+    background: var(--accent);
+    color: var(--text-light);
+    border-color: var(--accent);
+  }
+
+  .code-preview {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-ornate);
+    padding: 1.5rem;
+    max-width: 650px;
+    margin: 2.5rem auto 0;
+    text-align: left;
+  }
+
+  [data-aesthetic="futuristic"] .code-preview {
+    border-left: none;
+    border: 1px solid var(--border-ornate);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .code-preview {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.1), inset 0 0 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .code-preview pre {
+    margin: 0;
+    font-size: 0.85rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .features {
+    padding: 3rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .features h2 {
+    font-family: var(--font-heading);
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  [data-aesthetic="futuristic"] .features h2 {
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .features h2 {
+    text-shadow: 0 0 20px var(--accent);
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-ornate);
+    padding: 1.25rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  [data-aesthetic="futuristic"] .feature-card {
+    border-left: none;
+    border: 1px solid var(--border);
+  }
+
+  .feature-card:hover {
+    border-left-color: var(--accent);
+  }
+
+  [data-aesthetic="futuristic"] .feature-card:hover {
+    border-color: var(--accent);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .feature-card:hover {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+  }
+
+  .feature-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  [data-aesthetic="futuristic"] .feature-card h3 {
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .feature-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .workflow {
+    padding: 3rem 2rem;
+    background: var(--bg-inset);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  [data-aesthetic="futuristic"] .workflow {
+    border-color: var(--border-ornate);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .workflow {
+    background: linear-gradient(180deg, var(--bg-inset) 0%, var(--bg) 100%);
+  }
+
+  .workflow-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .workflow h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  [data-aesthetic="futuristic"] .workflow h2 {
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .workflow h2 {
+    text-shadow: 0 0 20px var(--accent);
+  }
+
+  .workflow-subtitle {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  [data-aesthetic="classic"] .workflow-subtitle {
+    font-style: italic;
+  }
+
+  .workflow-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+  }
+
+  .step {
+    flex: 1;
+    min-width: 180px;
+    max-width: 220px;
+    text-align: center;
+  }
+
+  .step-number {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--border-ornate);
+    color: var(--accent-warm);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+  }
+
+  [data-aesthetic="futuristic"] .step-number {
+    border-radius: 0;
+    color: var(--accent);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .step-number {
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  }
+
+  .step h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+  }
+
+  [data-aesthetic="futuristic"] .step h3 {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.9rem;
+  }
+
+  .step p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  /* Network Section */
+  .network {
+    padding: 3rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .network h2 {
+    font-family: var(--font-heading);
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  [data-aesthetic="futuristic"] .network h2 {
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .network h2 {
+    text-shadow: 0 0 20px var(--accent);
+  }
+
+  .network-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  [data-aesthetic="classic"] .network-subtitle {
+    font-style: italic;
+  }
+
+  .network-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .network-site {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    text-decoration: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  [data-aesthetic="classic"] .network-site {
+    border-left: 3px solid var(--border-ornate);
+  }
+
+  .network-site:hover {
+    border-color: var(--accent);
+    text-decoration: none;
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .network-site:hover {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+  }
+
+  .network-site h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    margin: 0 0 0.35rem;
+    color: var(--accent);
+  }
+
+  .network-site p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Use Cases Section */
+  .use-cases {
+    padding: 3rem 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    background: var(--bg-inset);
+    border-top: 1px solid var(--border);
+  }
+
+  [data-aesthetic="futuristic"] .use-cases {
+    border-color: var(--border-ornate);
+  }
+
+  .use-cases h2 {
+    font-family: var(--font-heading);
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  [data-aesthetic="futuristic"] .use-cases h2 {
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .use-cases h2 {
+    text-shadow: 0 0 20px var(--accent);
+  }
+
+  .use-cases-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  [data-aesthetic="classic"] .use-cases-subtitle {
+    font-style: italic;
+  }
+
+  .use-cases-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .use-cases-list li {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  [data-aesthetic="classic"] .use-cases-list li {
+    border-left: 3px solid var(--border-ornate);
+  }
+
+  .use-cases-list li strong {
+    color: var(--text);
+  }
+
+  [data-aesthetic="futuristic"] .use-cases-list li:hover {
+    border-color: var(--accent);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .use-cases-list li:hover {
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.15);
+  }
+
+</style>
+
+<Nav />
+
+<main>
+  <section class="hero">
+    <h1>ExteNote</h1>
+    <p class="hero-subtitle">
+      A tool for managing structured Markdown content. Define schemas, validate frontmatter, build static sites, and keep bibliographic references accurate.
+    </p>
+    <div class="cta-buttons">
+      <a href={`${base}/docs/quickstart`} class="btn btn-primary">Documentation</a>
+      <a href="https://github.com/nickmvincent/extenote" class="btn btn-secondary" target="_blank">Source Code</a>
+    </div>
+
+    <div class="code-preview">
+      <pre><code># Install
+git clone https://github.com/nickmvincent/extenote.git
+cd extenote && bun install && bun run build
+
+# Use via CLI, TUI, or web interface
+bun run cli -- status
+bun run cli -- check shared-references
+bun run web</code></pre>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="features">
+    <h2>What It Does</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>Schema Validation</h3>
+        <p>Define content types in YAML. ExteNote validates frontmatter against your schemas and reports issues with file paths and line numbers.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Reference Checking</h3>
+        <p>Verify bibliographic entries against DBLP, Semantic Scholar, OpenAlex, and Crossref. Identify mismatches and missing metadata.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Multi-Project Support</h3>
+        <p>Manage multiple content projects in one vault. Each project can have its own schemas, build config, and deploy target.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Static Site Building</h3>
+        <p>Export content to JSON, Markdown, or BibTeX. Build sites with Astro or Quarto. Deploy to GitHub Pages or Cloudflare.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Tag Operations</h3>
+        <p>Rename, merge, or delete tags across your vault. Preview changes before applying. Supports hierarchical tags with colon separators.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Federated Publishing</h3>
+        <p>Sync content to ATProto (Bluesky ecosystem) via Semble. Optionally create GitHub Discussions for content items.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Issue Tracking</h3>
+        <p>Lint rules catch common problems: missing required fields, invalid types, compatibility issues. View all issues in one place.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Three Interfaces</h3>
+        <p>CLI for scripting and automation. Terminal UI for keyboard-driven browsing. Web UI for visual exploration and review workflows.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Backup & Undo</h3>
+        <p>Destructive operations (tag mutations, bulk edits) create automatic backups. Undo recent changes if something goes wrong.</p>
+      </div>
+      <div class="feature-card">
+        <h3>LLM-Ready Data</h3>
+        <p>Schema-validated data stays clean and portable. Use LLMs to rapidly build fit-for-purpose interfaces without corrupting your source data.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="workflow">
+    <div class="workflow-content">
+      <h2>Typical Workflow</h2>
+      <p class="workflow-subtitle">Content management with validation</p>
+      <div class="workflow-steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Write</h3>
+          <p>Create Markdown files with YAML frontmatter matching your schemas</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Validate</h3>
+          <p>Run <code>extenote status</code> or <code>lint</code> to catch issues</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Check</h3>
+          <p>Verify references against external databases if needed</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Build</h3>
+          <p>Export content and build static sites with Astro or Quarto</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="network">
+    <h2>Example: Data Leverage Network</h2>
+    <p class="network-subtitle">A set of interconnected sites managed with ExteNote</p>
+    <div class="network-grid">
+      <a href="https://datalicenses.org" target="_blank" class="network-site">
+        <h3>Data Licenses</h3>
+        <p>Catalog of data licensing initiatives</p>
+      </a>
+      <a href="https://datacounterfactuals.org" target="_blank" class="network-site">
+        <h3>Data Counterfactuals</h3>
+        <p>Training data counterfactual explorer</p>
+      </a>
+      <a href="https://exploringai.org" target="_blank" class="network-site">
+        <h3>Data Napkin Math</h3>
+        <p>Quick AI data calculations</p>
+      </a>
+      <a href="https://sharedreferences.pages.dev" target="_blank" class="network-site">
+        <h3>Shared References</h3>
+        <p>Verified bibliography with 400+ entries</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="use-cases">
+    <h2>Use Cases</h2>
+    <p class="use-cases-subtitle">ExteNote works well for:</p>
+    <ul class="use-cases-list">
+      <li><strong>Research bibliographies</strong> — maintain accurate citations with automated verification</li>
+      <li><strong>Multi-site content</strong> — share content across projects with includes and cross-references</li>
+      <li><strong>Structured knowledge bases</strong> — enforce consistency with schemas and lint rules</li>
+      <li><strong>Academic writing</strong> — export to BibTeX, build with Quarto for papers and books</li>
+      <li><strong>LLM-generated tools</strong> — clean data + schema means you can quickly spin up custom interfaces (a todo app, a review tracker) with LLMs, without compromising data integrity</li>
+    </ul>
+  </section>
+</main>
+
+<Footer />
+
+</Layout>

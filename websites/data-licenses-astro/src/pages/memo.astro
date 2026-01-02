@@ -1,0 +1,26 @@
+---
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import Layout from '../layouts/Layout.astro';
+import { loadMemo } from '../lib/content-loader';
+
+const memo = await loadMemo();
+const markdown = await createMarkdownProcessor();
+const rendered = await markdown.render(memo.body);
+const memoHtml = rendered.code;
+---
+
+<Layout>
+  <main class="wrap narrow">
+    <header class="page-header">
+      <h1>Memo</h1>
+      <p class="muted">Read our memo on AI preference signals, licenses, and enforcement.</p>
+      <p>
+        <a class="btn" href="/">← Back to home</a>
+      </p>
+    </header>
+
+    <article class="memo" set:html={memoHtml}>
+    </article>
+  </main>
+  
+</Layout>

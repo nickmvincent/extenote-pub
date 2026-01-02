@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import ReferenceCard from '../../components/ReferenceCard.astro';
+
+export async function getStaticPaths() {
+  const rawReferences = await getCollection('shared-references');
+
+  // Normalize function inline (filter out entries without title)
+  const references = rawReferences.filter(r => r.data.title).map((ref) => {
+    const d = ref.data;
+    let authors: string[] = [];
+    if (d.authors) {
+      authors = d.authors;
+    } else if (d.author) {
+      authors = [d.author];
+    }
+
+    return {
+      id: ref.id,
+      citation_key: d.citation_key || d.citekey || ref.id,
+      entry_type: d.entry_type || d.type || 'misc',
+      title: d.title,
+      authors,
+      year: d.year,
+      venue: d.venue,
+      journal: d.journal,
+      url: d.url,
+      abstract: d.abstract,
+      tags: d.tags || [],
+    };
+  });
+
+  const allTags = [...new Set(references.flatMap(r => r.tags || []))];
+
+  return allTags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      references: references
+        .filter(r => r.tags?.includes(tag))
+        .sort((a, b) => {
+          const yearA = parseInt(a.year || '0');
+          const yearB = parseInt(b.year || '0');
+          return yearB - yearA;
+        }),
+    },
+  }));
+}
+
+const { tag, references } = Astro.props;
+---
+
+<Layout title={`Tag: ${tag}`}>
+  <a href="/" class="back-link">&larr; Back to browse</a>
+
+  <h2 style="margin-bottom: 1rem;">
+    Tag: <span class="tag" style="font-size: 1rem;">{tag}</span>
+    <span style="font-weight: normal; color: var(--text-muted); font-size: 1rem; margin-left: 0.5rem;">
+      ({references.length} references)
+    </span>
+  </h2>
+
+  <div class="references-list">
+    {references.map((ref) => (
+      <ReferenceCard
+        id={ref.id}
+        title={ref.title}
+        citation_key={ref.citation_key}
+        entry_type={ref.entry_type}
+        authors={ref.authors}
+        year={ref.year}
+        venue={ref.venue}
+        journal={ref.journal}
+        url={ref.url}
+        abstract={ref.abstract}
+        tags={ref.tags}
+      />
+    ))}
+  </div>
+</Layout>

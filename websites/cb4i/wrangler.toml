@@ -1,0 +1,6 @@
+name = "cb4i"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-03-01"
+
+[vars]
+# Add build-time vars if needed (override with `--var KEY=VALUE`).

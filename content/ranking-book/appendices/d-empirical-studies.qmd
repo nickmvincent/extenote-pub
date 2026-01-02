@@ -1,0 +1,187 @@
+---
+type: book_appendix
+title: Empirical Studies Reference
+visibility: public
+---
+# Empirical Studies Reference {#sec-appendix-empirical}
+
+This appendix provides a comprehensive reference for the empirical studies cited throughout the book, organized by topic. For each study, we provide the key finding, methodology, and relevance to our framework.
+
+## D.1 Platform Competition and Traffic Effects
+
+### D.1.1 Stack Overflow Decline
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @delriochanona2024stackoverflow | 25% reduction in Stack Overflow activity within 6 months of ChatGPT release | Diff-in-diff comparing SO to platforms where ChatGPT restricted | Direct evidence of chunk-ranker (ChatGPT) competing with bundle-ranker (Q&A) |
+| @burtch2024 | Decline concentrated among newer users; questions became more complex post-ChatGPT | Time series analysis of SO contribution patterns | Suggests experienced users remain, novices exit to AI |
+| @kabir2024 | ChatGPT answers incorrect 52% of time *when compared to accepted SO answers*; users still prefer ChatGPT style | Human evaluation of 517 programming questions | Quality not main driver of preference; convenience and style matter |
+
+**Key insight**: The Stack Overflow case demonstrates that AI systems directly compete with human knowledge platforms even when AI quality is lower.
+
+### D.1.2 Broader Platform Effects
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @burtch2024 | Reddit developer communities showed no decline (vs. SO decline) | Comparison across platforms | Social fabric may buffer against AI competition |
+
+## D.2 Training Data and Model Outputs
+
+### D.2.1 Membership Inference and Extraction
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @carlini2021 | LLMs can regurgitate training data verbatim | Prompting experiments with GPT-2 | Training data directly affects outputs; memorization occurs |
+| @hayes2025 | Membership inference attacks work on large LLMs (with challenges) | Attack development and evaluation | Possible to partially determine if specific data was in training |
+| @carlini2023 | Extractable memorization scales with model size and data frequency | Systematic extraction experiments | Larger models memorize more; frequent data more memorized |
+
+**Key insight**: The coupling between training data and outputs is not just theoretical—it's empirically measurable through extraction and inference attacks.
+
+### D.2.2 Model Collapse and Synthetic Data
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @shumailov2024 | Training on synthetic data without human data causes "model collapse" | Multi-generation training experiments | Feedback loop concern is empirically grounded |
+| @alemohammad2024 | "MAD" (Model Autophagy Disorder) occurs with recursive self-training | Simulation and theoretical analysis | Stability concerns from information theory perspective |
+
+## D.3 Labor Market Effects
+
+### D.3.1 Task and Occupation Exposure
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @eloundou2023 | ~80% of US workers have at least 10% of tasks exposed to LLMs | Expert annotation of O*NET task database | Broad exposure across occupations |
+| @labaschin2025 | Firm-level extension of task exposure analysis | Extending GPTs-are-GPTs methodology | Exposure varies by firm characteristics |
+| @noy2023 | ChatGPT increases productivity 35-40% for writing tasks | Randomized experiment with professionals | Demonstrated productivity effects |
+| @peng2023 | GitHub Copilot increases coding speed ~55% | Controlled experiment | AI augmentation effects measurable |
+
+**Key insight**: Exposure is broad (80%+ of workers) and effects are measurable in controlled settings. Real-world labor market outcomes still emerging.
+
+### D.3.2 Employment Effects (Emerging)
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @hui2024 | Freelance writing demand dropped post-ChatGPT | Analysis of freelance platforms | Early evidence of labor market effects |
+| @felten2023 | Occupations with higher AI exposure saw differential wage changes | Occupation-level wage analysis | Beginning to see labor market signals |
+
+**Caveat**: Labor market effects take time to materialize. Current evidence is preliminary.
+
+## D.4 Evaluation and Benchmarks
+
+### D.4.1 Benchmark Limitations
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @rogers2023 | Benchmark saturation and contamination are widespread | Meta-analysis of benchmark usage | Evaluation crisis in AI |
+| @ott2022 | Data contamination affects reported model performance | Analysis of benchmark data in pretraining corpora | Benchmarks may overstate capability |
+| @kiela2021 | Benchmarks become "saturated" faster than capabilities improve | Historical benchmark analysis | Goodhart's law in action |
+
+### D.4.2 Human Evaluation Challenges
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @clark2021 | Humans struggle to distinguish GPT-3 text from human text | Detection experiments | Evaluation by output inspection is unreliable |
+| @kabir2024 | Users preferred ChatGPT answers even when incorrect (polite, comprehensive style) | User study with SO questions | Style biases human evaluation |
+
+## D.5 Data Documentation and Transparency
+
+### D.5.1 Current State of Transparency
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @bommasani2023 | Average FMTI score: 37/100 | Scoring based on 100 transparency indicators | Severe lack of transparency in foundation model ecosystem |
+| @bommasani2024 | FMTI v1.1 shows some improvement after index release | Follow-up scoring with company reports | Transparency indices can drive improvement |
+| @dodge2021 | C4 dataset contains problematic content, poor documentation | Content analysis of Common Crawl-derived data | Training data documentation is inadequate |
+
+### D.5.2 Data Provenance
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @longpre2023 | Data Provenance Initiative reveals training data composition | Audit of major LLM training datasets | Beginning of systematic data documentation |
+| @min2023silo | SILO: model trained only on permissively licensed data | Construction and evaluation | Demonstrates feasibility of "clean" training |
+
+## D.6 Interpretability Evidence
+
+### D.6.1 Internal Mechanisms
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @geva2022 | FF layers "promote concepts" in vocabulary space | Probing and intervention experiments | Mechanistic support for ranking framing |
+| @nostalgebraist2020 | "Logit lens" reveals intermediate predictions | Layer-wise projection to vocabulary | Predictions crystallize through layers |
+| @lioubashevski2024 | "Ordered saturation"—models determine top-k tokens sequentially | Analysis of prediction stability across layers | Ranking computed in ordered fashion |
+
+### D.6.2 Attention and Information Flow
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @elhage2021 | "Induction heads" implement in-context learning | Mechanistic interpretability | Specific circuits implement specific capabilities |
+| @olsson2022 | In-context learning emerges from induction head formation | Training dynamics analysis | Capability emergence has mechanistic explanation |
+
+## D.7 RLHF and Preference Learning
+
+### D.7.1 RLHF Effectiveness
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @ouyang2022instructgpt | InstructGPT preferred to GPT-3 despite being smaller | Human evaluation | RLHF substantially improves alignment with preferences |
+| @bai2022 | "Constitutional AI" reduces need for human feedback | Comparison of RLHF variants | Iterative approaches can scale preference learning |
+| @rafailov2023 | DPO matches RLHF performance without reward model | Method comparison | Preference optimization doesn't require explicit reward |
+
+### D.7.2 RLHF Limitations
+
+| Study | Key Finding | Methodology | Relevance |
+|-------|-------------|-------------|-----------|
+| @gao2023 | Reward model overoptimization degrades actual quality | Scaling experiments | Goodhart's law applies to reward models |
+| @casper2023 | "Reward hacking" is pervasive in RLHF | Literature review and experiments | RLHF optimizes proxy, not true objective |
+
+## D.8 Summary Statistics
+
+### Studies by Topic
+
+| Topic | Number of Studies Cited |
+|-------|------------------------|
+| Platform effects | 6 |
+| Training data coupling | 5 |
+| Labor market | 6 |
+| Evaluation/benchmarks | 5 |
+| Transparency/documentation | 5 |
+| Interpretability | 5 |
+| RLHF | 5 |
+| **Total** | **37** |
+
+### Evidence Strength Assessment
+
+| Claim | Evidence Strength | Key Studies |
+|-------|------------------|-------------|
+| LLMs rank tokens via softmax | Definitional (mechanistic) | N/A—follows from architecture |
+| Training data affects outputs | Strong (extraction works) | @carlini2021, @hayes2025 |
+| AI competes with knowledge platforms | Strong (Stack Overflow decline) | @delriochanona2024stackoverflow, @burtch2024 |
+| Labor exposure is broad | Moderate-strong | @eloundou2023 |
+| Labor displacement occurring | Preliminary | @hui2024 |
+| Model collapse from synthetic data | Moderate | @shumailov2024 |
+| Transparency is low | Strong | @bommasani2023 |
+
+## D.9 Gaps in Evidence
+
+We acknowledge significant gaps:
+
+1. **Long-term labor market effects**: Effects take years to materialize; current evidence is preliminary
+
+2. **Causal mechanisms**: Most studies are observational; causal claims require assumptions
+
+3. **Geographic scope**: Most studies focus on US/English; global picture unclear
+
+4. **Power concentration**: Theoretical concern but hard to measure empirically
+
+5. **Intervention effectiveness**: Collective bargaining and data rules are proposals, not evaluated interventions
+
+Future empirical work should prioritize:
+- Longitudinal labor market studies
+- Randomized policy experiments where feasible
+- International comparisons
+- Measurement of power concentration metrics
+
+## References for Appendix D
+
+::: {#refs-appendix-d}
+:::

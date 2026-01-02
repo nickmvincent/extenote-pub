@@ -1,0 +1,274 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import ReferenceCard from '../components/ReferenceCard.astro';
+
+const rawReferences = await getCollection('shared-references');
+
+// Normalize data to handle both schema formats
+function normalizeRef(ref: typeof rawReferences[0]) {
+  const d = ref.data;
+  // Handle author/authors - convert string to array if needed
+  let authors: string[] = [];
+  if (d.authors) {
+    authors = d.authors;
+  } else if (d.author) {
+    authors = [d.author];
+  }
+
+  return {
+    id: ref.id,
+    citation_key: d.citation_key || d.citekey || ref.id,
+    entry_type: d.entry_type || d.type || 'misc',
+    title: d.title,
+    authors,
+    year: d.year,
+    venue: d.venue,
+    journal: d.journal,
+    url: d.url,
+    abstract: d.abstract,
+    tags: d.tags || [],
+  };
+}
+
+const references = rawReferences
+  .filter(r => r.data.title) // Filter out entries without title
+  .map(normalizeRef);
+
+// Sort by year descending by default
+references.sort((a, b) => {
+  const yearA = parseInt(a.year || '0');
+  const yearB = parseInt(b.year || '0');
+  return yearB - yearA;
+});
+
+// Extract unique values for filters
+// Hide collection tags (dc:*, collection:*) from the dropdown
+const isCollectionTag = (tag: string) => tag.startsWith('dc:') || tag.startsWith('collection:');
+const allTags = [...new Set(references.flatMap(r => r.tags || []))]
+  .filter(tag => !isCollectionTag(tag))
+  .sort();
+const allYears = [...new Set(references.map(r => r.year).filter(Boolean))].sort().reverse() as string[];
+const allTypes = [...new Set(references.map(r => r.entry_type).filter(Boolean))].sort();
+---
+
+<Layout title="Browse References">
+  <div class="filter-bar">
+    <input type="text" id="search" placeholder="Search title or author..." />
+    <select id="tag-filter">
+      <option value="">All tags</option>
+      {allTags.map(tag => <option value={tag}>{tag}</option>)}
+    </select>
+    <select id="year-filter">
+      <option value="">All years</option>
+      {allYears.map(year => <option value={year}>{year}</option>)}
+    </select>
+    <select id="type-filter">
+      <option value="">All types</option>
+      {allTypes.map(type => <option value={type}>{type}</option>)}
+    </select>
+    <select id="sort">
+      <option value="year-desc">Year (newest)</option>
+      <option value="year-asc">Year (oldest)</option>
+      <option value="title-asc">Title (A-Z)</option>
+      <option value="title-desc">Title (Z-A)</option>
+    </select>
+    <button id="random-btn">Random 10</button>
+    <button id="reset-btn">Reset</button>
+    <span class="count"><span id="count">{references.length}</span> / {references.length} references</span>
+  </div>
+
+  <div class="empty-state" id="empty-state" style="display: none;">
+    <p>No references match your filters.</p>
+    <button id="clear-filters-btn">Clear filters</button>
+  </div>
+
+  <div class="references-list" id="references">
+    {references.map((ref) => (
+      <ReferenceCard
+        id={ref.id}
+        title={ref.title}
+        citation_key={ref.citation_key}
+        entry_type={ref.entry_type}
+        authors={ref.authors}
+        year={ref.year}
+        venue={ref.venue}
+        journal={ref.journal}
+        url={ref.url}
+        abstract={ref.abstract}
+        tags={ref.tags}
+      />
+    ))}
+  </div>
+
+  <div class="load-more-wrapper" id="load-more-wrapper">
+    <button id="load-more-btn">Show More</button>
+    <span class="load-more-info" id="load-more-info"></span>
+  </div>
+</Layout>
+
+<script>
+  const searchInput = document.getElementById('search') as HTMLInputElement;
+  const tagFilter = document.getElementById('tag-filter') as HTMLSelectElement;
+  const yearFilter = document.getElementById('year-filter') as HTMLSelectElement;
+  const typeFilter = document.getElementById('type-filter') as HTMLSelectElement;
+  const sortSelect = document.getElementById('sort') as HTMLSelectElement;
+  const randomBtn = document.getElementById('random-btn') as HTMLButtonElement;
+  const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
+  const clearFiltersBtn = document.getElementById('clear-filters-btn') as HTMLButtonElement;
+  const loadMoreBtn = document.getElementById('load-more-btn') as HTMLButtonElement;
+  const loadMoreWrapper = document.getElementById('load-more-wrapper') as HTMLDivElement;
+  const loadMoreInfo = document.getElementById('load-more-info') as HTMLSpanElement;
+  const countSpan = document.getElementById('count') as HTMLSpanElement;
+  const container = document.getElementById('references') as HTMLDivElement;
+  const emptyState = document.getElementById('empty-state') as HTMLDivElement;
+
+  const cards = Array.from(container.querySelectorAll('.reference-card')) as HTMLDetailsElement[];
+  const PAGE_SIZE = 50;
+  let currentlyShowing = PAGE_SIZE;
+  let isFiltering = false;
+
+  function getCardData(card: HTMLDetailsElement) {
+    return {
+      citationKey: card.dataset.citationKey || '',
+      entryType: card.dataset.entryType || '',
+      year: card.dataset.year || '',
+      tags: (card.dataset.tags || '').split(',').filter(Boolean),
+      title: card.querySelector('.title')?.textContent || '',
+      authors: card.querySelector('.authors')?.textContent || '',
+    };
+  }
+
+  function filterAndSort() {
+    const search = searchInput.value.toLowerCase();
+    const tag = tagFilter.value;
+    const year = yearFilter.value;
+    const type = typeFilter.value;
+    const sort = sortSelect.value;
+
+    // Detect if any filter is active
+    isFiltering = !!(search || tag || year || type);
+
+    let visible = cards.filter(card => {
+      const data = getCardData(card);
+
+      if (search && !data.title.toLowerCase().includes(search) && !data.authors.toLowerCase().includes(search)) {
+        return false;
+      }
+      if (tag && !data.tags.includes(tag)) {
+        return false;
+      }
+      if (year && data.year !== year) {
+        return false;
+      }
+      if (type && data.entryType !== type) {
+        return false;
+      }
+      return true;
+    });
+
+    // Sort
+    visible.sort((a, b) => {
+      const dataA = getCardData(a);
+      const dataB = getCardData(b);
+
+      switch (sort) {
+        case 'year-desc':
+          return parseInt(dataB.year || '0') - parseInt(dataA.year || '0');
+        case 'year-asc':
+          return parseInt(dataA.year || '0') - parseInt(dataB.year || '0');
+        case 'title-asc':
+          return dataA.title.localeCompare(dataB.title);
+        case 'title-desc':
+          return dataB.title.localeCompare(dataA.title);
+        default:
+          return 0;
+      }
+    });
+
+    // Update visibility with pagination
+    cards.forEach(card => card.style.display = 'none');
+
+    // When filtering, show all matching results; otherwise limit to currentlyShowing
+    const toShow = isFiltering ? visible : visible.slice(0, currentlyShowing);
+    toShow.forEach(card => {
+      card.style.display = '';
+      container.appendChild(card);
+    });
+
+    countSpan.textContent = String(toShow.length);
+
+    // Show/hide empty state
+    emptyState.style.display = visible.length === 0 ? 'block' : 'none';
+
+    // Update load more button
+    updateLoadMoreButton(visible.length);
+  }
+
+  function updateLoadMoreButton(totalVisible: number) {
+    if (isFiltering || currentlyShowing >= totalVisible) {
+      loadMoreWrapper.style.display = 'none';
+    } else {
+      loadMoreWrapper.style.display = 'flex';
+      const remaining = totalVisible - currentlyShowing;
+      loadMoreInfo.textContent = `Showing ${currentlyShowing} of ${totalVisible} (${remaining} more)`;
+    }
+  }
+
+  function loadMore() {
+    currentlyShowing += PAGE_SIZE;
+    filterAndSort();
+  }
+
+  function showRandom10() {
+    // Reset filters first
+    searchInput.value = '';
+    tagFilter.value = '';
+    yearFilter.value = '';
+    typeFilter.value = '';
+
+    // Shuffle and pick 10
+    const shuffled = [...cards].sort(() => Math.random() - 0.5);
+    const selected = new Set(shuffled.slice(0, 10));
+
+    cards.forEach(card => {
+      card.style.display = selected.has(card) ? '' : 'none';
+    });
+
+    countSpan.textContent = String(Math.min(10, cards.length));
+  }
+
+  function reset() {
+    searchInput.value = '';
+    tagFilter.value = '';
+    yearFilter.value = '';
+    typeFilter.value = '';
+    sortSelect.value = 'year-desc';
+    currentlyShowing = PAGE_SIZE;
+    filterAndSort();
+  }
+
+  // Initial setup: hide cards beyond PAGE_SIZE
+  function initPagination() {
+    cards.forEach((card, index) => {
+      if (index >= PAGE_SIZE) {
+        card.style.display = 'none';
+      }
+    });
+    updateLoadMoreButton(cards.length);
+    countSpan.textContent = String(Math.min(PAGE_SIZE, cards.length));
+  }
+
+  searchInput.addEventListener('input', filterAndSort);
+  tagFilter.addEventListener('change', filterAndSort);
+  yearFilter.addEventListener('change', filterAndSort);
+  typeFilter.addEventListener('change', filterAndSort);
+  sortSelect.addEventListener('change', filterAndSort);
+  randomBtn.addEventListener('click', showRandom10);
+  resetBtn.addEventListener('click', reset);
+  clearFiltersBtn.addEventListener('click', reset);
+  loadMoreBtn.addEventListener('click', loadMore);
+
+  // Initialize pagination on load
+  initPagination();
+</script>

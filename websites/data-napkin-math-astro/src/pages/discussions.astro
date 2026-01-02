@@ -1,0 +1,106 @@
+---
+import Layout from '../layouts/Layout.astro';
+import NetworkDiscussions from '../../../../helpers/astro/NetworkDiscussions.astro';
+import type { NetworkData } from '../../../../helpers/network-data';
+
+// Use static import - Vite can resolve this at build time
+import networkData from '../data/network.json';
+---
+
+<Layout title="Discussions & Network - Data Napkin Math">
+  <NetworkDiscussions
+    networkData={networkData as NetworkData}
+    backLinkHref="/"
+    backLinkLabel="← Back to home"
+    hideProjectLinks={true}
+    hideRelatedProjects={true}
+    classes={{
+      container: 'container',
+      header: 'page-header',
+      subtitle: 'subtitle',
+      backLink: 'btn',
+      section: 'section',
+      discussionsList: 'link-list',
+      list: 'link-list',
+      description: 'description',
+      muted: 'muted',
+    }}
+  />
+</Layout>
+
+<style>
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+  }
+
+  .btn:hover {
+    background: #0056b3;
+  }
+
+  .section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .link-list li {
+    margin-bottom: 0.5rem;
+  }
+
+  .link-list a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .link-list a:hover {
+    text-decoration: underline;
+  }
+
+  .muted {
+    color: #666;
+    font-size: 0.875rem;
+  }
+
+  .description {
+    display: block;
+    color: #666;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+</style>

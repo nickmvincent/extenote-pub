@@ -1,0 +1,12 @@
+---
+title: "Data Leverage Blog"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: false
+  fields: [date, title, subtitle]
+page-layout: full
+---
+
+Archives of blog posts from the [Data Leverage Substack](https://dataleverage.substack.com/).

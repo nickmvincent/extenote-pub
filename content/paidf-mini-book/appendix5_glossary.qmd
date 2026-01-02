@@ -1,0 +1,133 @@
+---
+title: Glossary
+type: paidf_chapter
+slug: appendix5_glossary
+visibility: public
+---
+
+# Glossary
+
+Key terms and concepts used throughout this book.
+
+## A
+
+**AI Flywheel**
+: A self-reinforcing cycle where AI systems improve through data collection, which attracts more users, generating more data. This book focuses on *public* AI flywheels that operate transparently for collective benefit.
+
+**ATProto**
+: The AT Protocol, a decentralized social networking protocol developed by Bluesky. Used as infrastructure for federated data sharing and preference signaling.
+
+## C
+
+**Consent**
+: Informed agreement to participate in data collection. This book advocates for meaningful consent that goes beyond click-through terms, with clear explanation of data uses and easy withdrawal options.
+
+**Contribution**
+: An act of voluntarily sharing data (like a chat log or evaluation) to support public AI development. Distinguished from passive data extraction.
+
+## D
+
+**Data Commons**
+: A shared resource of training data governed collectively rather than by a single entity. Aims to democratize access to AI development resources.
+
+**Data Flywheel**
+: See *AI Flywheel*.
+
+**Data Governance**
+: The policies, processes, and structures that determine how data is collected, stored, used, and shared. Central to building trustworthy public AI systems.
+
+**Data Provenance**
+: The documented history of a piece of data—where it came from, how it was processed, and what permissions apply.
+
+## E
+
+**Evaluation Data**
+: Data used to assess AI model performance rather than train it. Contributors can provide evaluation data (like rating AI outputs) with lower risk than providing training data.
+
+## F
+
+**Fine-tuning**
+: Adapting a pre-trained AI model to a specific task or domain using additional, targeted data. One way contributed data might be used.
+
+**Flywheel**
+: See *AI Flywheel*.
+
+## L
+
+**Leverage**
+: The collective power that data contributors have to influence AI development by controlling access to their data. See also *Data Leverage*.
+
+## M
+
+**Model Card**
+: Documentation describing an AI model's intended use, training data, performance characteristics, and limitations. Part of responsible AI development.
+
+**MVP (Minimum Viable Product)**
+: The simplest version of a product that demonstrates core functionality. This book describes an MVP for public data contribution systems.
+
+## N
+
+**Notable Chat**
+: A conversation with an AI system that a user considers worth preserving and potentially sharing—whether because it was helpful, surprising, problematic, or otherwise interesting.
+
+## O
+
+**Opt-in**
+: A consent model where explicit permission is required before data can be used. Contrasts with opt-out, where data is used by default unless users object.
+
+**Open Source**
+: Software or data released under licenses that permit free use, modification, and redistribution. Public AI flywheels typically aim for open or open-ish licensing.
+
+## P
+
+**Peer Production**
+: Collaborative creation of shared resources by distributed participants, as in Wikipedia or open source software. A model for public AI data contribution.
+
+**Pipeworks**
+: The system of data flows, transformations, and governance structures that move data from contribution through to AI model deployment.
+
+**Preference Signal**
+: A machine-readable indication of how a data creator wants their content used. Can be expressed through protocols like robots.txt, ai.txt, or embedded metadata.
+
+**Public AI**
+: AI systems developed for broad public benefit rather than private profit, with transparent governance and open access where possible.
+
+**Public Benefit**
+: Outcomes that serve the common good rather than narrow private interests. The goal of public AI development.
+
+## R
+
+**RAG (Retrieval-Augmented Generation)**
+: A technique where AI models retrieve relevant documents at inference time to augment their responses. One way contributed data might be accessed.
+
+**Record**
+: A unit of contributed data, such as a chat transcript, evaluation, or piece of feedback.
+
+## S
+
+**Schema**
+: A structured definition of what fields and formats a data record should contain. Ensures consistency across contributions.
+
+**Stewardship**
+: Responsible management of shared resources on behalf of a community. Data stewards help govern how contributed data is used.
+
+## T
+
+**Terms of Service**
+: Legal agreement governing data use. This book argues for clearer, more contributor-friendly terms.
+
+**Training Data**
+: Data used to teach AI models. The central resource that AI flywheels aim to collect ethically.
+
+**Transparency**
+: Openness about data practices, model behavior, and governance decisions. A core principle of public AI.
+
+## U
+
+**Upstream**
+: In data pipelines, the source or origin of data. Upstream governance means establishing rules at the point of data creation.
+
+## V
+
+**Voluntary Contribution**
+: Data sharing based on genuine choice rather than coercion or dark patterns. Essential for ethical public AI flywheels.

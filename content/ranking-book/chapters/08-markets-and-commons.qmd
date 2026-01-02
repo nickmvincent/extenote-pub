@@ -1,0 +1,424 @@
+---
+type: book_chapter
+title: Balancing Markets and Commons
+visibility: public
+---
+# Balancing Markets and Commons {#sec-markets-commons}
+
+## Overview
+
+The previous chapter proposed collective bargaining for information—mechanisms to give data contributors leverage over AI development. But this raises a concern: will stronger data rights undermine open knowledge?
+
+Wikipedia, open-source software, Creative Commons—these represent a tradition of sharing that has produced enormous value. If data rules make open contribution more complicated or less attractive, we might gain bargaining power while losing something equally precious.
+
+This chapter addresses the tension directly:
+
+1. **The conflict**: Why markets and commons seem to pull in opposite directions
+2. **Resolution strategies**: Four approaches to preserve commons while enabling markets
+3. **Public AI as bridge**: How public institutions can support both goals
+4. **A positive vision**: What success might look like
+
+The goal is not to choose between markets and commons but to design institutions that enable both.
+
+## Background Research
+
+### The Economics of Commons and Anti-Commons
+
+Economists have long recognized that neither pure private property nor pure open access optimally governs all resources. Garrett Hardin's "Tragedy of the Commons" [@hardin1968] argued that shared resources face overexploitation without property rights. But Heller's "Tragedy of the Anti-Commons" [@heller1998] identified the opposite problem: when too many parties hold blocking rights, resources are underused because transaction costs prevent efficient bargaining.
+
+Both tragedies apply to training data. The commons tragedy appears when open data is over-harvested for training, degrading incentives for future contribution. The anti-commons tragedy appears when fragmented rights make licensing prohibitively costly, preventing beneficial uses.
+
+Ostrom's Nobel Prize-winning research [@ostrom1990] challenged Hardin's binary of privatization or government control, documenting successful community management of common-pool resources. Key institutional features included clearly defined boundaries, collective choice arrangements, monitoring, graduated sanctions, and conflict resolution mechanisms. The governance infrastructure proposed in this book draws on these design principles, adapted for digital contexts where traditional boundaries blur.
+
+### Open Source and Open Knowledge Movements
+
+The open source software movement provides the closest precedent for organized knowledge sharing. Stallman's Free Software Foundation [@stallman2002] established the copyleft principle: software could be freely used and modified, provided derivatives maintained the same freedoms. The GNU General Public License operationalized this vision, creating a self-reinforcing commons that grew to underpin much of modern computing.
+
+Open source succeeded partly through ideological commitment but also through practical advantages: distributed development, rapid debugging, and credibility from transparency [@raymond1999]. Corporate adoption accelerated as companies recognized that commodity software layers benefited from shared development, with competitive differentiation occurring at higher levels.
+
+Open knowledge movements extended these principles beyond software. Wikipedia demonstrated that encyclopedia-quality content could emerge from volunteer coordination [@benkler2006]. Creative Commons licenses [@lessig2004] created standardized options for sharing creative works. Open access publishing [@suber2012] sought to remove paywalls from scholarly communication. Each movement balanced openness against sustainability, grappling with free-riding and quality maintenance.
+
+### The Enclosure Problem
+
+AI training has created unprecedented pressures on open knowledge resources. Models trained on Wikipedia, GitHub, Stack Overflow, and other open repositories can generate substitutes for those resources—potentially reducing contributions to the commons they depend on [@vincent2021]. This creates a novel form of enclosure: not preventing access to the commons, but extracting value from it while undermining its renewal.
+
+Several dynamics accelerate enclosure:
+
+**Commercial capture**: Companies can train on openly-shared work, then sell access to the resulting models. The surplus flows to model providers rather than data contributors. Unlike traditional enclosure, the commons remains technically accessible, but its value has been extracted.
+
+**Quality degradation**: As AI outputs proliferate online, future training data increasingly contains AI-generated content. The "model collapse" literature [@shumailov2024] documents resulting quality degradation. Open resources face this especially acutely: anyone can contribute AI-generated content to Wikipedia or Stack Overflow.
+
+**Contribution suppression**: If AI systems can answer questions previously answered by Stack Overflow contributors, the reward for contributing declines. The platform may persist as a training data archive while losing the community that made it valuable.
+
+### Public Provision of Information Goods
+
+Economic theory recognizes that information goods—non-rivalrous, non-excludable—may be underprovided by markets. Traditional responses include intellectual property rights (creating artificial excludability) and public provision (government funding of research and culture).
+
+Public broadcasting, libraries, and publicly funded research represent major investments in information commons. The National Science Foundation, NIH, and equivalent agencies globally fund research whose outputs are (increasingly) openly accessible. National libraries preserve cultural heritage. Public broadcasting provides information not subject to advertising incentives.
+
+Extending public provision to AI training data raises novel questions. Should governments fund data curation for AI training? Should public AI services exist alongside commercial offerings? What governance structures would ensure public AI serves public interests? Several countries have begun exploring "sovereign AI" initiatives, though their scope and governance vary widely [@benaich2023].
+
+### Theoretical Frameworks for Data Governance
+
+Several theoretical frameworks inform data governance design:
+
+**Data as labor** [@posner2018] treats data contributions as work deserving compensation. This framing supports payment schemes and worker-like protections but may overstate individual contribution value given aggregation effects.
+
+**Data as capital** treats data as an asset whose returns should flow to asset holders. This framing supports property rights and investment incentives but may create anti-commons problems with fragmented ownership.
+
+**Data as infrastructure** treats data as shared foundation for economic activity, like roads or utilities [@frischmann2012]. This framing supports public provision and regulated access but may undervalue individual contributions and privacy interests.
+
+**Data as commons** [@ostrom1990; @hess2007] treats data as collectively managed resource. This framing supports community governance and sustainable use rules but requires solving coordination and free-riding problems.
+
+The governance approach developed in this chapter draws on all four framings selectively: labor-like protections for contributions, property-like transferable rights, infrastructure-like public provision, and commons-like collective governance. No single framing captures the full complexity of data in AI systems.
+
+### Creative Commons and Licensing Innovation
+
+The Creative Commons project [@lessig2004] demonstrated that standardized licenses could enable sharing at scale. By reducing transaction costs—creators simply select license terms from a menu—CC enabled vast sharing that would be impractical through individually negotiated agreements.
+
+Six standard CC license combinations allow creators to specify whether commercial use is permitted, whether modifications are allowed, and whether derivatives must maintain the same license. Icons and metadata make license terms machine-readable, enabling automated filtering and aggregation.
+
+Extending this approach to AI training contexts requires additional dimensions: training versus retrieval versus evaluation; fine-tuning versus prompting; research versus commercial applications. The "Standardized Contract Templates" proposed in Chapter 7 attempt to create CC-like menus for these dimensions, though broader adoption remains uncertain.
+
+### Market Design for Information Goods
+
+Market design—the application of economic theory to engineer market institutions—has achieved notable successes in spectrum auctions, matching markets, and platform regulation [@roth2015]. Could similar approaches improve AI data markets?
+
+Key market design considerations include:
+
+**Reducing transaction costs**: If every data use requires individual negotiation, most beneficial transactions won't occur. Standardization, aggregation, and automated licensing can reduce friction.
+
+**Addressing externalities**: Data use creates positive externalities (others benefit from trained models) and negative externalities (data contributors face competition from trained models). Prices should internalize these effects, but current markets don't.
+
+**Managing market power**: Concentrated buyers and sellers distort prices and access. Bargaining collectives, antitrust enforcement, and regulated access can address power imbalances.
+
+**Ensuring quality**: Data markets face adverse selection—low-quality data is cheap to produce and may drive out high-quality contributions. Quality signals, curation, and provenance tracking can address information asymmetries.
+
+The vision articulated in this chapter—clearly-defined commons plus functioning markets—requires institutional infrastructure that current data markets lack.
+
+## The Tension
+
+### What Open Knowledge Provides
+
+Open knowledge—information freely shared, used, and modified—has built remarkable resources:
+
+**Wikipedia**: 60 million articles in 300+ languages, maintained by volunteers who believe knowledge should be free. No paywall, no ads (for most versions), no exclusion. Anyone can read; anyone can contribute.
+
+**Open-source software**: Linux, Apache, Python, TensorFlow—the infrastructure of modern computing built through collaborative contribution. Free to use, free to modify, free to redistribute.
+
+**Creative Commons**: Over 2 billion works licensed for sharing. Photographs, music, text, educational resources—a vast commons available without negotiation.
+
+**Open science**: Preprints, open access journals, open data repositories. Research shared before and beyond traditional publication.
+
+These resources exist because people chose to share rather than sell. They chose openness because they believed in it, because sharing advanced their reputations, or because sharing was easier than commercializing. The reasons vary, but the result is a commons of immense value.
+
+### What Markets Require
+
+Markets depend on exclusivity. If you can't exclude non-payers, you can't charge. Traditional content markets work because:
+
+- Books are physical; you must buy to read
+- Movies play in theaters; you must buy tickets
+- Music was on physical media; you must buy the vinyl/CD/file
+- Software was distributed on disk; you must buy the license
+
+Digital distribution eroded many of these exclusions, creating piracy problems and forcing new business models (streaming, subscriptions, advertising). But some exclusion remains: you can't access Netflix without paying, can't download commercial software without a license, can't access paywalled articles without subscription.
+
+Data rules strengthen exclusivity. If data contributors can prevent unlicensed training, they can charge for licensed training. If provenance tracking identifies unauthorized use, enforcement becomes possible. Markets require some ability to say "no" to non-payers.
+
+### The Conflict
+
+Here's the tension: strengthening exclusivity may weaken openness.
+
+If default rules favor data contributors' rights, open sharing becomes an exception requiring explicit waiver. Every Wikipedia contributor might need to affirmatively license their contributions. Every Stack Overflow answer might come with license terms. The friction could deter contribution.
+
+Worse, if commercial AI training becomes something that requires permission, open resources might split. Some contributors want their work in the commons; others want compensation. Managing this split adds complexity.
+
+The nightmare scenario: data rules intended to empower creators instead empower lawyers and platforms. Transaction costs rise. Small contributors can't navigate the complexity. Open knowledge shrinks as the path of least resistance becomes "don't share."
+
+This isn't hypothetical. GDPR, while valuable for privacy, created compliance burdens that disadvantaged small organizations. Cookie consent banners became ubiquitous annoyances that mostly don't improve privacy. Well-intentioned rules can have unintended consequences.
+
+So how do we respect both markets and commons?
+
+## Resolution Strategy 1: Preserve Commons Pathways
+
+### The Principle
+
+The first strategy is simple: don't break what works. Wikipedia, GitHub, Stack Overflow, Creative Commons—these institutions existed before AI and should continue to function.
+
+Any data governance regime should preserve clear pathways for open contribution. If new rules make peer production non-compliant, those are bad rules.
+
+### Implementation: Bottom-Up Choice
+
+Rules should not prevent individuals from choosing to share openly. If I want to license my blog posts for any use including AI training, that should be straightforward. If Wikipedia editors want their contributions in the commons, that should require no lawyer.
+
+This means:
+
+**Clear defaults for open sharing**: A simple declaration—"I dedicate this to the public domain" or "I license this under CC0"—should be sufficient. No complex forms, no registration, no fees.
+
+**Platform-level options**: Platforms like GitHub and Wikipedia should be able to set defaults for their communities. If the community chooses open licensing, individual opt-in shouldn't be required.
+
+**Recognition in legal frameworks**: Any legislation on AI training should explicitly preserve open licensing. The EU's AI Act and proposed US legislation should include carve-outs for CC-licensed and public domain content.
+
+### Support Existing Institutions
+
+Open knowledge institutions need support, not additional burdens.
+
+The Wikimedia Foundation has developed Wikimedia Enterprise—commercial access to Wikipedia data with support and reliability guarantees—while maintaining free access for everyone else. This is a model: commercial value extraction can coexist with commons availability.
+
+Supporting this means:
+
+**Funding**: Philanthropic and public funding for open knowledge institutions. Wikipedia runs on donations; expanded funding could enhance quality and coverage.
+
+**Technical support**: Infrastructure for managing licensing, tracking provenance, and enforcing terms. Open source projects often lack resources for these functions.
+
+**Legal defense**: Resources to defend open licenses in court. If a case establishes that CC licenses don't cover AI training, the commons shrinks; legal defense matters.
+
+## Resolution Strategy 2: Use-Restricted Open Sharing
+
+### The Concept
+
+Pure open access—anyone can use for any purpose—may not be sustainable when some uses extract enormous value while harming contributors. A middle ground: open access with restrictions on specific uses.
+
+This is already how many Creative Commons licenses work. CC BY-NC (Attribution, Non-Commercial) permits sharing and modification but not commercial use without permission. CC BY-SA (Attribution, ShareAlike) permits any use but requires derivatives to maintain the same license.
+
+Extending this to AI training:
+
+**CC BY-NC-Training**: Open for non-commercial use, including non-commercial AI training. Commercial AI training requires separate license.
+
+**CC BY-Training-Attribution**: Open for any use including commercial AI training, but training systems must document data sources.
+
+**CC BY-Training-Share**: Open for AI training, but trained models must be openly released.
+
+These don't exist as standard licenses yet, but they could be developed.
+
+### Organizational Restrictions
+
+Another approach: restrict by organization type rather than use type.
+
+Open to:
+- Nonprofit organizations
+- Public universities
+- Government agencies
+- Public benefit corporations
+- Individual researchers
+
+Not open to (without separate license):
+- For-profit corporations above some size threshold
+- Commercial AI services
+
+This mirrors how some academic software and data are currently licensed: free for academic use, commercial license required for business.
+
+The challenge is defining boundaries. What counts as nonprofit? How do you handle mixed uses? These are soluble problems—academic software licensing has navigated them for decades—but they require clear rules.
+
+### The Advantage
+
+Use-restricted open sharing preserves much of the commons' accessibility while limiting extractive uses. A student can train a model on CC BY-NC data without negotiation; a trillion-dollar company needs a license.
+
+This isn't perfect openness, but it may be sustainable openness. If unrestricted AI training undermines contributor incentives, some restriction may be necessary to preserve the commons long-term.
+
+## Resolution Strategy 3: Document the Commons Clearly
+
+### The Problem of Ambiguity
+
+Currently, nobody knows exactly what's in the data commons.
+
+Is this particular book in the public domain or still under copyright? It depends on publication date, author death date, registration, renewals—and the rules vary by country.
+
+Was this GitHub repository licensed openly? Many lack explicit licenses, leaving status ambiguous.
+
+Did this photograph's CC license permit AI training? The license predates modern AI; application is unclear.
+
+Ambiguity harms everyone. Content creators don't know if their work is protected. AI companies don't know what they can legally use. Researchers waste time on legal analysis rather than research.
+
+### A Public Commons Registry
+
+One solution: create a definitive registry of what's in the commons.
+
+The registry would:
+
+**Catalog openly-licensed works**: A searchable database of works with clear open licenses. If it's in the registry, you can train on it.
+
+**Document provenance**: Where did this content come from? Who contributed it? What license applies? Clear records enable verification.
+
+**Update continuously**: As works enter the public domain, as creators choose open licenses, the registry grows.
+
+**Be authoritative**: Courts and regulators could treat registry status as meaningful. Registry inclusion creates safe harbor; registry exclusion requires separate licensing.
+
+This exists in fragments. Creative Commons has search tools. GitHub shows license status. The Internet Archive preserves public domain works. But no unified registry provides comprehensive coverage.
+
+### Benefits
+
+A clear commons registry would:
+
+**Reduce transaction costs**: AI companies could train on registry content without legal uncertainty. No need to analyze each source.
+
+**Empower creators**: Creators could see what's already in the commons. If their domain is well-covered, their marginal contribution may be less valuable—or more valuable if they address gaps.
+
+**Prevent misallocation**: Resources spent on licensing already-public content could go elsewhere. Clear boundaries reduce waste.
+
+**Enable enforcement**: If content isn't in the registry and wasn't licensed, its use is unauthorized. Clear boundaries enable consequences.
+
+## Resolution Strategy 4: Consider Commons by Default
+
+### The Controversial Proposal
+
+Here is a more aggressive proposal: define a category of "commons by default" content that is free to train on unless creators actively opt out.
+
+The logic:
+
+**Opt-in has low participation**: If open sharing requires affirmative choice, most content stays restricted by default. The commons shrinks to the explicitly-committed.
+
+**Opt-out reverses this**: If training permission is the default, the commons includes everything unless creators object. The commons grows to include the indifferent.
+
+**Democratic governance**: A democratic body would define what's in the default commons and update it regularly. This isn't pure laissez-faire—it's collective choice about baseline rules.
+
+### What This Might Look Like
+
+A legislative or regulatory body defines categories of content that are "training commons" by default:
+
+- Published text more than 25 years old (extended public domain)
+- Content posted to public forums without commercial intent
+- Scientific publications funded by public grants
+- Government documents
+- Content explicitly waived by platforms or communities
+
+Creators can opt out through simple declaration: "I reserve AI training rights" attached to content. No registration, no fees—just a clear signal.
+
+AI companies training on commons content would have safe harbor. Training on opted-out content would require licensing.
+
+### Why This Is Controversial
+
+Open knowledge advocates might support this as expanding the commons. But data rights advocates might oppose it as undermining creator control.
+
+The controversy centers on defaults:
+- If the default is "closed" (must license to train), creators have maximum control but commons may shrink
+- If the default is "open" (can train unless opted out), commons is larger but passive creators get no compensation
+
+There's no neutral answer. Any default affects outcomes. The question is which default better serves collective interests.
+
+### The Practical Argument
+
+Current ambiguity isn't neutral either. It means:
+- AI companies train on everything and litigate later
+- Creators have nominal rights they can't enforce
+- Legal uncertainty chills both creation and training
+
+Clear rules—even controversial ones—may be better than indefinite ambiguity. Defining commons by default at least settles the question.
+
+## Public AI as Bridge
+
+### The Role of Public Institutions
+
+Public institutions can bridge markets and commons in ways private actors cannot.
+
+**Governments can provision compute**: Training frontier models requires enormous compute resources. If governments provide compute infrastructure, smaller organizations can participate without relying on cloud oligopolies.
+
+**Governments can exemplify practices**: Public AI projects can demonstrate transparent data practices. Documenting training data, respecting opt-outs, compensating contributors—public projects can set standards private actors might follow.
+
+**Governments can fund commons**: Direct funding for commons data curation creates resources that benefit everyone. Public investment in open datasets offsets costs from stricter private licensing.
+
+### Offsetting Data Costs
+
+Stricter data rules may increase costs for AI developers. If licensing requires payment, models cost more to train.
+
+Public investment can offset this:
+
+**Fund open data curation**: Pay for the creation and maintenance of high-quality open datasets. Medical data, legal data, multilingual data—domains where private incentives underprovide.
+
+**Subsidize licensing for research**: If commercial AI training requires licensing, research uses could receive public subsidies. Academic institutions shouldn't bear increased costs for beneficial research.
+
+**Create public AI services**: Just as public libraries provide free book access, public AI services could provide free model access. Not competing with commercial offerings on frontier capabilities, but ensuring baseline access.
+
+### Public AI Governance
+
+Public AI raises governance questions:
+
+**Accountability**: Who controls public AI development? How are priorities set? Elected officials? Expert agencies? Public input?
+
+**Independence**: Should public AI be insulated from political pressure? Or democratically responsive? The tension between expertise and accountability applies.
+
+**Scope**: Should public AI attempt frontier capabilities? Or focus on specialized public-interest applications? Resource constraints may require choice.
+
+**Relationship to private sector**: Competition, complement, or regulator? Public AI could compete with commercial offerings, complement them in underserved areas, or set standards they must meet.
+
+These questions don't have obvious answers, but they're worth asking as public AI initiatives develop.
+
+## A Positive Vision: 2030
+
+What might success look like? Here's a scenario for 2030, not a prediction but an aspiration.
+
+### The Journalist
+
+Maria works for a regional newspaper. Through her union, she's a member of a data collective representing thousands of journalists.
+
+Every quarter, she receives a report: her articles appeared in training data for three major AI systems under licensing agreements. Her share of the collective's licensing revenue: a few hundred dollars per quarter. Not life-changing money, but known and transparent.
+
+When she writes an article, she can choose: contribute to the commons (for academic and nonprofit AI training) or restrict to licensed use only. She chooses based on the story—some investigative work she shares openly for public benefit; others she restricts.
+
+She can see, in a public dashboard, which AI systems used her work and what terms applied. The mystery of "where does my work go?" is solved.
+
+### The Researcher
+
+Dr. Chen studies climate science. When she needs to train a model on scientific literature, she downloads a snapshot of the Global Training Commons—a curated dataset of openly-licensed research.
+
+The documentation is clear: source publications, author demographics, topic coverage, known gaps. She knows exactly what her model learned from and what it might miss.
+
+For proprietary data—satellite imagery, proprietary sensors—she works through her university's licensing office, which has standard agreements with major data providers. The process takes days, not months.
+
+Her trained model, built on commons data, she releases openly. Others can build on her work, as she built on theirs.
+
+### The Model Builder
+
+James works at an AI startup. His company pays more for data than companies paid in 2024—licensing fees, collective agreements, compliance costs.
+
+But he sleeps better. The legal uncertainty that hung over the industry in 2024—will we be sued? will the courts void our training?—is resolved. Clear rules exist; his company follows them.
+
+When a competitor tries to clone their model through distillation, enforcement mechanisms work. The watermarking embedded in outputs is detected; the competitor faces consequences. The investment in original training is protected.
+
+The ecosystem has stabilized. Data flows are transparent. The arms race of extraction and evasion has given way to functioning markets.
+
+### The Student
+
+Aisha is a computer science undergraduate in Nairobi. She wants to build an AI application for her community—something to help local farmers access agricultural knowledge.
+
+She has access to:
+- The Global Training Commons, free for any use
+- Public AI compute credits from an international development fund
+- Standard contract templates for any additional data she needs
+- Documentation in Swahili explaining how to use these resources
+
+The barriers that would have blocked her in 2024—compute costs, licensing complexity, English-only resources—are lower. Not gone, but lower.
+
+Her project, when complete, she contributes back to the commons. Others will build on it.
+
+### The Two Zones
+
+The world has stabilized into two complementary zones:
+
+**The commons**: Clearly-defined, well-documented, freely accessible. Anyone can train on commons content. The commons is large—public domain works, openly-contributed content, government data, publicly-funded research. And it's growing, as more creators choose open sharing with clear terms.
+
+**The market**: Clearly-defined, efficiently functioning, fairly priced. Collectives bargain for contributors. Standard contracts reduce friction. Enforcement mechanisms work. Value flows to those who create value.
+
+Between them, infrastructure that makes both work: registries, standards, audit mechanisms, dispute resolution, public investment.
+
+This is not utopia. Tensions remain. Some creators want more protection; some AI developers want less cost. The balance is always contested.
+
+But the chaos of the early 2020s—where nobody knew the rules, everyone feared litigation, and power resided with those who could extract before being stopped—that's in the past. The data ecosystem has governance. Markets function. Commons thrive.
+
+## Summary
+
+The tension between markets and commons is real but manageable:
+
+**Resolution Strategy 1: Preserve commons pathways.** Don't break Wikipedia, GitHub, Creative Commons. Any data governance regime must preserve clear routes for open contribution. Bottom-up choice to share openly should remain simple.
+
+**Resolution Strategy 2: Use-restricted open sharing.** Open access with restrictions on specific uses (commercial AI training, large corporations) can preserve accessibility while limiting extractive uses. Extended Creative Commons licenses could enable this.
+
+**Resolution Strategy 3: Document the commons clearly.** A public registry of commons content would reduce ambiguity, lower transaction costs, and enable both training and enforcement. Clear boundaries help everyone.
+
+**Resolution Strategy 4: Consider commons by default.** Defining baseline categories of freely-trainable content, with opt-out for those who want it, could expand the commons. This is controversial but worth considering.
+
+**Public AI as bridge.** Public institutions can provision compute, exemplify practices, and fund commons data. Public investment offsets costs from stricter private licensing.
+
+The positive vision: clearly-defined commons plus functioning markets, with infrastructure that makes both work. Not a choice between openness and rights, but institutional design that enables both.
+
+This chapter concludes the intervention section of the book. The final chapter summarizes the framework and identifies open questions for future work.

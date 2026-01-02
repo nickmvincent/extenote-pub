@@ -1,0 +1,593 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { loadInitiatives } from '../lib/content-loader';
+import { formatCitation } from '../lib/content-loader';
+
+const items = (await loadInitiatives()).sort((a, b) => {
+  // Group by whether recentActivity exists, then by date desc, then by title
+  const aHas = Boolean(a.recentActivity);
+  const bHas = Boolean(b.recentActivity);
+  if (aHas !== bHas) return aHas ? -1 : 1; // items with recentActivity first
+
+  if (aHas && bHas) {
+    const aTime = new Date(a.recentActivity).getTime();
+    const bTime = new Date(b.recentActivity).getTime();
+    if (aTime !== bTime) return bTime - aTime; // newer first
+  }
+
+  return a.title.localeCompare(b.title);
+});
+
+// Lookup maps for relations
+const bySlug = Object.fromEntries(items.map((i) => [i.slug, i]));
+const byId = Object.fromEntries(items.map((i) => [i.id, i]));
+
+function formatDate(d) {
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
+  } catch (e) {
+    return String(d);
+  }
+}
+
+const statusOrder = ['WIP', 'usable-but-new', 'usable-with-some-evidence', 'usable-with-strong-evidence'];
+const statuses = statusOrder.filter((s) => items.some((i) => i.status === s));
+const actionLabels = {
+  'attach-preference-signal': 'Attach preference signal',
+  'attach-formal-license': 'Attach formal license',
+  'join-licensing-collective': 'Join licensing collective',
+  'add-tollgate': 'Add tollgate',
+  'technical-blocking': 'Technical blocking',
+  'new-infrastructures': 'New infrastructures',
+  'certification': 'Certification',
+};
+const actionDescriptions = {
+  'attach-preference-signal': 'Express reuse preferences via machine-readable signals like robots.txt or ai.txt. Crawlers and AI agents can read these to understand permitted uses.',
+  'attach-formal-license': 'Publish structured license terms that machines can parse. Enables automated compliance checking and clear legal boundaries for data reuse.',
+  'join-licensing-collective': 'Pool rights with other creators through a collective or agency. Provides negotiating power and streamlined licensing for AI companies.',
+  'add-tollgate': 'Require payment or authentication for automated access. Monetizes bot traffic while maintaining control over who accesses your content.',
+  'technical-blocking': 'Detect and block unwanted scraping or automated access. Uses rate limiting, CAPTCHAs, or fingerprinting to enforce access policies.',
+  'new-infrastructures': 'Build new protocols or standards for data rights management. Enables end-to-end tracking of permissions across the AI pipeline.',
+  'certification': 'Verify that AI models or processes meet specific data use criteria. Provides third-party validation of ethical training practices.',
+};
+const actions = Array.from(new Set(items.flatMap((i) => i.actionsSupported || [])))
+  .sort((a, b) => (actionLabels[a] || a).localeCompare(actionLabels[b] || b));
+
+// Status labels and descriptions (used for legend and badges)
+const statusLabels = {
+  WIP: 'Work in progress',
+  'usable-but-new': 'Usable (new)',
+  'usable-with-some-evidence': 'Usable (some evidence)',
+  'usable-with-strong-evidence': 'Usable (strong evidence)',
+};
+const statusDescriptions = {
+  WIP: 'Under active development; details may change.',
+  'usable-but-new': 'Can be used today but limited or no third-party evidence.',
+  'usable-with-some-evidence': 'Usable with some independent adoption or deployments reported.',
+  'usable-with-strong-evidence': 'Usable with strong, broad evidence of adoption (none yet).',
+};
+
+// Standardized pipeline stage labels
+const pipelineLabels = {
+  collect: 'Collect/Scrape',
+  train: 'Train',
+  'fine-tune': 'Fine-tune',
+  retrieve: 'Retrieve',
+  generate: 'Generate',
+};
+---
+
+<Layout>
+  <main class="wrap">
+    <header class="page-header">
+      <div class="intro box">
+        <p>
+          A community-curated index of initiatives for controlling AI data flow — licensing, <a href="/glossary#preference-signal">preference signals</a>, and <a href="/glossary#technical-control">technical enforcement</a>.
+        </p>
+        <p class="muted small">
+          Maintained by <a href="https://nickmvincent.com">Nick Vincent</a>.
+          <a href="/contributing">Contributions welcome</a>. New to these concepts? See the <a href="/glossary">Glossary</a>.
+        </p>
+      </div>
+    </header>
+
+    <!-- Creator Guide -->
+    <section class="creator-guide box" id="creator-guide">
+      <div class="guide-header">
+        <h2 class="guide-title">I'm a creator — what can I do?</h2>
+        <p class="guide-subtitle">Select a goal below to filter the catalog.</p>
+      </div>
+
+      <div class="guide-flow" id="guide-flow">
+        <!-- Goal selection - always visible -->
+        <div class="guide-goals">
+          <button class="guide-option" data-goal="signal" data-actions="attach-preference-signal,attach-formal-license" aria-pressed="false">
+            <span class="option-emoji">📢</span>
+            <span class="option-text">
+              <span class="option-title">Express my preferences</span>
+              <span class="option-desc">Tell AI companies how I want my work used</span>
+            </span>
+          </button>
+          <button class="guide-option" data-goal="block" data-actions="technical-blocking" aria-pressed="false">
+            <span class="option-emoji">🛡️</span>
+            <span class="option-text">
+              <span class="option-title">Block AI scraping</span>
+              <span class="option-desc">Prevent bots from collecting my content</span>
+            </span>
+          </button>
+          <button class="guide-option" data-goal="paid" data-actions="add-tollgate,join-licensing-collective,certification" aria-pressed="false">
+            <span class="option-emoji">💰</span>
+            <span class="option-text">
+              <span class="option-title">Get compensated</span>
+              <span class="option-desc">License my work or get paid for AI use</span>
+            </span>
+          </button>
+        </div>
+        <p class="guide-hint" id="guide-hint">Click a goal to filter, click again to clear</p>
+      </div>
+    </section>
+
+    <!-- Icon Legend -->
+    <details class="legend box" open>
+      <summary class="legend-toggle">Icon legend</summary>
+      <div class="legend-content">
+        <div class="legend-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span>Website</span>
+        </div>
+        <div class="legend-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          <span>Source code</span>
+        </div>
+        <div class="legend-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Specification</span>
+        </div>
+        <div class="legend-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/></svg>
+          <span>Press & news</span>
+        </div>
+        <div class="legend-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Evidence of adoption</span>
+        </div>
+      </div>
+    </details>
+
+    <section class="primer box">
+      <details>
+        <summary class="primer-title">FAQ: Preference signals, licenses, technical controls, and infrastructures <span class="primer-link">(<a href="/glossary">full glossary</a>)</span></summary>
+        <div class="primer-grid">
+          <div class="primer-card">
+            <h3>What are <a href="/glossary#preference-signal">preference signals</a>?</h3>
+            <p>Machine-readable hints for AI agents/crawlers; easy to adopt, rely on compliance.</p>
+            <ul class="primer-list">
+              <li><strong>Attach preference signal</strong>: publish <a href="/glossary#robots-txt">robots.txt</a>/<a href="/glossary#ai-txt">ai.txt</a>, headers, or CC/IETF signals to express permitted AI uses.</li>
+            </ul>
+          </div>
+          <div class="primer-card">
+            <h3>What are licenses and collectives?</h3>
+            <p>Legal terms and institutions that define and negotiate reuse rights.</p>
+            <ul class="primer-list">
+              <li><strong>Attach formal license</strong>: machine-readable terms (e.g., <a href="/glossary#rsl-really-simple-licensing-">RSL</a>) for reuse, attribution, compensation.</li>
+              <li><strong>Join <a href="/glossary#licensing-collective">licensing collective</a></strong>: manage rights and negotiations via a collective or agency.</li>
+              <li><strong>Certification</strong>: independent verification that models/processes follow stated data-use criteria.</li>
+            </ul>
+          </div>
+          <div class="primer-card">
+            <h3>What are <a href="/glossary#technical-control">technical controls</a>?</h3>
+            <p>Perimeter and platform measures that block, meter, or monetize automated access.</p>
+            <ul class="primer-list">
+              <li><strong>Technical blocking</strong>: detect/limit <a href="/glossary#scraping">scraping</a> or unauthorized automated access.</li>
+              <li><strong>Add <a href="/glossary#tollgate">tollgate</a></strong>: gate or charge for automated access (e.g., AI/bots) under defined terms.</li>
+            </ul>
+          </div>
+          <div class="primer-card">
+            <h3>What are new infrastructures?</h3>
+            <p>Emerging standards, protocols, or infra that carry preference and licensing metadata across the AI <a href="/glossary#pipeline-stage">pipeline</a>.</p>
+            <ul class="primer-list">
+              <li><strong>New infrastructures</strong>: new standards/protocols that enable end-to-end data rights.</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="filter-bar box">
+      {/* Primary row: Search + Quick filters */}
+      <div class="filter-row-primary">
+        <div class="search-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="q" type="search" placeholder="Search initiatives…" />
+        </div>
+        <div class="quick-filters">
+          <button id="usable" class="filter-pill" aria-pressed="false">Usable today</button>
+          <select id="status" class="filter-select">
+            <option value="all">All statuses</option>
+            {statuses.map((s) => <option value={s}>{statusLabels[s] || s}</option>)}
+          </select>
+          <select id="sort" class="filter-select">
+            <option value="recent">Recent first</option>
+            <option value="alpha">A → Z</option>
+            <option value="usable">Most usable</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Secondary row: Action type filters as pills */}
+      <div class="filter-row-secondary">
+        <span class="filter-label">Filter by action:</span>
+        <div id="actions" class="action-pills">
+          {actions.map((a) => (
+            <button class="action-pill" data-action={a} title={actionDescriptions[a] || ''} aria-pressed="false">
+              {actionLabels[a] || a}
+            </button>
+          ))}
+        </div>
+        <button id="copylink" class="share-btn" title="Copy link to this view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>Share</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="results-meta">
+      <span id="count">{items.length}</span> items
+    </section>
+
+    <section id="cards" class="grid">
+      {items.map((i) => {
+        const hasDetails = (Array.isArray(i.dependsOn) && i.dependsOn.length > 0) ||
+          i.usersCount || i.dataVolume || i.moneyVolume ||
+          (Array.isArray(i.referencesResolved) && i.referencesResolved.length > 0) ||
+          (Array.isArray(i.implementationSnippets) && i.implementationSnippets.length > 0) ||
+          i.recentActivityNote;
+        return (
+        <article
+          class="card"
+          id={i.slug}
+          data-title={i.title.toLowerCase()}
+          data-summary={(i.summary || '').toLowerCase()}
+          data-tags={(i.tags || []).join(' ').toLowerCase()}
+          data-actions={(i.actionsSupported || []).join(' ').toLowerCase()}
+          data-status={i.status}
+          data-pipeline={(i.pipelineStages || []).join(' ').toLowerCase()}
+          data-uses={(i.dependsOn || []).join(' ').toLowerCase()}
+          data-usable={String((i.status || '') !== 'WIP')}
+          data-activity={i.recentActivity ? String(new Date(i.recentActivity).getTime()) : ''}
+        >
+          {/* Primary: Title + Status */}
+          <div class="card-header">
+            <h2 class="card-title">{i.title}</h2>
+            <span class={`badge ${i.status}`} title={statusDescriptions[i.status] || ''}>{statusLabels[i.status] || i.status}</span>
+          </div>
+
+          {/* Summary */}
+          <p class="card-summary">{i.summary}</p>
+
+          {/* Icon links row */}
+          <div class="icon-links">
+            {i.website && <a href={i.website} target="_blank" rel="noopener" title="Website" class="icon-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>}
+            {i.sourceRepo && <a href={i.sourceRepo} target="_blank" rel="noopener" title="Source code" class="icon-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a>}
+            {i.spec && <a href={i.spec} target="_blank" rel="noopener" title="Specification" class="icon-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></a>}
+            {i.pressPage && <a href={i.pressPage} target="_blank" rel="noopener" title="Press & news" class="icon-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/></svg></a>}
+            {i.linkWithEvidenceOfUse && <a href={i.linkWithEvidenceOfUse} target="_blank" rel="noopener" title="Evidence of adoption" class="icon-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></a>}
+            {i.recentActivity && <span class="activity-date" title={`Last activity: ${formatDate(i.recentActivity)}`}>{formatDate(i.recentActivity)}</span>}
+          </div>
+
+          {/* Primary action chip - show type prefix for clarity */}
+          <div class="meta">
+            {(i.actionsSupported || []).slice(0, 2).map((a) => <span class="chip type-chip" title={actionDescriptions[a] || ''}><span class="chip-label">Type:</span> {actionLabels[a] || a}</span>)}
+            {(i.pipelineStages || []).length > 0 && <span class="chip muted-chip"><span class="chip-label">Stage:</span> {(i.pipelineStages || []).map(p => pipelineLabels[p] || p).join(' → ')}</span>}
+          </div>
+
+          {/* Expandable details section */}
+          {hasDetails && (
+            <details class="card-details">
+              <summary class="details-toggle">More details</summary>
+              <div class="details-content">
+                {/* Dependencies */}
+                {(Array.isArray(i.dependsOn) && i.dependsOn.length > 0) && (
+                  <div class="detail-section">
+                    <span class="detail-label">Uses:</span>
+                    {i.dependsOn.map((d) => {
+                      const dep = bySlug[d] || byId[d];
+                      const label = (dep && dep.title) || d;
+                      const href = dep ? `#${dep.slug}` : '';
+                      return href ? (
+                        <a class="chip" href={href} title={`Jump to ${label}`}>{label}</a>
+                      ) : (
+                        <span class="chip">{label}</span>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Metrics */}
+                {(i.usersCount || i.dataVolume || i.moneyVolume) && (
+                  <div class="detail-section">
+                    {i.usersCount && <span class="chip" title="Reported users/adopters">👥 {i.usersCount}</span>}
+                    {i.dataVolume && <span class="chip" title="Reported data throughput">📊 {i.dataVolume}</span>}
+                    {i.moneyVolume && <span class="chip" title="Reported payments or revenue">💰 {i.moneyVolume}</span>}
+                  </div>
+                )}
+
+                {/* Activity note */}
+                {i.recentActivityNote && (
+                  <div class="detail-section">
+                    <p class="activity-note">{i.recentActivityNote}</p>
+                  </div>
+                )}
+
+                {/* References */}
+                {(Array.isArray(i.referencesResolved) && i.referencesResolved.length > 0) && (
+                  <div class="detail-section">
+                    <span class="detail-label">Related papers:</span>
+                    <ul class="references-list">
+                      {i.referencesResolved.map((ref) => (
+                        <li>
+                          {ref.url ? (
+                            <a href={ref.url} target="_blank" rel="noopener">{formatCitation(ref)}</a>
+                          ) : (
+                            <span>{formatCitation(ref)}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Implementation snippets */}
+                {Array.isArray(i.implementationSnippets) && i.implementationSnippets.length > 0 && (
+                  <div class="detail-section">
+                    <span class="detail-label">Implementation:</span>
+                    <div class="snippets-wrap">
+                      {i.implementationSnippets.map((s) => (
+                        <div class="snippet">
+                          <div class="snippet-head">
+                            <span class="chip">{s.title}</span>
+                            {s.sourceUrl && <a href={s.sourceUrl} target="_blank" rel="noopener" title="Source">Source</a>}
+                            <button class="copy" data-code={encodeURIComponent(s.code || '')}>Copy</button>
+                          </div>
+                          <pre class="code"><code>{s.code}</code></pre>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </details>
+          )}
+        </article>
+      )})}
+    </section>
+
+    
+
+
+    <p id="empty" class="muted" style="display:none;">No results match your filters. <button id="clear">Clear filters</button></p>
+  </main>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+    // Creator Guide Flow - toggles filter the main card list
+    let activeGoal = null;
+    const guideHint = $('#guide-hint');
+
+    function updateGoalButtons() {
+      $$('.guide-option').forEach(btn => {
+        const isActive = btn.dataset.goal === activeGoal;
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+      if (activeGoal && guideHint) {
+        guideHint.textContent = 'Filtering by goal. Click again to show all.';
+      } else if (guideHint) {
+        guideHint.textContent = 'Click a goal to filter, click again to clear';
+      }
+    }
+
+    $$('.guide-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const goal = btn.dataset.goal;
+        if (activeGoal === goal) {
+          // Toggle off
+          activeGoal = null;
+          // Clear action pills
+          $$('#actions .action-pill').forEach(el => el.setAttribute('aria-pressed', 'false'));
+        } else {
+          // Set new goal and apply its actions
+          activeGoal = goal;
+          const actionTypes = (btn.dataset.actions || '').split(',');
+          // Set matching action pills
+          $$('#actions .action-pill').forEach(el => {
+            const match = actionTypes.includes(el.dataset.action);
+            el.setAttribute('aria-pressed', String(match));
+          });
+        }
+        updateGoalButtons();
+        applyFilters();
+      });
+    });
+
+    const q = $('#q');
+    const status = $('#status');
+    const actionsContainer = $('#actions');
+    const usable = $('#usable');
+    const sort = $('#sort');
+    const count = $('#count');
+    const empty = $('#empty');
+    const copylink = $('#copylink');
+    const clearBtn = $('#clear');
+
+    function getSelectedActions() {
+      return $$('#actions .action-pill[aria-pressed="true"]').map(el => el.dataset.action.toLowerCase());
+    }
+
+    function applyFilters() {
+      const qv = (q.value || '').trim().toLowerCase();
+      const stat = status.value;
+      const selectedActions = getSelectedActions();
+      const onlyUsable = usable.getAttribute('aria-pressed') === 'true';
+      const sortMode = sort.value;
+
+      const cards = $$('#cards .card');
+
+      let shown = 0;
+      cards.forEach((el) => {
+        let ok = true;
+        if (qv) {
+          const hay = `${el.dataset.title} ${el.dataset.summary} ${el.dataset.tags}`;
+          ok = hay.includes(qv);
+        }
+        if (ok && stat !== 'all') ok = el.dataset.status === stat;
+        if (ok && selectedActions.length) {
+          const acts = (el.dataset.actions || '').split(' ');
+          ok = selectedActions.some((a) => acts.includes(a));
+        }
+        if (ok && onlyUsable) ok = el.dataset.usable === 'true';
+
+        el.style.display = ok ? '' : 'none';
+        if (ok) shown++;
+      });
+      count.textContent = String(shown);
+      empty.style.display = shown === 0 ? '' : 'none';
+
+      // Sort visible cards
+      const visible = cards.filter((el) => el.style.display !== 'none');
+      visible.sort((a, b) => {
+        if (sortMode === 'alpha') {
+          return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+        }
+        if (sortMode === 'usable') {
+          const au = a.dataset.usable === 'true' ? 1 : 0;
+          const bu = b.dataset.usable === 'true' ? 1 : 0;
+          if (au !== bu) return bu - au;
+          return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+        }
+        // default and explicit 'recent'
+        if (sortMode === 'recent' || !sortMode) {
+          const at = Number(a.dataset.activity || 0);
+          const bt = Number(b.dataset.activity || 0);
+          if (at !== bt) return bt - at;
+          return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+        }
+        return 0;
+      });
+      // Re-append in new order
+      const container = $('#cards');
+      visible.forEach((el) => container.appendChild(el));
+
+      // Update URL params for shareable views
+      const params = new URLSearchParams();
+      if (qv) params.set('q', qv);
+      if (stat && stat !== 'all') params.set('status', stat);
+      selectedActions.forEach((a) => params.append('actions', a));
+      if (onlyUsable) params.set('usable', 'true');
+      if (sortMode) params.set('sort', sortMode);
+      const qs = params.toString();
+      const nextUrl = qs ? `?${qs}` : location.pathname;
+      history.replaceState(null, '', nextUrl);
+    }
+
+    q.addEventListener('input', applyFilters);
+    status.addEventListener('change', applyFilters);
+    sort.addEventListener('change', applyFilters);
+
+    // Action pill toggle handler
+    actionsContainer.addEventListener('click', (e) => {
+      const pill = e.target.closest('.action-pill');
+      if (!pill) return;
+      const pressed = pill.getAttribute('aria-pressed') === 'true';
+      pill.setAttribute('aria-pressed', String(!pressed));
+      applyFilters();
+    });
+
+    // Usable today toggle
+    usable.addEventListener('click', () => {
+      const next = usable.getAttribute('aria-pressed') !== 'true';
+      usable.setAttribute('aria-pressed', String(next));
+      applyFilters();
+    });
+
+    // Share button
+    copylink.addEventListener('click', async () => {
+      const textSpan = copylink.querySelector('span');
+      try {
+        await navigator.clipboard.writeText(location.href);
+        textSpan.textContent = 'Copied!';
+        setTimeout(() => (textSpan.textContent = 'Share'), 1800);
+      } catch (e) {
+        alert('Could not copy link');
+      }
+    });
+
+    // Clear filters
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        q.value = '';
+        status.value = 'all';
+        $$('#actions .action-pill').forEach(el => el.setAttribute('aria-pressed', 'false'));
+        usable.setAttribute('aria-pressed', 'false');
+        sort.value = 'recent';
+        applyFilters();
+      });
+    }
+
+    // Copy snippet button handler
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.copy');
+      if (!btn) return;
+      const code = decodeURIComponent(btn.getAttribute('data-code') || '');
+      try {
+        await navigator.clipboard.writeText(code);
+        btn.textContent = 'Copied';
+        setTimeout(() => (btn.textContent = 'Copy'), 1200);
+      } catch {}
+    });
+
+    // Initialize from URL params (basic deep-link support)
+    const params = new URLSearchParams(location.search);
+    if (params.has('q')) q.value = params.get('q');
+    if (params.has('status')) {
+      const val = params.get('status');
+      const has = Array.from(status.options).some((o) => o.value === val);
+      if (has) status.value = val;
+    }
+    if (params.has('action') || params.has('actions')) {
+      const preselect = new Set([...params.getAll('action'), ...params.getAll('actions')]);
+      $$('#actions .action-pill').forEach((el) => {
+        if (preselect.has(el.dataset.action)) {
+          el.setAttribute('aria-pressed', 'true');
+        }
+      });
+    }
+    if (params.get('usable') === 'true') {
+      usable.setAttribute('aria-pressed', 'true');
+    }
+    if (params.has('sort')) {
+      const val = params.get('sort');
+      if (Array.from(sort.options).some((o) => o.value === val)) sort.value = val;
+    }
+    applyFilters();
+  </script>
+
+  <style>
+    .references {
+      margin-top: 0.75rem;
+    }
+    .references-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .references-list {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+    .references-list li {
+      margin: 0.15rem 0;
+    }
+  </style>
+</Layout>

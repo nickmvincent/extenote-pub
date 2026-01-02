@@ -1,0 +1,221 @@
+---
+type: book_chapter
+title: Related Work
+visibility: public
+---
+# Related Work {#sec-related-work}
+
+This chapter situates the book's framework within the broader scholarly landscape. We draw on literature spanning economics, media studies, science and technology studies, cybernetics, legal theory, and computer science. The diversity of sources reflects our conviction that understanding AI governance requires crossing disciplinary boundaries.
+
+## Digital Labor and "Free Labor"
+
+Our framework builds on a rich tradition analyzing how digital platforms extract value from user activity.
+
+### The Free Labor Thesis
+
+@terranova2000 introduced the concept of "free labor" to describe how the digital economy depends on willing, uncompensated participation. Users of early internet platforms—moderators, content creators, community builders—provided labor that was "free" in both senses: voluntarily given and unpaid. This insight presaged today's debates about AI training data.
+
+Terranova's analysis was prescient: "The internet is animated by cultural and technical labor through and through... but it is a type of labor we do not immediately recognize as such." The same could be said of the millions of people whose writing, images, and code now train foundation models.
+
+### AI as Accumulated Labor
+
+@pasquinelli2023, in *The Eye of the Master*, offers a compelling reframing of AI history. Rather than viewing AI as imitation of biological intelligence, Pasquinelli argues AI embodies "the intelligence of labour and social relations." His "labor theory of automation" suggests that AI systems are designed based on the division of labor and collective knowledge: "Labour is the first algorithm."
+
+This resonates with our ranking framework: the patterns that LLMs learn to rank highly are patterns extracted from human labor—writing, coding, creating. The model's capabilities are, in a real sense, accumulated human expertise compressed into parameters.
+
+### Ghost Work and Heteromation
+
+@gray2019 coined "ghost work" to describe the invisible human labor that makes AI systems appear autonomous. From content moderation to data labeling to quality assurance, human workers perform "high-tech piecework" that remains hidden from end users. The "ghost" is apt: this labor is designed to be invisible.
+
+@ekbia2017 introduced "heteromation" to describe the extraction of economic value from low-cost or free labor in computer-mediated networks. Unlike automation (machines replacing humans) or augmentation (machines assisting humans), heteromation involves humans performing labor that computers cannot do—but in ways that primarily benefit platform owners rather than workers.
+
+@irani2013 documented these dynamics empirically through Turkopticon, a system enabling Amazon Mechanical Turk workers to share information and hold employers accountable. Their research revealed the "technical structures of invisibility" that hide crowdworker contributions.
+
+### AI as Extraction
+
+@crawford2021 provides a sweeping analysis of AI as "a technology of extraction"—from minerals mined to power computation, to labor pulled from low-wage information workers, to data taken from every user action. Her *Atlas of AI* situates AI within planetary supply chains and challenges narratives of disembodied intelligence.
+
+Crawford's framing complements our Data Pipeworks model: AI systems don't emerge from nowhere but depend on material resources and human labor at every stage.
+
+## Human Computation
+
+Our framework connects to the field of human computation, which studies systems combining human and machine capabilities.
+
+### Von Ahn's Paradigm
+
+@vonahn2005 introduced "human computation" as a paradigm for utilizing human processing power to solve problems computers cannot solve alone. Through projects like reCAPTCHA (which digitized books while verifying users weren't bots) and the ESP Game (which labeled images through gameplay), von Ahn demonstrated that massive-scale human computation could be embedded in activities people were already doing.
+
+@law2011 systematized this work, showing how crowdsourcing, games with a purpose, and social computing could be understood as variations on the theme of human-computer collaboration.
+
+### Relevance to LLMs
+
+Human computation provides a lens for understanding both AI training and deployment:
+
+- **Training**: LLM training data represents massive human computation—millions of people answering questions, writing documentation, creating content—aggregated through the Data Pipeworks
+- **RLHF**: Reinforcement learning from human feedback is explicit human computation: humans rank outputs, and models learn from those rankings
+- **Deployment**: Many AI applications involve humans checking AI outputs, effectively making users part of a human computation system
+
+The ranking framework reveals that LLMs don't replace human computation; they compress and redistribute it.
+
+## Cybernetics
+
+Our control-theory formalization of the Data Pipeworks (Appendix B) draws on cybernetics—the study of control and communication in animals and machines.
+
+### Wiener's Vision
+
+@wiener1948 founded cybernetics on the insight that feedback loops are fundamental to both biological and mechanical systems. His concept of the "message" (information sent and responded to) and emphasis on feedback for maintaining homeostasis presaged modern concerns about AI alignment and control.
+
+@wiener1950, in *The Human Use of Human Beings*, extended these ideas to society, warning about automation's potential to concentrate power and advocating for technology that enhances rather than diminishes human agency. His concerns remain relevant.
+
+### Ashby and Beer
+
+@ashby1956 formalized key cybernetic concepts, including the "Law of Requisite Variety": a system needs sufficient internal complexity to respond effectively to environmental complexity. Applied to AI governance, this suggests that simple rules may be insufficient to govern complex AI systems.
+
+@beer1972 applied cybernetics to organizational management through the Viable System Model. His work on how nested feedback systems can maintain stability while adapting to change informs our analysis of feedback loops in the Data Pipeworks.
+
+### Data Leverage as Cybernetic Control
+
+The cybernetic perspective positions data contributors as part of a control loop. If AI systems are feedback systems, then collective action over data—strikes, boycotts, conditional licensing—becomes a mechanism for affecting system behavior. This "data leverage" perspective motivates our policy proposals in Chapters 7-8.
+
+## Economics of Automation
+
+### The Task-Based Framework
+
+@acemoglu2019tasks developed a "task-based framework" for analyzing automation's economic effects. Rather than treating labor as homogeneous, they model production as composed of tasks, some of which can be automated while others cannot (yet).
+
+Key insights relevant to our framework:
+
+- **Displacement effect**: Automation shifts tasks from labor to capital, reducing labor demand
+- **Reinstatement effect**: New tasks emerge where humans have comparative advantage, increasing labor demand
+- **Productivity effect**: Cost savings from automation can increase overall output and labor demand
+
+The net effect depends on the balance of these forces—and on policy choices.
+
+@acemoglu2018ai extended this analysis specifically to AI, arguing that "the presumption that all technologies increase aggregate labor demand simply because they raise productivity is wrong. Some automation technologies may in fact reduce labor demand because they bring sizable displacement effects but modest productivity gains."
+
+### Historical Perspectives
+
+@autor2015 asks "Why are there still so many jobs?" despite centuries of automation predictions. His answer involves the complementarity between human and machine capabilities and the ongoing creation of new task categories. However, he notes that recent technological change has "hollowed out" middle-skill jobs, raising concerns about polarization.
+
+@frey2017 estimated that 47% of US employment is "at risk" of automation, sparking widespread debate. The specific number has been contested—critics note the methodology focused on technical feasibility rather than economic likelihood, and subsequent OECD analyses using task-level approaches found lower figures (9-14%). Nonetheless, the paper catalyzed serious analysis of AI's labor market implications.
+
+@brynjolfsson2014 argue we've entered a "Second Machine Age" characterized by digital technologies that are exponentially improving, combinatorial in their effects, and increasingly capable of cognitive tasks previously reserved for humans. Unlike the First Machine Age (which complemented physical labor), they suggest the Second Machine Age may substitute for cognitive labor.
+
+### Implications for Our Framework
+
+These economic perspectives inform our analysis in Chapter 6. The ranking framework suggests that if AI can rank information better than humans for a task—producing outputs that users prefer—economic pressure will drive substitution. The question is not whether this will happen but how to govern the transition.
+
+## Data as Labor and Data Dignity
+
+### The Arrieta-Ibarra et al. Proposal
+
+@arrieta2018 proposed treating data as labor rather than as capital owned by firms. If users are producing valuable data through their activities, they argue, treating that data as labor could:
+
+- Restore incentives for high-quality contributions
+- Distribute gains from the data economy more equitably
+- Reduce fears of automation (since humans would retain income from data labor)
+
+This proposal directly informs our collective bargaining framework.
+
+### Data Dignity
+
+@lanier2013 and @lanier2018 developed the concept of "data dignity"—the principle that people should be compensated for data they create and have meaningful control over its use. Rather than the current model where data is extracted without compensation, data dignity envisions "mediators of individual data" (MIDs) negotiating on behalf of data creators.
+
+The ranking framework strengthens the case for data dignity: if LLM outputs are causally dependent on training data, and training data represents human labor, then claims to compensation and control have a clear basis.
+
+### Radical Markets
+
+@posner2018 include data as labor among their "radical market" proposals for restructuring economic institutions. They argue that the current data economy involves massive implicit subsidies from users to platforms, and that market mechanisms could distribute these gains more equitably.
+
+## Platform Studies
+
+### Platform Capitalism
+
+@srnicek2017 analyzes platforms as a distinctive organizational form in contemporary capitalism. Platforms extract value by mediating between different user groups, with data serving as "the raw material to be extracted, refined, and used in a variety of ways."
+
+His taxonomy of platform types (advertising, cloud, industrial, product, lean) helps situate different AI applications within broader platform dynamics.
+
+### Digital Economy Critiques
+
+@zuboff2019 introduced "surveillance capitalism" to describe business models based on extracting behavioral data for prediction products sold to advertisers. Her analysis of the "behavioral futures market" illuminates the economic logic driving data extraction.
+
+@sadowski2020 extends this critique, arguing that "smart" technologies are driven by dual imperatives: extracting data and expanding control. His analysis of smart homes, cities, and selves reveals how data extraction becomes embedded in everyday life.
+
+@couldry2019 and @couldry2019costs frame data extraction as "data colonialism"—a new form of appropriation analogous to historical colonialism. This framing emphasizes power relations and challenges "win-win" narratives about data sharing.
+
+### Platform Cooperativism
+
+@scholz2016 and @scholz2016platforms propose "platform cooperativism" as an alternative to extractive platforms. Worker-owned and democratically governed platforms could distribute value more equitably while maintaining technological capabilities.
+
+This vision informs our proposals for collective bargaining infrastructure and data cooperatives.
+
+## Commons Governance
+
+### Ostrom's Insights
+
+@ostrom1990 demonstrated that communities can successfully govern common-pool resources without either privatization or state control. Her "design principles" for successful commons governance—clear boundaries, collective-choice arrangements, monitoring, graduated sanctions, conflict resolution—inform proposals for governing data commons.
+
+Her work challenges assumptions that commons inevitably suffer "tragedies" requiring private ownership. Instead, institutional design determines outcomes.
+
+### Digital Commons
+
+Wikipedia, open-source software, and Creative Commons content represent successful digital commons. Our proposals in Chapter 8 aim to preserve these commons while creating mechanisms for creators who want compensation.
+
+The challenge is designing institutions that respect both commons-oriented and market-oriented approaches to data.
+
+## Legal and Policy Frameworks
+
+### Copyright and AI
+
+@samuelson2023 analyzes the collision between generative AI and copyright law. Key questions include whether training on copyrighted material constitutes infringement, whether AI outputs can be copyrighted, and how attribution and compensation should work.
+
+@grimmelmann2009 analyzed search engines' legal status, establishing precedents relevant to AI systems that curate and present information.
+
+### Science and Technology Studies
+
+@winner1980 asked "Do artifacts have politics?"—whether technologies embody particular power arrangements. His analysis of bridges designed to exclude buses (and thus poor and minority New Yorkers) from Long Island beaches illustrates how technical choices embed social values.
+
+Applied to AI: the choice to train on particular data, to optimize for particular objectives, to deploy in particular contexts—these are political choices with distributional consequences. The ranking framework makes these choices visible.
+
+## Information Theory
+
+### Shannon's Foundation
+
+@shannon1948 established information theory, providing the mathematical foundations for quantifying information, channel capacity, and compression. Our information-theoretic formalization of the Data Pipeworks (Appendix B) draws on these foundations.
+
+Key concepts:
+- **Entropy**: The uncertainty or information content of a source
+- **Channel capacity**: Maximum reliable information transfer rate
+- **Rate-distortion**: Trade-off between compression and fidelity
+
+These concepts illuminate what's possible and impossible in AI systems: no model can convey more information about reality than was captured in training data.
+
+## Critical AI Studies
+
+### Stochastic Parrots
+
+@bender2021 warned about dangers of large language models, including environmental costs, training data biases, and the gap between linguistic form and meaning. Their critique sparked ongoing debates about what LLMs do and don't understand.
+
+Our framework doesn't take a position on these debates. We describe mechanism (ranking), not phenomenology (understanding). But the concerns raised—about who bears costs, who benefits, what's in training data—align with our governance focus.
+
+### Normal Technology
+
+@narayanan2025 argue for treating AI as "normal technology"—continuous with previous information technologies rather than unprecedented. This framing counsels against panic and suggests existing regulatory approaches may suffice.
+
+We agree that AI is continuous with prior systems (that's our point about ranking) while arguing that the speed and breadth of change warrant proactive governance innovation.
+
+## Synthesis
+
+The literatures surveyed here converge on several themes that inform our framework:
+
+1. **Human labor underlies AI**: From Terranova's free labor to Pasquinelli's labor theory of automation to Gray's ghost work, scholars emphasize the human labor that AI systems depend on and often obscure.
+
+2. **Data is not just a resource but a relation**: Treating data purely as raw material ignores the social relations involved in its production. Data dignity, data colonialism, and platform cooperativism all highlight these relational aspects.
+
+3. **Feedback and control matter**: Cybernetics and control theory provide tools for analyzing how AI systems interact with the social systems they're embedded in. Feedback loops can destabilize or stabilize, concentrate or distribute power.
+
+4. **Institutional design shapes outcomes**: Ostrom's work on commons governance shows that institutional arrangements—not just technology—determine whether shared resources thrive or degrade.
+
+5. **Technical choices are political choices**: From Winner's bridges to Crawford's supply chains, technology embeds power relations. AI governance requires attending to these embedded politics.
+
+Our contribution is to integrate these insights through the ranking framework and Data Pipeworks model, providing a unified foundation for analyzing AI governance across domains.

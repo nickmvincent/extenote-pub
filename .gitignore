@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+.claude/
+.wrangler/
+.astro/
+.extenote-backup/
+dist/
+bun.lockb
+package-lock.json

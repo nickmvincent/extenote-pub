@@ -1,0 +1,17 @@
+{
+  "name": "",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "cf:deploy": "npx wrangler pages deploy dist --project-name datalicenses",
+    "lint:content": "node scripts/lint-content.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.13.7",
+    "js-yaml": "^4.1.1"
+  }
+}

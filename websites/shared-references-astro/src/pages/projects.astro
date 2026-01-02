@@ -1,0 +1,339 @@
+---
+import Layout from '../layouts/Layout.astro';
+import networkData from '../data/network.json';
+
+// Enhanced project data with descriptions
+// Projects to hide from the index
+const hiddenProjects = new Set(['ranking-book']);
+
+const projectDescriptions: Record<string, { description: string; category: 'research' | 'tool' | 'book' }> = {
+  'personal-website': {
+    description: 'Academic homepage with CV, publications, talks, and media coverage.',
+    category: 'research'
+  },
+  'data-leverage-blogs': {
+    description: 'Blog posts exploring data leverage, AI governance, and collective action.',
+    category: 'research'
+  },
+  'data-counterfactuals': {
+    description: 'Research on data counterfactual analysis and AI data dependencies.',
+    category: 'research'
+  },
+  'data-napkin-math': {
+    description: 'Back-of-the-envelope calculations for AI and data economics.',
+    category: 'research'
+  },
+  'data-licenses': {
+    description: 'Catalog of AI data licensing initiatives and policy briefings.',
+    category: 'research'
+  },
+  'paidf-mini-book': {
+    description: 'Mini-book on "Paid for Data" concepts and data economy proposals.',
+    category: 'book'
+  },
+};
+
+// Add extenote-docs and shared-references to the list
+const allProjects = [
+  {
+    name: 'shared-references',
+    title: 'Shared References',
+    website: networkData.links.website,
+    description: 'Annotated bibliography of 100+ papers on AI, data, and collective action.',
+    category: 'tool' as const,
+    isCurrent: true
+  },
+  ...networkData.relatedProjects
+    .filter(p => !hiddenProjects.has(p.name))
+    .map(p => ({
+      ...p,
+      description: projectDescriptions[p.name]?.description ?? 'Project in the extenote network.',
+      category: projectDescriptions[p.name]?.category ?? 'research' as const,
+      isCurrent: false
+    })),
+  {
+    name: 'extenote-docs',
+    title: 'ExteNote',
+    website: 'https://nickmvincent.github.io/extenote',
+    description: 'Documentation for the extenote software (open-source content management for researchers).',
+    category: 'tool' as const,
+    isCurrent: false
+  }
+];
+
+const byCategory = {
+  research: allProjects.filter(p => p.category === 'research'),
+  book: allProjects.filter(p => p.category === 'book'),
+  tool: allProjects.filter(p => p.category === 'tool'),
+};
+---
+
+<Layout title="Projects | Data Leverage Network">
+  <div class="projects-header">
+    <h2>Nick Vincent's Project Index</h2>
+    <div class="header-ornament"></div>
+    <p class="subtitle">
+      Public sites managed with <a href="https://nickmvincent.github.io/extenote" target="_blank" rel="noopener noreferrer">extenote</a>,
+      an open-source content system for researchers.
+    </p>
+  </div>
+
+  <section class="category-section">
+    <h3>Research Sites</h3>
+    <div class="projects-grid">
+      {byCategory.research.map((project) => (
+        <article class="project-card">
+          <header>
+            <h4>{project.title}</h4>
+            {project.isCurrent && <span class="current-badge">You are here</span>}
+          </header>
+          <p class="description">{project.description}</p>
+          <footer>
+            <a href={project.website} class="project-link" target={project.isCurrent ? '_self' : '_blank'} rel="noopener noreferrer">
+              {project.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+            </a>
+          </footer>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="category-section">
+    <h3>Books & Guides</h3>
+    <div class="projects-grid">
+      {byCategory.book.map((project) => (
+        <article class="project-card">
+          <header>
+            <h4>{project.title}</h4>
+          </header>
+          <p class="description">{project.description}</p>
+          <footer>
+            <a href={project.website} class="project-link" target="_blank" rel="noopener noreferrer">
+              {project.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+            </a>
+          </footer>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="category-section">
+    <h3>Tools & Documentation</h3>
+    <div class="projects-grid">
+      {byCategory.tool.map((project) => (
+        <article class="project-card">
+          <header>
+            <h4>{project.title}</h4>
+            {project.isCurrent && <span class="current-badge">You are here</span>}
+          </header>
+          <p class="description">{project.description}</p>
+          <footer>
+            <a href={project.website} class="project-link" target={project.isCurrent ? '_self' : '_blank'} rel="noopener noreferrer">
+              {project.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+            </a>
+          </footer>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <div class="network-info">
+    <h3>About This Index</h3>
+    <div class="registry-divider"></div>
+    <p>
+      This is <strong>Nick Vincent's public content network</strong>—a collection of interconnected research sites.
+      All sites are built with <a href="https://nickmvincent.github.io/extenote" target="_blank" rel="noopener noreferrer">extenote</a>,
+      an open-source content management tool that uses schema-driven markdown for cross-project references and multi-format publishing.
+    </p>
+    <p class="network-stats">
+      <strong>{allProjects.length}</strong> public projects &middot;
+      <strong>100+</strong> shared references &middot;
+      Software on <a href="https://github.com/nickmvincent/extenote" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </p>
+  </div>
+</Layout>
+
+<style>
+  .projects-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .projects-header h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .header-ornament {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.8rem;
+    margin: 0.25rem 0 0.75rem;
+  }
+
+  .header-ornament::before {
+    content: '--- * ---';
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    margin: 0;
+    font-style: italic;
+  }
+
+  .category-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .category-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dotted var(--border);
+    color: var(--text);
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .project-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-ornate);
+    padding: 1rem 1.25rem;
+    transition: border-color 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .project-card:hover {
+    border-left-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .project-card header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-card h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .current-badge {
+    background: var(--accent);
+    color: var(--text-light);
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .description {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+  }
+
+  .project-card footer {
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .project-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+  }
+
+  .project-link:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+  }
+
+  .network-info {
+    background: var(--bg-inset);
+    border: 2px solid var(--border);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    position: relative;
+  }
+
+  .network-info::before {
+    content: '*';
+    position: absolute;
+    top: -0.5rem;
+    left: 1.5rem;
+    background: var(--bg-inset);
+    padding: 0 0.5rem;
+    color: var(--border-ornate);
+    font-size: 0.8rem;
+  }
+
+  .network-info h3 {
+    margin: 0;
+    font-size: 1rem;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .registry-divider {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.7rem;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .registry-divider::before {
+    content: '-- * --';
+  }
+
+  .network-info p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 0.75rem;
+  }
+
+  .network-info a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .network-info a:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+  }
+
+  .network-stats {
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  @media (max-width: 600px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

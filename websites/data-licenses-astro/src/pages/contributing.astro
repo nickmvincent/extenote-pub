@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+import networkData from '../data/network.json';
+---
+
+<Layout>
+  <main class="wrap narrow">
+    <header class="page-header">
+      <h1>About & Contributing</h1>
+      <p class="muted">Help improve this community-curated index.</p>
+    </header>
+
+    <section class="box section">
+      <h2>What we're capturing</h2>
+      <ul>
+        <li>Initiatives that shape AI data flows via preference signals, licenses/terms, collectives, technical controls, certification, or new infrastructures.</li>
+        <li>Concrete implementation details (links to specs, repos, headers/robots examples) and evidence of use.</li>
+        <li>Practical metadata: status, pipeline stages, jurisdictions, and adoption signals (users/data/money).</li>
+      </ul>
+    </section>
+
+    <section class="box section">
+      <h2>What's not in scope (for now)</h2>
+      <ul>
+        <li>General-purpose anti-AI cybersecurity without a clear data rights angle.</li>
+        <li>Pure research concepts without a public artifact or path to adoption.</li>
+        <li>Content provenance-only work unless it directly informs data licensing/preferences.</li>
+      </ul>
+    </section>
+
+    <section class="box section">
+      <h2>How to contribute</h2>
+      <ul>
+        <li>Suggest a new initiative or update an existing one (links appreciated: website, spec, repo, press, evidence of use).</li>
+        <li>Provide short, neutral summaries; include any adoption metrics if public.</li>
+      </ul>
+      <p>Send a note to <a href="https://nickmvincent.com" target="_blank" rel="noopener">Nick</a>.</p>
+      <p class="muted small">Developers: you can also open a PR by adding/updating a markdown file under <code>content/data-licenses/initiatives/</code>. See the schema in <code>src/content.config.ts</code> for available fields.</p>
+    </section>
+
+    <section class="box section">
+      <h2>Discussions</h2>
+      <p class="muted">Join the conversation about data licensing initiatives.</p>
+      <ul class="discussion-list">
+        {networkData.discussions?.map((d) => (
+          <li>
+            <a href={d.url} target="_blank" rel="noopener">{d.label}</a>
+            {d.description && <span class="muted"> — {d.description}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .discussion-list {
+    margin: 12px 0 0;
+    padding-left: 20px;
+  }
+  .discussion-list li {
+    margin: 8px 0;
+  }
+</style>

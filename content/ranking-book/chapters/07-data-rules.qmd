@@ -1,0 +1,462 @@
+---
+type: book_chapter
+title: Data Rules and Collective Bargaining
+visibility: public
+---
+# Data Rules and Collective Bargaining {#sec-data-rules}
+
+## Overview
+
+The previous chapters established why data matters: AI systems rank information based on training data, this creates economic disruption, and the default trajectory favors power concentration. This chapter proposes an intervention: collective bargaining over data and information.
+
+The core idea is straightforward. AI systems depend on training data. Training data originates from human activity—writing, coding, photographing, recording. If the humans whose activity generates this data can organize and bargain collectively, they gain leverage over AI development.
+
+This chapter develops the proposal in detail:
+
+1. **The "Same Boat" argument**: Why clear data rules benefit most AI companies, not just data creators
+2. **Three archetypes**: The different interests at stake—Authors, Model Builders, and Open Knowledge Advocates
+3. **Collective Bargaining for Information**: The institutional proposal for organizing data contributors
+4. **Data valuation infrastructure**: Technical and institutional support for assessing contribution value
+5. **Standardized contract templates**: Reducing transaction costs through common agreements
+
+A note on feasibility: This chapter proposes institutional innovations that don't yet exist at scale. We can point to precedents and analogies, but whether collective bargaining for information can work as described is an open question. The goal is to articulate a vision worth pursuing, not to claim certainty about outcomes.
+
+## Background Research
+
+### Collective Bargaining: Theory and History
+
+Collective bargaining—negotiation between organized workers and employers—emerged as a response to power asymmetries in labor markets. Individual workers face coordination problems: each has an incentive to accept lower wages if others hold out, but collective restraint benefits all [@freeman1984]. Unions solve this coordination problem by aggregating worker interests and negotiating collectively.
+
+The theory of collective bargaining emphasizes countervailing power. In markets dominated by few large buyers (monopsony or oligopsony), prices are set below competitive levels. Organized sellers can restore bargaining balance, potentially improving efficiency as well as equity [@galbraith1952]. This logic applies directly to data markets: a small number of AI companies purchasing from millions of individual data contributors exhibit extreme buyer concentration.
+
+Historical union movements achieved significant gains in working conditions, wages, and benefits across manufacturing, transportation, and service industries [@lichtenstein2002]. More recently, collective action has extended to non-traditional contexts: the freelance economy, platform workers, and creative professions have explored new organizational forms adapted to dispersed, non-employee relationships [@cherry2019].
+
+### Data Governance Frameworks
+
+The governance of data has evolved through several paradigmatic frameworks, each with limitations:
+
+**Property rights approaches** treat data as ownable, drawing on intellectual property traditions. This framing enables markets but faces challenges: data is non-rivalrous (my use doesn't prevent yours), and property boundaries are unclear (does a photo of you belong to you, the photographer, or the platform hosting it?) [@samuelson2000].
+
+**Privacy frameworks** focus on information about individuals, typically restricting collection and use without consent. GDPR exemplifies this approach, requiring legal bases for processing and granting data subject rights [@voigt2017]. However, privacy frameworks primarily address harms to individuals, not collective harms from data aggregation or displacement effects on data contributors.
+
+**Fiduciary frameworks** propose that data controllers owe duties to data subjects, analogous to doctor-patient or attorney-client relationships [@balkin2016]. This would impose affirmative obligations to act in contributors' interests. Critics note enforcement challenges and unclear scope.
+
+**Commons frameworks**, discussed further in Chapter 8, treat data as shared resources requiring collective governance [@ostrom1990; @hess2007]. This approach foregrounds collective action problems and institutional design rather than individual rights or transactions.
+
+None of these frameworks adequately addresses the specific challenges of AI training data: the aggregation of millions of contributions into systems that may compete with contributors. The "Collective Bargaining for Information" approach proposed in this chapter draws on elements of each—property-like transferable rights, privacy-like consent mechanisms, fiduciary-like duties, and commons-like collective governance—tailored to this context.
+
+### Intellectual Property and AI Training
+
+The legal status of AI training on copyrighted works remains unsettled. In the United States, defendants in ongoing litigation argue that training constitutes fair use, citing the transformative nature of model outputs [@lemley2021]. Plaintiffs counter that training is commercial copying at unprecedented scale, undermining markets for licensed training data.
+
+International approaches vary significantly. The European Union's Digital Single Market Directive permits text and data mining for research purposes while allowing rights holders to reserve commercial mining rights [@hugenholtz2021]. Japan has adopted permissive stances toward AI training. This regulatory fragmentation complicates governance and may encourage jurisdiction shopping.
+
+Regardless of litigation outcomes, copyright's binary structure—permitted or infringing—may poorly match the nuanced interests at stake. Authors may prefer licensed training with attribution and compensation to either prohibition or uncompensated use. The standardized contract templates proposed in this chapter attempt to enable such intermediate arrangements.
+
+### Data Valuation Methods
+
+Compensating data contributors fairly requires methods to assess contribution value. Several technical approaches exist:
+
+**Ablation studies** measure how model performance changes when specific data is removed from training. If excluding a contributor's data substantially degrades performance, that data was presumably valuable [@ghorbani2019datashapley]. This approach is computationally expensive, requiring retraining for each subset, though approximation methods exist.
+
+**Shapley values**, borrowed from cooperative game theory, allocate credit for collective outcomes to individual contributors [@shapley1953]. Data Shapley applies this framework to training data, computing each example's marginal contribution averaged over all possible orderings.  While theoretically principled, exact computation is infeasible for large datasets.
+
+**Influence functions** estimate how training examples affect model predictions without retraining, using gradient information [@koh2017understanding]. These are more computationally tractable but provide approximations rather than exact values.
+
+All these methods face a common challenge: value depends on what other data exists. A unique expert contribution is valuable; an identical contribution to data already present is worthless. This suggests valuation cannot be purely individual—it requires reference to the broader data ecosystem.
+
+### News Bargaining Precedents
+
+Recent legislation in Australia and Canada provides precedents for collective bargaining between content creators and platforms. Australia's News Media Bargaining Code [@flew2021] created a framework requiring designated digital platforms to negotiate with news organizations, with binding arbitration as a backstop. The threat of designation prompted platforms to negotiate significant payments.
+
+Canada's Online News Act adopted a similar approach, though platform responses differed—Meta chose to block news content rather than negotiate. These outcomes illustrate both the potential and the limits of bargaining frameworks: they can shift surplus toward content creators, but platforms may exit rather than pay if alternatives exist.
+
+Extending these precedents to AI training faces additional challenges. News organizations are concentrated enough to coordinate; individual data contributors number in millions. News has clear boundaries; "training data" includes anything ever written online. The infrastructure proposed in this chapter—low-friction collectives, standardized contracts, automated enforcement—attempts to address these differences.
+
+### Technical Enforcement Mechanisms
+
+Enforcement of data agreements requires technical infrastructure. Several approaches show promise:
+
+**Watermarking** embeds imperceptible signatures in content that persist through model training, enabling detection of unauthorized use [@kirchenbauer2023]. Limitations include robustness to adversarial removal and scalability to diverse content types.
+
+**Provenance tracking** maintains chains of custody for data, recording its origin and permitted uses [@longpre2023]. Blockchain and similar technologies can make provenance tamper-evident, though adoption remains limited.
+
+**API-level controls** restrict model access to authorized users and uses, enabling enforcement through technical means rather than solely legal ones [@solaiman2023]. Rate limiting, output filtering, and access revocation can implement contractual restrictions.
+
+**Reproducibility requirements** mandate that model developers maintain training data checksums and documentation, enabling audits of data use [@dodge2021]. Even without source data disclosure, attestations about data provenance can support contractual enforcement.
+
+No single mechanism is sufficient; effective enforcement likely requires combining technical, legal, and institutional approaches.
+
+## The "Same Boat" Argument
+
+Before proposing data rules, we should ask: who benefits from such rules? The answer, perhaps surprisingly, includes most AI companies—not just data creators.
+
+### AI Companies Sell Content
+
+Consider what AI companies actually sell. Strip away the technology talk, and the business model is straightforward: customers pay for payloads of text and media.
+
+**Consumer subscriptions**: ChatGPT Plus, Claude Pro, and similar services charge monthly fees for access to AI-generated text. Users pay for the outputs—the written answers, code, analysis.
+
+**Enterprise contracts**: Businesses pay for AI systems that produce documents, code, customer service responses. They're buying output at scale.
+
+**API credits**: Developers pay per token—literally per unit of text generated. The product is content.
+
+In this light, AI companies are content producers. They acquire inputs (training data), process those inputs (model training), and sell outputs (generated text and media). The economics are not so different from publishers, studios, or news organizations—just automated.
+
+### Issues Facing Both Sides
+
+This structural similarity means AI companies face some of the same challenges as traditional content producers:
+
+**Data creators face:**
+- Training on their intellectual property without consent
+- Retrieval and display of their content without compensation
+- Lack of attribution or credit for contributions
+- Traffic siphoning that undermines their economic models
+
+**AI companies face:**
+- Model stealing—competitors copying their trained systems
+- Benchmark contamination—their proprietary outputs appearing in others' training data
+- Legal uncertainty about training data rights
+- Liability for reproducing private or problematic content
+
+Both sides suffer from a chaotic data ecosystem where rights are unclear, enforcement is impossible, and bad actors flourish.
+
+### The Coalition Opportunity
+
+Data rules that help creators can also help AI companies—at least, the ones that want to operate legitimately.
+
+**Clear licensing reduces legal risk.** AI companies currently face massive litigation uncertainty. The major players have billions of dollars in potential liability from training on copyrighted works. A standardized licensing regime, even with payment obligations, might be preferable to ongoing litigation.
+
+**Provenance tracking enables enforcement against competitors.** The same infrastructure that lets creators track their data also lets AI companies protect their own outputs. If an AI company's model can be identified through watermarking, competitors can't freely copy it.
+
+**Standardized contracts reduce transaction costs.** Currently, negotiating data access is expensive and bespoke. Standard terms, even if they require payment, reduce legal costs and enable scale.
+
+**Legitimacy improves regulatory relations.** Companies that can demonstrate fair data practices face easier regulatory environments than those accused of mass infringement.
+
+This "same boat" argument suggests that data rules might find broader support than one might expect. The key insight: AI companies and data creators share interests in a functioning data ecosystem, even if they disagree on specific terms.
+
+## Three Archetypes
+
+To understand the interests at stake in data governance, consider three archetypes. Most real people exhibit elements of multiple archetypes, but distinguishing them clarifies the tradeoffs.
+
+### The Author
+
+The Author creates works—writes, codes, photographs, composes—and wants credit and compensation for those works.
+
+Almost everyone is an Author in some capacity. You've written emails that might appear in training data. You've posted photos that might train image generators. You've contributed to documents, code, and conversations that become AI fuel.
+
+The Author's interests include:
+- Compensation when their work is used commercially
+- Attribution when their work shapes outputs
+- Some control over how their work is used
+- Protection from systems that undermine their economic model
+
+Most Authors accept that some use of their work is beneficial—they write to be read, after all. But commercial exploitation at massive scale, without compensation or credit, feels like theft. The Author wants fair terms, not prohibition.
+
+### The Model Builder
+
+The Model Builder trains AI systems and wants to do so cheaply while selling outputs at high prices.
+
+This is a small population—a few thousand people work at frontier AI labs—but an influential one. Model Builders often were once Authors (researchers who wrote papers, developers who wrote code) and carry some of that identity. But their current incentives favor maximizing data access and minimizing data costs.
+
+The Model Builder's interests include:
+- Access to diverse, high-quality training data
+- Legal clarity to avoid ongoing litigation
+- Protection of their own models from copying
+- Flexibility to experiment with new data sources
+
+Model Builders aren't necessarily opposed to paying for data—they're opposed to chaos and uncertainty. Clear rules, even expensive ones, may be preferable to the current situation.
+
+### The Open Knowledge Advocate
+
+The Open Knowledge Advocate believes in free sharing of information and opposes restrictions on data flow.
+
+This archetype is especially influential in computer science and AI culture, which has strong open-source traditions. Wikipedia, open-source software, Creative Commons—these are not just projects but expressions of a value system that sees information as a commons that should be free.
+
+The Open Knowledge Advocate's interests include:
+- Maintaining open access to information
+- Preventing "enclosure" of knowledge by private parties
+- Enabling research and education without barriers
+- Preserving traditions of sharing that benefit science and society
+
+Open Knowledge Advocates often worry that data rules will restrict beneficial uses, favor large organizations over individuals, and undermine the open knowledge ecosystem. These concerns are legitimate and addressed in Chapter 8.
+
+### The Tensions
+
+These archetypes have genuine tensions:
+
+- Authors want compensation; Model Builders want cheap data; Open Knowledge Advocates want free access
+- Authors want restrictions on commercial use; Open Knowledge Advocates resist restrictions of any kind
+- Model Builders want legal clarity; this may require either stricter or looser rules than currently exist
+
+The proposal in this chapter attempts to navigate these tensions by:
+- Creating compensation mechanisms (for Authors)
+- Providing legal clarity (for Model Builders)
+- Preserving open knowledge options (for Advocates)
+- Making these compatible rather than mutually exclusive
+
+Whether this is achievable is the central question. The answer depends on institutional design.
+
+## Collective Bargaining for Information (CBI)
+
+### The Problem: Near-Zero Individual Leverage
+
+An individual contributor's data is worth almost nothing in isolation.
+
+Consider a blogger whose posts contributed to GPT-4's training. That blogger's words might represent 0.0001% of the training corpus. In a dataset of trillions of tokens, a few thousand tokens from any single person are marginal. The model would be essentially identical without them.
+
+This creates a fundamental bargaining problem. If you, as an individual, demand compensation for your data, the AI company can simply exclude you. Your data doesn't matter enough to negotiate.
+
+This is why terms of service dominate. Platforms can offer take-it-or-leave-it terms because each individual user is dispensable. The collective value of all users is enormous, but that collective value is captured by the platform, not distributed to users.
+
+### The Solution: Collective Organization
+
+The solution is the same as for labor markets: organize collectively.
+
+If individual bloggers can't bargain, what about the collective of all bloggers? What about professional associations of photographers, guilds of writers, collectives of programmers?
+
+A collective that controls meaningful amounts of data has leverage that individuals lack. If a substantial portion of medical expertise is represented by organized physicians, AI companies building medical systems must negotiate. If a substantial portion of code is controlled by organized developers, coding assistants need access.
+
+The key variables are:
+- **Coverage**: What fraction of relevant data does the collective control?
+- **Uniqueness**: Is this data available elsewhere?
+- **Substitutability**: Can AI companies route around the collective?
+
+High coverage of unique, non-substitutable data creates leverage. Low coverage of common, easily-replaced data creates none.
+
+### Institutional Forms
+
+What would data collectives look like organizationally?
+
+**Sector-based collectives** organize contributors by field: journalists, programmers, academics, artists. These leverage existing professional identities and networks. The Screen Actors Guild negotiates for actors; a "Data Actors Guild" could negotiate for data contributors.
+
+**Geography-based collectives** organize by location, leveraging regulatory frameworks. European data collectives could operate under GDPR; different frameworks might apply elsewhere.
+
+**Content-type collectives** organize by data type: text, images, code, music. This aligns with how AI systems specialize.
+
+**Platform-based collectives** organize users of specific platforms. Stack Overflow contributors, Reddit users, Wikipedia editors might organize around their shared platform.
+
+Institutional forms include:
+- **Nonprofits** focused on advocacy and standard-setting
+- **Cooperatives** that pool data and distribute returns to members
+- **Public bodies** that represent data contributors as part of government function
+- **Professional associations** that add data bargaining to existing functions
+
+### Low-Friction Joining
+
+Traditional unions require formal membership processes. Data collectives need lower friction—joining must be nearly effortless.
+
+Possibilities include:
+- **Browser extensions** that register preferences and detect data use
+- **Account-level settings** (like Do Not Track, but for training data)
+- **App integrations** that opt users into collectives through platforms they already use
+- **Default enrollment** with easy opt-out (controversial but effective for coverage)
+
+The goal is to make collective membership the default for people who care, without requiring active management. This is analogous to how Creative Commons works: choose a license once, apply it everywhere.
+
+### Historical Precedents
+
+Several precedents suggest this can work:
+
+**Australia's News Media Bargaining Code** required platforms to negotiate with news organizations, resulting in significant payments. The "designation" threat (platforms would be required to pay if designated) created leverage even without formal collective organization.
+
+**Stack Overflow's agreements** with AI companies demonstrate that platforms representing contributor data can negotiate. Whether contributors themselves benefit is another question, but the bargaining mechanism exists.
+
+**OpenAI-News Corp deals** show that AI companies will pay for licensed data when they see value. The question is extending this beyond large media organizations to smaller contributors.
+
+**Music licensing collectives** (ASCAP, BMI) have for decades aggregated artists' rights and negotiated blanket licenses with users. This model, adapted for data, could provide templates.
+
+## Data Valuation Infrastructure
+
+Collective bargaining requires valuation: how much is contributed data worth?
+
+### Technical Methods
+
+Several technical approaches can inform valuation:
+
+**Ablation studies** measure model performance with and without specific data. If removing medical journals substantially degrades medical performance, those journals are valuable. This is computationally expensive but provides direct evidence.
+
+**Shapley values** allocate credit mathematically, computing each contributor's marginal value averaged over all possible orderings. This is theoretically principled but computationally intractable for large datasets. Approximations exist but involve tradeoffs.
+
+**Influence functions** estimate contribution value using gradient information, without retraining. This is tractable but approximate.
+
+**Market proxies** use transaction prices for similar data as valuation benchmarks. If licensed news data costs $X per article, similar content has a reference price.
+
+No method is perfect. Values are inherently contextual—data that's valuable for one model may be worthless for another. Practical valuation will likely combine multiple methods with negotiated conventions.
+
+### Institutional Infrastructure
+
+Technical methods need institutional homes:
+
+**Public valuation services** could provide reference prices, analogous to how the USDA provides commodity pricing for agricultural markets. A government or international body could maintain standard valuations for data categories.
+
+**Mandatory transparency requirements** could require AI companies to disclose training data sources and compositions. This enables third parties to assess value even without access to proprietary methods.
+
+**Third-party auditors** could verify data use and assess contribution value, providing independent opinions for negotiation. Accounting and consulting firms already perform analogous functions for other assets.
+
+**Arbitration bodies** could resolve disputes about valuation, providing binding decisions when parties disagree. The News Media Bargaining Code's arbitration mechanism offers a template.
+
+### The Valuation Challenge
+
+A fundamental challenge: data value depends on context.
+
+A unique contribution to an underrepresented domain is valuable. A redundant contribution to an already-saturated domain is worthless. An early contribution that shapes model foundations may be more valuable than a late contribution to an already-trained model.
+
+This means:
+- Individual contributors can't know their data's value in isolation
+- Collectives may have better information than individuals
+- Valuation is inherently collective, not individual
+- Different valuation methods will give different answers
+
+Practical governance will require accepting uncertainty and negotiating conventions, not achieving perfect accuracy.
+
+## Standardized Contract Templates
+
+Transaction costs currently prevent functioning data markets. Negotiating bespoke agreements for each data-AI company pair is infeasible. Standardized contracts could solve this.
+
+### Key Contract Dimensions
+
+Contracts need to specify several dimensions:
+
+**Use type**: What uses are permitted?
+- *Training*: Using data to train model weights
+- *Retrieval*: Returning data directly in responses (RAG)
+- *Evaluation*: Using data to assess model performance
+- *Fine-tuning*: Using data to specialize a pre-trained model
+
+Different uses warrant different terms. Training that influences all future outputs differs from retrieval that just surfaces specific content.
+
+**Commercial vs. research**: Is the use commercial or purely research?
+- *Commercial*: Deployed in products, generating revenue
+- *Research*: Published for scientific purposes, not deployed
+
+Academic research traditionally receives more permissive treatment than commercial use.
+
+**Derivatives and flow-down**: What about derived works?
+- Can the trained model be further shared?
+- Do restrictions flow to model outputs?
+- Can model weights be distilled into other models?
+
+These questions are especially tricky. If data trains a model that trains another model, which restrictions apply?
+
+**Attribution**: Is credit required?
+- Name attribution in outputs?
+- Documentation of training sources?
+- Links to original sources?
+
+Attribution may matter more than compensation for some contributors.
+
+**Compensation structure**: How is payment structured?
+- Per-training-run fees?
+- Revenue sharing?
+- Flat licensing fees?
+- No monetary compensation (but other terms)?
+
+Different structures fit different relationships.
+
+**Termination and revocation**: Can permissions be withdrawn?
+- Can data be removed from future training?
+- What about already-trained models?
+- Are there sunset clauses?
+
+The irreversibility of training creates special challenges here.
+
+### Example Templates
+
+Standard templates might include:
+
+**"Training-Commercial-Standard"**: Permits commercial training with flat per-token fee, requires documentation of use, allows revocation from future training, no attribution in outputs.
+
+**"Retrieval-Attribution"**: Permits retrieval and display with source attribution, revenue share based on display frequency, allows takedown requests.
+
+**"Research-Open"**: Permits any research use, requires citation in publications, prohibits commercial deployment without renegotiation.
+
+**"Eval-Public"**: Permits evaluation use, requires publication of results, no compensation but notification.
+
+These are illustrative. Actual templates would require extensive negotiation and refinement.
+
+### Creative Commons as Model
+
+Creative Commons licenses provide a template for standardized data permissions. CC licenses:
+- Offer a small number of standard options
+- Are human-readable and machine-readable
+- Have been adopted across platforms
+- Reduce transaction costs for licensing decisions
+
+A "Data Commons" modeled on Creative Commons could provide similar infrastructure for AI training permissions. Key differences:
+- CC licenses govern copying; data permissions govern training
+- CC is perpetual; data permissions might be revocable
+- CC is individual; data permissions might be collective
+
+But the standardization principle applies: a small number of well-understood options beats infinite bespoke negotiation.
+
+### Enforcement Mechanisms
+
+Contracts are only as good as enforcement. Technical mechanisms support enforcement:
+
+**Watermarking** embeds detectable signatures in content. If a model's outputs show watermarks from data governed by certain terms, those terms apply.
+
+**Provenance audits** verify that claimed data sources match actual training. Third parties could audit AI companies' data practices.
+
+**API-level controls** enforce terms through access restrictions. Models could be configured to exclude outputs derived from certain data sources.
+
+**Model checkpointing** maintains records of training states, enabling verification of when specific data was incorporated.
+
+No mechanism is foolproof. Enforcement will rely on a combination of technical, legal, and reputational factors—similar to how copyright enforcement works today.
+
+## Implementation Considerations
+
+### Building the Infrastructure
+
+The proposal requires infrastructure that doesn't yet exist:
+- Collective organizations with significant coverage
+- Valuation methods accepted as legitimate
+- Standard contracts with legal recognition
+- Technical enforcement mechanisms at scale
+
+Building this infrastructure is a multi-year effort. Near-term steps might include:
+- Pilot collectives in specific sectors
+- Research on valuation methods
+- Draft standard contracts for feedback
+- Experiments with enforcement mechanisms
+
+### Transition Challenges
+
+The transition from current chaos to organized bargaining faces challenges:
+
+**Holdout problems**: If some contributors organize while others don't, AI companies may simply use non-organized data. This favors either broad coverage or unique data.
+
+**Free rider problems**: Contributors may benefit from collective bargaining without joining collectives. Strong value propositions for membership are needed.
+
+**Coordination costs**: Organizing millions of contributors is expensive. Funding for collective infrastructure is a bottleneck.
+
+**International fragmentation**: Different jurisdictions have different frameworks. Global AI companies face patchwork requirements.
+
+### What Success Looks Like
+
+If collective bargaining for information works, the result would be:
+- Data contributors receive some share of AI value creation
+- AI companies have legal clarity about data rights
+- Clear standards reduce transaction costs
+- Open knowledge remains available under appropriate terms
+- Power asymmetry between contributors and AI companies is reduced
+
+This doesn't require that every contributor benefits equally, or that AI development stops, or that all data is controlled. It requires that the data ecosystem becomes more functional—clearer rights, lower transaction costs, more balanced bargaining.
+
+## Summary
+
+Collective bargaining for information addresses the power asymmetry between individual data contributors and AI companies.
+
+**The "Same Boat" argument** suggests that clear data rules benefit most AI companies, not just creators. Legal clarity, provenance tracking, and standardized contracts serve multiple interests.
+
+**Three archetypes**—Authors, Model Builders, and Open Knowledge Advocates—have genuine tensions but potentially compatible interests if institutional design is thoughtful.
+
+**Collective organization** solves the individual leverage problem. Organized collectives with meaningful coverage can bargain effectively; isolated individuals cannot.
+
+**Valuation infrastructure** is needed to assess contribution value. Technical methods (ablation, Shapley, influence functions) and institutional support (public services, auditors, arbitration) must develop together.
+
+**Standardized contracts** reduce transaction costs. Templates specifying use type, commercial status, attribution, compensation, and termination can enable functioning data markets.
+
+The proposal is ambitious and uncertain. But the alternative—continuing chaos where AI companies freely use data while contributors have no recourse—is not sustainable. Collective bargaining for information offers a path toward more balanced AI governance.
+
+The next chapter addresses a key tension: how to preserve open knowledge while establishing data rules that benefit creators.

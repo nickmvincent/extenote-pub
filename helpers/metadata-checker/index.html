@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shared References Metadata Checker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <main class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Shared References</p>
+          <h1>Metadata Review</h1>
+          <p class="subhead">Scan core fields, spot missing metadata, and open each source link to verify it loads.</p>
+        </div>
+        <div class="stats" id="stats">
+          <div class="stat">
+            <span class="stat-label">Entries</span>
+            <span class="stat-value" id="countTotal">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Missing Required</span>
+            <span class="stat-value" id="countMissing">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Missing Optional</span>
+            <span class="stat-value" id="countWarnings">0</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="controls">
+        <label class="search">
+          <span>Search</span>
+          <input id="searchInput" type="search" placeholder="Title, author, citation key, URL" />
+        </label>
+        <label class="toggle">
+          <input id="toggleMissing" type="checkbox" />
+          <span>Only missing required</span>
+        </label>
+        <label class="toggle">
+          <input id="toggleWarnings" type="checkbox" />
+          <span>Only missing optional</span>
+        </label>
+      </section>
+
+      <section>
+        <div class="list" id="entryList"></div>
+      </section>
+    </main>
+
+    <template id="entryTemplate">
+      <article class="card">
+        <div class="card-header">
+          <div>
+            <p class="card-title" data-title></p>
+            <p class="card-subtitle" data-subtitle></p>
+          </div>
+          <div class="status" data-status></div>
+        </div>
+        <dl class="meta">
+          <div>
+            <dt>Authors</dt>
+            <dd data-authors></dd>
+          </div>
+          <div>
+            <dt>Year</dt>
+            <dd data-year></dd>
+          </div>
+          <div>
+            <dt>Entry Type</dt>
+            <dd data-entry></dd>
+          </div>
+          <div>
+            <dt>URL</dt>
+            <dd data-url></dd>
+          </div>
+          <div>
+            <dt>File</dt>
+            <dd data-file></dd>
+          </div>
+        </dl>
+        <div class="issues" data-issues></div>
+        <div class="actions">
+          <a class="button" data-open target="_blank" rel="noreferrer">Open link</a>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

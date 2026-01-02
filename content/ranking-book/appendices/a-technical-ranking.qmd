@@ -1,0 +1,300 @@
+---
+type: book_appendix
+title: Technical Details of the Ranking Mechanism
+visibility: public
+---
+# Technical Details of the Ranking Mechanism {#sec-appendix-technical}
+
+This appendix provides a rigorous technical account of why "ranking" is not merely a metaphor for what language models do, but an accurate mechanistic description. We present the mathematical formulations, examine the evidence, and engage seriously with counterarguments.
+
+## A.1 The Claim and Its Scope
+
+**The core claim**: Autoregressive language models, at each generation step, produce a ranking over all possible next tokens. The output is sampled from this ranked distribution. This is not analogous to ranking—it *is* ranking.
+
+**Scope limitations**: We make no claims about whether this ranking constitutes "understanding," "intelligence," or any other cognitive property. The ranking framing is a description of mechanism, not phenomenology. Whether the model "knows" what it's ranking is orthogonal to the fact that it produces rankings.
+
+## A.2 Next-Token Prediction: The Mathematical Reality
+
+### A.2.1 The Forward Pass
+
+Consider a vocabulary $V$ of size $|V|$ (e.g., 50,257 for GPT-2, ~100,000 for modern models). Given a context sequence $c = (t_1, t_2, ..., t_n)$ of tokens, the model computes:
+
+1. **Embedding**: Each token $t_i$ is mapped to a vector $e_i \in \mathbb{R}^d$ via an embedding matrix $E \in \mathbb{R}^{|V| \times d}$
+
+2. **Transformer processing**: The sequence of embeddings passes through $L$ transformer layers, producing a final hidden state $h_c \in \mathbb{R}^d$ for the last position
+
+3. **Unembedding**: A linear layer projects back to vocabulary space:
+   $$z = W_u \cdot h_c + b_u$$
+   where $z \in \mathbb{R}^{|V|}$ is the vector of **logits**
+
+4. **Softmax**: Convert logits to probabilities:
+   $$P(t_{next} = v | c) = \frac{\exp(z_v)}{\sum_{v' \in V} \exp(z_{v'})}$$
+
+**Critical observation**: Step 4 produces a complete probability distribution over the entire vocabulary. Every possible next token receives a probability. This is, by definition, a ranking—tokens are ordered by $P(t_{next} = v | c)$.
+
+### A.2.2 Sampling as Rank-Based Selection
+
+The generation process selects from this ranked distribution. Common strategies:
+
+**Greedy decoding** (temperature → 0):
+$$t_{next} = \arg\max_{v \in V} P(v | c)$$
+This directly selects the highest-ranked token.
+
+**Temperature sampling**:
+$$P_\tau(v | c) = \frac{\exp(z_v / \tau)}{\sum_{v'} \exp(z_{v'} / \tau)}$$
+
+- $\tau < 1$: Sharpens the ranking (top tokens more likely)
+- $\tau > 1$: Flattens the ranking (more uniform)
+- $\tau = 1$: Uses the ranking as-is
+
+**Top-k sampling**: Restrict to the $k$ highest-ranked tokens:
+$$P_{top-k}(v | c) = \begin{cases} \frac{P(v|c)}{\sum_{v' \in V_k} P(v'|c)} & \text{if } v \in V_k \\ 0 & \text{otherwise} \end{cases}$$
+where $V_k$ is the set of $k$ tokens with highest probability.
+
+**Top-p (nucleus) sampling**: Restrict to the smallest set whose cumulative probability exceeds $p$:
+$$V_p = \arg\min_{S \subseteq V} |S| \text{ such that } \sum_{v \in S} P(v|c) \geq p$$
+
+All of these strategies operate on the ranking. They differ only in how they use it.
+
+### A.2.3 The Full Sequence as Iterated Ranking
+
+A complete generated sequence $(t_1, ..., t_T)$ is the result of $T$ ranking operations:
+
+$$P(t_1, ..., t_T | c) = \prod_{i=1}^{T} P(t_i | c, t_1, ..., t_{i-1})$$
+
+Each factor is a ranking over $V$. The sequence is a path through the space of rankings.
+
+## A.3 Internal Evidence: Ordered Saturation
+
+Recent interpretability work provides evidence that transformers internally compute rankings in a structured way.
+
+### A.3.1 The Logit Lens
+
+@nostalgebraist2020 introduced the "logit lens"—projecting intermediate layer hidden states through the unembedding matrix to see what the model would predict at each layer:
+
+$$z^{(l)} = W_u \cdot h^{(l)}$$
+
+This reveals that predictions often "crystallize" at intermediate layers, with the top-1 token becoming fixed before the final layer.
+
+### A.3.2 Sequential Saturation
+
+@lioubashevski2024 demonstrate **ordered saturation**: the model determines the top-1 token first, then the top-2 token, then top-3, and so on across layers. This is consistent with the model performing a sequential ranking computation.
+
+Key findings:
+
+- Task-transition mechanism: Different layers correspond to different "tasks" (ranking the 1st token, ranking the 2nd, etc.)
+- Predictable from activations: The current "task" can be predicted from internal activations alone
+- Causal intervention: Perturbing activations can cause the model to skip tasks
+
+This suggests transformers don't just output a ranking—they *compute* a ranking through an ordered internal process.
+
+### A.3.3 Feed-Forward Layers as Concept Promotion
+
+@geva2022 show that transformer feed-forward layers "build predictions by promoting concepts in the vocabulary space." Individual neurons contribute to increasing or decreasing the probability of specific tokens.
+
+This is mechanistically consistent with ranking: each layer adjusts the relative scores of vocabulary items.
+
+## A.4 RLHF: Ranking Made Explicit
+
+Reinforcement Learning from Human Feedback makes the ranking framing explicit at the training level.
+
+### A.4.1 The Bradley-Terry Model
+
+Human preference data consists of comparisons: given prompt $x$ and two responses $y_1, y_2$, a human indicates which is preferred. The Bradley-Terry model [@bradley1952] posits:
+
+$$P(y_1 \succ y_2 | x) = \frac{\exp(r(x, y_1))}{\exp(r(x, y_1)) + \exp(r(x, y_2))} = \sigma(r(x, y_1) - r(x, y_2))$$
+
+where $r(x, y)$ is a latent "reward" (quality score) and $\sigma$ is the sigmoid function.
+
+**This is a ranking model**: it assumes responses have underlying quality scores and preferences arise from comparing these scores.
+
+### A.4.2 Reward Model Training
+
+The reward model $r_\phi(x, y)$ is trained to maximize:
+
+$$\mathcal{L}_{RM} = -\mathbb{E}_{(x, y_w, y_l) \sim D} \left[ \log \sigma(r_\phi(x, y_w) - r_\phi(x, y_l)) \right]$$
+
+where $y_w$ is the preferred response and $y_l$ is the dispreferred response.
+
+The reward model learns to rank responses by quality.
+
+### A.4.3 Policy Optimization
+
+The language model policy $\pi_\theta$ is then optimized to maximize expected reward while staying close to the base policy $\pi_{ref}$:
+
+$$\max_\theta \mathbb{E}_{x \sim D, y \sim \pi_\theta(\cdot|x)} \left[ r_\phi(x, y) \right] - \beta \cdot D_{KL}(\pi_\theta || \pi_{ref})$$
+
+This optimizes the model to produce outputs that rank highly according to the learned ranking function.
+
+### A.4.4 Direct Preference Optimization
+
+DPO [@rafailov2023] shows that the optimal policy under RLHF has a closed form:
+
+$$\pi^*(y|x) \propto \pi_{ref}(y|x) \exp\left(\frac{r(x,y)}{\beta}\right)$$
+
+DPO trains directly on this objective without an explicit reward model:
+
+$$\mathcal{L}_{DPO} = -\mathbb{E} \left[ \log \sigma \left( \beta \log \frac{\pi_\theta(y_w|x)}{\pi_{ref}(y_w|x)} - \beta \log \frac{\pi_\theta(y_l|x)}{\pi_{ref}(y_l|x)} \right) \right]$$
+
+**Key insight**: Even "reward-free" methods like DPO are still fundamentally ranking-based—they adjust the model's ranking of outputs based on preference data.
+
+## A.5 The Weighted Combination Interpretation
+
+A stronger version of the ranking claim: each generated output represents a **weighted combination** of all possible continuations, where the weights are the model's probability assignments.
+
+### A.5.1 Expected Output (An Interpretation)
+
+We can *interpret* the probability distribution as defining an expected position in embedding space:
+
+$$\mathbb{E}[e_{t_{next}}] = \sum_{v \in V} P(v|c) \cdot e_v$$
+
+This is a weighted average of all token embeddings, weighted by the ranking.
+
+**Clarification**: This is an analytical interpretation, not the generation mechanism. Actual generation samples a discrete token from the distribution—we don't output the "expected" embedding. However, this interpretation can illuminate what the model "represents" before the discrete sampling step.
+
+### A.5.2 Beam Search as Explicit Multi-Ranking
+
+Beam search maintains $k$ candidate sequences and their cumulative probabilities. At each step, it:
+
+1. Extends each candidate with all possible next tokens
+2. Ranks all extensions by cumulative probability
+3. Keeps the top $k$
+
+This makes explicit that generation is search over a ranked space.
+
+### A.5.3 Connections to Information Retrieval
+
+The generation process has deep structural similarities to information retrieval:
+
+| Information Retrieval | Language Generation |
+|----------------------|---------------------|
+| Query | Context $c$ |
+| Document collection | Vocabulary $V$ |
+| Relevance score | Probability $P(v|c)$ |
+| Ranked list | Sorted vocabulary by probability |
+| Top-k retrieval | Top-k sampling |
+
+This isn't coincidence—both are ranking problems over discrete candidates.
+
+## A.6 Counterarguments and Responses
+
+We now engage seriously with objections to the ranking framing.
+
+### A.6.1 Objection: "Ranking" Is Too Broad to Be Meaningful
+
+**The objection**: If generation is "ranking," then so is any classifier, any regression model, any function that produces outputs. The term becomes vacuous.
+
+**Response**: 
+
+The claim is not that LLMs are *like* ranking systems in some abstract sense. The claim is that:
+
+1. The output is literally a probability distribution over discrete candidates (ranking)
+2. The training objective (next-token prediction, RLHF) explicitly optimizes rankings
+3. The internal computation appears to perform ordered ranking (saturation findings)
+
+This is more specific than "any function." A regression model predicts a continuous value; an LLM predicts a distribution over ~100,000 discrete options. The discreteness and the softmax structure make "ranking" precise.
+
+**Concession**: We agree that "ranking" has limited explanatory power for *how* the model produces good rankings. It's a description of what the model does, not a theory of why it works.
+
+### A.6.2 Objection: Generation Involves Synthesis, Not Selection
+
+**The objection**: A poem ChatGPT writes never existed before. Ranking implies selecting from pre-existing options. Generation creates something new.
+
+**Response**:
+
+This conflates the unit of ranking with the output. The model ranks *tokens*, not *sequences*. The novel sequence emerges from the composition of many ranking operations.
+
+Consider an analogy: A chess game is "novel"—the specific sequence of moves may never have been played before. But each move is selected from a finite set of legal moves. The novelty emerges from composition, not from any single selection being "creative."
+
+Similarly, a novel poem is composed of individually ranked token selections. The novelty is in the combination, not in any single token being unprecedented.
+
+**Concession**: This response may not satisfy those who believe something qualitatively different happens when systems produce novel outputs. We maintain that the *mechanism* is ranking, while acknowledging that the *outcome* may have properties (novelty, coherence) that emerge from many rankings.
+
+### A.6.3 Objection: Emergent Capabilities Transcend Pattern Matching
+
+**The objection**: LLMs exhibit emergent capabilities—chain-of-thought reasoning, mathematical proof, code generation—that seem to go beyond "ranking what's statistically likely." These capabilities suggest something more than ranking is happening.
+
+**Response**:
+
+We don't dispute that emergent capabilities exist or that they're surprising. Our claim is about mechanism, not outcome.
+
+Consider: A chess engine performs tree search with position evaluation. The *mechanism* is search and evaluation. The *outcome* can be brilliant, creative, superhuman play. The brilliance of the outcome doesn't change the mechanism.
+
+Similarly, even if LLMs exhibit capabilities that surprise us, those capabilities are produced through the ranking mechanism. The question of whether this mechanism can produce "genuine" understanding is separate from the question of what the mechanism is.
+
+**Concession**: We cannot rule out that there are important computational properties of LLMs that the "ranking" description obscures. Future interpretability work may reveal structure that makes a different framing more illuminating.
+
+### A.6.4 Objection: Latent Space Interpolation Is Different from Ranking
+
+**The objection**: LLMs operate in continuous latent spaces. Generation can be understood as interpolation in these spaces—moving through a continuous manifold of meaning. This is fundamentally different from ranking over discrete options.
+
+**Response**:
+
+The continuous latent space is an intermediate representation. The final output is discrete—a specific token from a finite vocabulary. The softmax operation explicitly discretizes:
+
+$$\text{Continuous } h_c \xrightarrow{W_u} \text{Continuous } z \xrightarrow{\text{softmax}} \text{Discrete distribution over } V$$
+
+The latent space enables the model to compute good rankings, but the output is still a ranking.
+
+**Concession**: For some purposes (understanding generalization, analyzing representations), the latent space view is more illuminating than the ranking view. We don't claim ranking is the only useful lens—only that it's accurate and useful for the governance and economics questions we address.
+
+### A.6.5 Objection: Training Doesn't Optimize Rankings Directly
+
+**The objection**: The training objective is cross-entropy loss on next-token prediction:
+
+$$\mathcal{L} = -\sum_{i} \log P(t_i | t_{<i})$$
+
+This maximizes the probability of correct tokens, not the quality of the overall ranking.
+
+**Response**:
+
+Cross-entropy loss is equivalent to minimizing KL divergence from the empirical distribution:
+
+$$\mathcal{L} = D_{KL}(P_{data} || P_{model}) + H(P_{data})$$
+
+where $H(P_{data})$ is constant. Minimizing cross-entropy makes the model's ranking match the data distribution's ranking.
+
+More directly: if the correct token is ranked #1 (highest probability), cross-entropy loss is minimized. The loss penalizes rankings where the correct token is ranked lower.
+
+**Concession**: The training objective optimizes for a specific ranking property (putting the correct token at rank #1), not for the full ranking being "good" by some other criterion. RLHF adds a second objective that more directly optimizes ranking quality as judged by humans.
+
+### A.6.6 Objection: This Framing Obscures What's Interesting
+
+**The objection**: Calling LLMs "ranking systems" doesn't help us understand why they can write poetry, debug code, or reason about novel situations. It's technically accurate but explanatorily empty.
+
+**Response**:
+
+We agree that "ranking" doesn't explain *how* LLMs achieve their capabilities. It's a mechanistic description, not a theory of intelligence.
+
+But the framing is useful for specific purposes:
+
+1. **Continuity with prior systems**: It reveals that LLMs, search engines, and recommendation systems are variations on the same task. This matters for policy.
+
+2. **Economic analysis**: The shift from ranking bundles (webpages) to ranking chunks (tokens) explains why generative AI disrupts existing economic arrangements.
+
+3. **Evaluation**: It clarifies that evaluation measures ranking quality, and that training data composition directly affects what gets ranked highly.
+
+4. **Governance**: It identifies the intervention point—the information being ranked—as the locus for collective bargaining.
+
+Different framings serve different purposes. We claim ranking is the right frame for governance and economics, not for cognitive science.
+
+## A.7 Summary
+
+The technical evidence supports the ranking framing:
+
+1. **Mechanistically**: LLMs produce probability distributions over vocabularies via softmax. This is, by definition, a ranking.
+
+2. **Internally**: Interpretability work shows ordered saturation—the model computes rankings sequentially across layers.
+
+3. **In training**: Both next-token prediction and RLHF optimize ranking quality—the former implicitly, the latter explicitly via Bradley-Terry.
+
+4. **In generation**: All decoding strategies (greedy, temperature, top-k, top-p) operate on the ranking, differing only in how they sample from it.
+
+The counterarguments identify legitimate limitations of the framing (it doesn't explain *why* models produce good rankings, it may obscure continuous-space properties), but don't undermine its accuracy as a mechanistic description.
+
+For the purposes of this book—analyzing AI governance, economics, and collective bargaining—the ranking framing provides the right level of abstraction.
+
+## References for Appendix A
+
+::: {#refs-appendix-a}
+:::

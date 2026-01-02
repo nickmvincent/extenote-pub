@@ -1,0 +1,1828 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getSiteData } from '../lib/contentLoader';
+import { truncateText, formatMonthYear } from '../lib/formatters';
+
+const data = await getSiteData();
+const { personalInfo, scholarly, editorial, talks, newsCoverage } = data;
+
+const peerReviewed = scholarly.filter(
+	(item) => String(item.metadata.publication_type ?? '').toLowerCase() === 'publication'
+);
+const summary = {
+	publications: peerReviewed.slice(0, 4),
+	editorial: editorial.slice(0, 4),
+	talks: talks.slice(0, 4),
+	news: newsCoverage.slice(0, 4)
+};
+
+const highlightList = Array.isArray(personalInfo.highlights) ? personalInfo.highlights : [];
+const heroName = (personalInfo.title ?? 'Academic Website').split(' - ')[0];
+const description =
+	typeof personalInfo.quick_bio === 'string' ? personalInfo.quick_bio.slice(0, 160) : '';
+const schemaPerson = {
+	'@context': 'https://schema.org',
+	'@type': 'Person',
+	name: personalInfo.title,
+	jobTitle: personalInfo.position,
+	affiliation: personalInfo.university,
+	email: personalInfo.email
+};
+const json = (value: unknown) => JSON.stringify(value).replace(/</g, '\\u003c');
+const profilePic =
+	typeof personalInfo.profile_pic === 'string' && personalInfo.profile_pic.length
+		? (personalInfo.profile_pic as string)
+		: null;
+
+const formatSummaryDate = (value: unknown) => formatMonthYear(value) || '';
+
+const getLeadAuthor = (authors: unknown): string => {
+	if (Array.isArray(authors) && authors.length > 0) {
+		const parts = String(authors[0]).trim().split(/\s+/);
+		return parts.length ? parts[parts.length - 1] : String(authors[0]);
+	}
+	return heroName.split(' ').pop() ?? 'Author';
+};
+
+// All affiliations in one array with primary/secondary distinction
+const allAffiliations = [
+	{ href: personalInfo.current_inst_link, label: 'SFU CS', primary: true },
+	{ href: personalInfo.ixlab_link, label: 'IXLab', primary: true },
+	{ href: personalInfo.padcomp_link, label: 'PADComp', primary: true },
+	{ href: personalInfo.ddi_link, label: 'DDI', primary: false },
+	{ href: personalInfo.metagov_link, label: 'Metagov', primary: false },
+	{ href: personalInfo.sfupp_link, label: 'SFU Policy', primary: false }
+].filter((link) => typeof link.href === 'string' && link.href.length);
+
+// Social links with icons
+const socialLinks = [
+	{ href: personalInfo.blog_link, label: 'Substack', icon: 'substack' },
+	{ href: personalInfo.twitter_link, label: 'X', icon: 'x' },
+	{ href: personalInfo.bsky_link, label: 'Bluesky', icon: 'bluesky' },
+	{ href: personalInfo.github_link, label: 'GitHub', icon: 'github' },
+	{ href: personalInfo.linkedin_link, label: 'LinkedIn', icon: 'linkedin' }
+].filter((link) => typeof link.href === 'string' && link.href.length);
+
+// Paper tracker links (text only)
+const paperLinks = [
+	{ href: personalInfo.scholar_link, label: 'Google Scholar' },
+	{ href: personalInfo.semantic_scholar_link, label: 'Semantic Scholar' },
+	{ href: personalInfo.dblp_link, label: 'DBLP' }
+].filter((link) => typeof link.href === 'string' && link.href.length);
+
+// All links for the modal
+const allLinks = [
+	...socialLinks.map(l => ({ ...l, category: 'Social' })),
+	...paperLinks.map(l => ({ ...l, category: 'Papers' }))
+];
+const workshopAndPreprint = scholarly.filter(
+	(item) => String(item.metadata.publication_type ?? '').toLowerCase() !== 'publication'
+);
+const publishedWriting = editorial.filter(
+	(item) => String(item.metadata.type ?? '').toLowerCase() !== 'blog_post'
+);
+const blogWriting = editorial.filter(
+	(item) => String(item.metadata.type ?? '').toLowerCase() === 'blog_post'
+);
+
+const publicationLinks = (meta: Record<string, any>) => {
+	const links: { label: string; url: string }[] = [];
+	if (meta.arxiv_url) links.push({ label: 'arXiv', url: meta.arxiv_url as string });
+	if (meta.acm_url) links.push({ label: 'ACM DL', url: meta.acm_url as string });
+	if (meta.url && !meta.arxiv_url && !meta.acm_url)
+		links.push({ label: meta.url.endsWith('.pdf') ? 'PDF' : 'Link', url: meta.url as string });
+	if (meta.doi) links.push({ label: 'DOI', url: `https://doi.org/${meta.doi}` });
+	if (meta.code_url) links.push({ label: 'Code', url: meta.code_url as string });
+	return links;
+};
+
+const publicationVenue = (meta: Record<string, any>) => {
+	const venue = meta.journal ?? meta.conference ?? '';
+	const year = formatMonthYear(meta.date) || '';
+	return [venue, year].filter(Boolean).join(' ');
+};
+
+const buildFilterOptions = <T,>(
+	items: T[],
+	getLabel: (item: T) => string | undefined | null
+) => {
+	const map = new Map<string, { label: string; value: string; count: number }>();
+	for (const item of items) {
+		const label = getLabel(item);
+		if (!label) continue;
+		const value = label.toLowerCase();
+		const entry = map.get(value);
+		if (entry) {
+			entry.count += 1;
+		} else {
+			map.set(value, { label, value, count: 1 });
+		}
+	}
+	return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+};
+
+const talkTypes = {
+	talk: 'Talk',
+	'guest lecture': 'Guest Lecture',
+	keynote: 'Keynote',
+	panel: 'Panel',
+	podcast: 'Podcast'
+};
+
+const peerReviewedFilters = buildFilterOptions(
+	peerReviewed,
+	(item) => item.metadata.journal ?? item.metadata.conference ?? undefined
+);
+const workshopFilters = buildFilterOptions(
+	workshopAndPreprint,
+	(item) => item.metadata.journal ?? item.metadata.conference ?? undefined
+);
+const editorialFilters = buildFilterOptions(publishedWriting, (item) => item.metadata.venue ?? undefined);
+const talksFilters = buildFilterOptions(talks, (item) => item.metadata.location ?? undefined);
+const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.source ?? undefined);
+---
+
+<Layout title={`${heroName} - Academic Website`} description={description}>
+	<script
+		slot="head"
+		type="application/ld+json"
+		set:html={json(schemaPerson)}
+	/>
+
+		<header id="home" class="hero hero-manuscript">
+			<div class="hero-intro">
+				<div class="hero-heading">
+					<div class="hero-text">
+						<div class="hero-name-row">
+							{profilePic && (
+								<img
+									src={profilePic}
+									alt="Profile picture"
+									class="profile-pic hero-inline-pic"
+									loading="lazy"
+									decoding="async"
+								/>
+							)}
+							<h1>{heroName}</h1>
+						</div>
+						<p class="hero-role">
+							{personalInfo.position}
+							{personalInfo.department && ` · ${personalInfo.department}`}
+							{personalInfo.university && `, ${personalInfo.university}`}
+						</p>
+						{personalInfo.research_interests && (
+							<p class="hero-research">{personalInfo.research_interests}</p>
+						)}
+					</div>
+				</div>
+				{(personalInfo.quick_bio || personalInfo.additional_background) && (
+					<div class="hero-bio-block">
+						<p class="hero-bio">
+							{personalInfo.quick_bio}
+							{personalInfo.additional_background && (
+								<button type="button" class="modal-trigger bio-trigger" data-modal="bio-modal">(Longer bio)</button>
+							)}
+						</p>
+					</div>
+				)}
+				{(personalInfo.email || personalInfo.cv_link || personalInfo.cv_html_link) && (
+					<nav class="hero-cta" aria-label="Primary contact actions">
+						{personalInfo.email && (
+							<a
+								class="hero-btn secondary hero-btn-small hero-btn-email"
+								href={`mailto:${personalInfo.email}`}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{personalInfo.email}
+							</a>
+						)}
+						{personalInfo.cv_link && (
+							<a
+								class="hero-btn secondary hero-btn-small"
+								href={personalInfo.cv_link as string}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								CV (PDF)
+							</a>
+						)}
+						{personalInfo.cv_html_link && (
+							<a
+								class="hero-btn secondary hero-btn-small"
+								href={personalInfo.cv_html_link as string}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								CV (HTML)
+							</a>
+						)}
+					</nav>
+				)}
+			</div>
+			<div class="hero-table">
+				<dl class="table-grid">
+					{allAffiliations.length > 0 && (
+						<div class="table-row">
+							<dt class="table-label">Affiliations</dt>
+							<dd class="table-value affiliation-line">
+								{allAffiliations.map((item, index) => (
+									<>
+										{index > 0 && ' · '}
+										<a href={item.href as string} target="_blank" rel="noopener noreferrer" class={item.primary ? 'primary' : 'secondary'}>
+											{item.label}
+										</a>
+									</>
+								))}
+							</dd>
+						</div>
+					)}
+					{socialLinks.length > 0 && (
+						<div class="table-row">
+							<dt class="table-label">Social</dt>
+							<dd class="table-value social-icons">
+								{socialLinks.map((item) => (
+									<a href={item.href as string} target="_blank" rel="noopener noreferrer" title={item.label} class="social-link">
+										{item.icon === 'substack' && (
+											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg>
+										)}
+										{item.icon === 'x' && (
+											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+										)}
+										{item.icon === 'bluesky' && (
+											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8z"/></svg>
+										)}
+										{item.icon === 'github' && (
+											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+										)}
+										{item.icon === 'linkedin' && (
+											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+										)}
+									</a>
+								))}
+								<button type="button" class="modal-trigger" data-modal="links-modal">all links</button>
+							</dd>
+						</div>
+					)}
+					{paperLinks.length > 0 && (
+						<div class="table-row">
+							<dt class="table-label">Papers</dt>
+							<dd class="table-value">
+								{paperLinks.map((item, index) => (
+									<>
+										{index > 0 && ' · '}
+										<a href={item.href as string} target="_blank" rel="noopener noreferrer">
+											{item.label}
+										</a>
+									</>
+								))}
+							</dd>
+						</div>
+					)}
+					<div class="table-row">
+						<dt class="table-label">Projects</dt>
+						<dd class="table-value">
+							<a href="https://shared-references.pages.dev/projects" target="_blank" rel="noopener noreferrer">extenote network index</a>
+						</dd>
+					</div>
+				</dl>
+			</div>
+	</header>
+
+	<section id="recent-summary">
+		<h2>Recent Content</h2>
+		<div class="grid">
+			<div>
+				<h3>Publications</h3>
+				<div class="centered-summary">
+					<div class="summary-item">
+						{summary.publications.map((pub) => (
+							<div style="margin-bottom:0.75em;">
+								{truncateText(String(pub.metadata.title ?? ''), 50)}, {getLeadAuthor(pub.metadata.authors)} ...,
+								{pub.metadata.journal ?? pub.metadata.conference ?? 'N/A'}, {formatSummaryDate(pub.metadata.date)}
+								{pub.metadata.url && (
+									<>
+										 {' '}
+										<a href={pub.metadata.url as string} target="_blank" rel="noopener noreferrer">
+											link
+										</a>
+									</>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+			<div>
+				<h3>Editorial</h3>
+				<div class="centered-summary">
+					<div class="summary-item">
+						{summary.editorial.map((post) => (
+							<div style="margin-bottom:0.75em;">
+								{truncateText(String(post.metadata.title ?? ''), 50)}, {post.metadata.venue ?? 'N/A'},
+								{formatSummaryDate(post.metadata.date)}
+								{post.metadata.url && (
+									<>
+										 {' '}
+										<a href={post.metadata.url as string} target="_blank" rel="noopener noreferrer">
+											link
+										</a>
+									</>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+			<div>
+				<h3>Talks</h3>
+				<div class="centered-summary">
+					<div class="summary-item">
+						{summary.talks.map((talk) => (
+							<div style="margin-bottom:0.75em;">
+								{truncateText(String(talk.metadata.title ?? ''), 40)}, {talk.metadata.location ?? 'N/A'},
+								{formatSummaryDate(talk.metadata.date)}
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+			<div>
+				<h3>Media Coverage</h3>
+				<div class="centered-summary">
+					<div class="summary-item">
+						{summary.news.map((item) => (
+							<div style="margin-bottom:0.75em;">
+								{truncateText(String(item.metadata.title ?? ''), 40)},{' '}
+								{Array.isArray(item.metadata.authors) && item.metadata.authors.length
+									? item.metadata.authors.join(', ')
+									: '—'}
+								, {item.metadata.source ?? 'N/A'}, {formatSummaryDate(item.metadata.date)}
+								{item.metadata.url && (
+									<>
+										 {' '}
+										<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+											link
+										</a>
+									</>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="status-board">
+		<div class="status-header">
+			<h2>News & Notes</h2>
+		</div>
+		{highlightList.length > 0 ? (
+			<div class="status-grid">
+				{highlightList.map((highlight) => (
+					<article class="status-card" set:html={highlight} />
+				))}
+			</div>
+		) : (
+			<p class="status-empty">No updates right now—check back soon.</p>
+		)}
+	</section>
+
+	<section class="tabs">
+		<nav class="section-nav">
+			<a href="#publications" class="active">Publications</a>
+			<a href="#writing">Editorial</a>
+			<a href="#talks">Talks</a>
+			<a href="#media">Media Coverage</a>
+		</nav>
+
+		<section id="publications" class="tab-panel is-active">
+			<h2>Publications</h2>
+			<p class="section-subtitle">Latest peer-reviewed work plus workshop pieces and preprints.</p>
+			<div class="row">
+				<div class="col">
+					<h3>Peer Reviewed</h3>
+					{peerReviewedFilters.length > 0 && (
+						<details class="filter-panel">
+							<summary>Filter by venue</summary>
+							<div class="filter-chips" data-filter-group="peer-reviewed">
+								<button type="button" class="chip active" data-filter-value="all">
+									All ({peerReviewed.length})
+								</button>
+								{peerReviewedFilters.map((option) => (
+									<button type="button" class="chip" data-filter-value={option.value}>
+										{option.label} ({option.count})
+									</button>
+								))}
+							</div>
+						</details>
+					)}
+					<ul class="entry-list" data-filter-target="peer-reviewed">
+						{peerReviewed.map((item) => (
+							<li
+								class="entry"
+								data-filter-value={(
+									item.metadata.journal ??
+									item.metadata.conference ??
+									'other'
+								).toLowerCase()}
+							>
+								<h3>{item.metadata.title}</h3>
+								<p>
+									{Array.isArray(item.metadata.authors) ? item.metadata.authors.join(', ') : personalInfo.title}
+									<br />
+									{publicationVenue(item.metadata)}
+								</p>
+								{publicationLinks(item.metadata).length > 0 && (
+									<p class="entry-links">
+										{publicationLinks(item.metadata).map((link) => (
+											<a class="chip-link" href={link.url} target="_blank" rel="noopener noreferrer">
+												{link.label}
+											</a>
+										))}
+									</p>
+								)}
+							</li>
+						))}
+					</ul>
+				</div>
+				<div class="col">
+					<h3>Workshop / Pre-print</h3>
+					{workshopFilters.length > 0 && (
+						<details class="filter-panel">
+							<summary>Filter by venue</summary>
+							<div class="filter-chips" data-filter-group="workshop">
+								<button type="button" class="chip active" data-filter-value="all">
+									All ({workshopAndPreprint.length})
+								</button>
+								{workshopFilters.map((option) => (
+									<button type="button" class="chip" data-filter-value={option.value}>
+										{option.label} ({option.count})
+									</button>
+								))}
+							</div>
+						</details>
+					)}
+					<ul class="entry-list" data-filter-target="workshop">
+						{workshopAndPreprint.map((item) => (
+							<li
+								class="entry"
+								data-filter-value={(
+									item.metadata.journal ??
+									item.metadata.conference ??
+									'other'
+								).toLowerCase()}
+							>
+								<h3>{item.metadata.title}</h3>
+								<p>
+									{Array.isArray(item.metadata.authors) ? item.metadata.authors.join(', ') : personalInfo.title}
+									<br />
+									{publicationVenue(item.metadata)}
+								</p>
+								{item.metadata.url && (
+									<p class="entry-links">
+										<a class="chip-link" href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+											link
+										</a>
+									</p>
+								)}
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<section id="writing" class="tab-panel">
+			<h2>Editorial</h2>
+			<p class="section-subtitle">Essays, commentary, and blogs.</p>
+			<div class="row">
+				<div class="col">
+					<h3>Published Writing</h3>
+					{editorialFilters.length > 0 && (
+						<details class="filter-panel">
+							<summary>Filter by venue</summary>
+							<div class="filter-chips" data-filter-group="editorial-published">
+								<button type="button" class="chip active" data-filter-value="all">
+									All ({publishedWriting.length})
+								</button>
+								{editorialFilters.map((option) => (
+									<button type="button" class="chip" data-filter-value={option.value}>
+										{option.label} ({option.count})
+									</button>
+								))}
+							</div>
+						</details>
+					)}
+					<ul class="entry-list" data-filter-target="editorial-published">
+						{publishedWriting.map((item) => (
+							<li
+								class="entry"
+								data-filter-value={(item.metadata.venue ?? 'other').toString().toLowerCase()}
+							>
+								<h3>{item.metadata.title}</h3>
+								<p>
+									{formatSummaryDate(item.metadata.date)} — {item.metadata.venue}
+									{item.metadata.url && (
+										<span class="entry-links">
+											<a class="chip-link" href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+												link
+											</a>
+										</span>
+									)}
+								</p>
+							</li>
+						))}
+					</ul>
+				</div>
+				<div class="col">
+					<h3>Blog Posts</h3>
+					<p class="blog-summary">
+						{blogWriting.length} posts.
+						{personalInfo.blog_link && (
+							<a href={personalInfo.blog_link as string} target="_blank" rel="noopener noreferrer">
+								View on Substack
+							</a>
+						)}
+					</p>
+					<ul class="entry-list blog-compact">
+						{blogWriting.slice(0, 6).map((item) => (
+							<li class="entry-compact">
+								<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+									{item.metadata.title}
+								</a>
+								<span class="entry-meta">{formatSummaryDate(item.metadata.date)}</span>
+							</li>
+						))}
+					</ul>
+					{blogWriting.length > 6 && (
+						<p class="blog-more">
+							<a href={personalInfo.blog_link as string || '#'} target="_blank" rel="noopener noreferrer">
+								View all {blogWriting.length} posts →
+							</a>
+						</p>
+					)}
+				</div>
+			</div>
+		</section>
+
+		<section id="talks" class="tab-panel">
+			<h2>Talks & Conversations</h2>
+			<p class="section-subtitle">Invited talks, panels, and podcasts.</p>
+			{talksFilters.length > 0 && (
+				<details class="filter-panel">
+					<summary>Filter by venue</summary>
+					<div class="filter-chips" data-filter-group="talks">
+						<button type="button" class="chip active" data-filter-value="all">
+							All ({talks.length})
+						</button>
+						{talksFilters.map((option) => (
+							<button type="button" class="chip" data-filter-value={option.value}>
+								{option.label} ({option.count})
+							</button>
+						))}
+					</div>
+				</details>
+			)}
+			<ul class="entry-list" data-filter-target="talks">
+				{talks.map((item) => (
+					<li
+						class="entry"
+						data-filter-value={(item.metadata.location ?? 'other').toString().toLowerCase()}
+					>
+						<h3>{item.metadata.title}</h3>
+						<p>
+							{formatSummaryDate(item.metadata.date)} — {item.metadata.location}
+							{talkTypes[String(item.metadata.type ?? '').toLowerCase()] &&
+								` (${talkTypes[String(item.metadata.type ?? '').toLowerCase()]})`}
+						</p>
+						<div class="entry-links">
+							{item.metadata.event_url && (
+								<a class="chip-link" href={item.metadata.event_url as string} target="_blank" rel="noopener noreferrer">
+									Event
+								</a>
+							)}
+							{item.metadata.video_url && (
+								<a class="chip-link" href={item.metadata.video_url as string} target="_blank" rel="noopener noreferrer">
+									Recording
+								</a>
+							)}
+						</div>
+					</li>
+				))}
+			</ul>
+		</section>
+
+		<section id="media" class="tab-panel">
+			<h2>Media Coverage</h2>
+			<p class="section-subtitle">Select press, interviews, and commentary appearances.</p>
+			{mediaFilters.length > 0 && (
+				<details class="filter-panel">
+					<summary>Filter by outlet</summary>
+					<div class="filter-chips" data-filter-group="media">
+						<button type="button" class="chip active" data-filter-value="all">
+							All ({newsCoverage.length})
+						</button>
+						{mediaFilters.map((option) => (
+							<button type="button" class="chip" data-filter-value={option.value}>
+								{option.label} ({option.count})
+							</button>
+						))}
+					</div>
+				</details>
+			)}
+			<ul class="entry-list" data-filter-target="media">
+				{newsCoverage.map((item) => (
+					<li
+						class="entry"
+						data-filter-value={(item.metadata.source ?? 'other').toString().toLowerCase()}
+					>
+						<h3>{item.metadata.title}</h3>
+						<p>
+							{item.metadata.source}
+							{Array.isArray(item.metadata.authors) && item.metadata.authors.length
+								? `, ${item.metadata.authors.join(', ')}`
+								: ''}
+							, {formatSummaryDate(item.metadata.date)}
+							{item.metadata.url && (
+								<span class="entry-links">
+									<a class="chip-link" href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+										Article link
+									</a>
+								</span>
+							)}
+						</p>
+					</li>
+				))}
+			</ul>
+		</section>
+	</section>
+
+	<footer>
+		<p>&copy; {heroName}. All rights reserved.</p>
+	</footer>
+
+	<!-- Bio Modal -->
+	<div id="bio-modal" class="modal" aria-hidden="true">
+		<div class="modal-backdrop" data-modal-close></div>
+		<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="bio-modal-title">
+			<button type="button" class="modal-close" data-modal-close aria-label="Close modal">&times;</button>
+			<h3 id="bio-modal-title">Extended Bio</h3>
+			<div class="modal-actions modal-actions-top">
+				<button type="button" class="hero-btn secondary hero-btn-small copy-bio-btn" data-copy-target="bio-text-content">
+					Copy bio
+				</button>
+				{profilePic && (
+					<a class="hero-btn secondary hero-btn-small" href={profilePic} target="_blank" rel="noopener noreferrer">
+						Download headshot
+					</a>
+				)}
+			</div>
+			<div class="bio-text" id="bio-text-content">
+				{String(personalInfo.additional_background ?? '').split(/\n\s*\n/).map((para) => (
+					<p>{para.trim()}</p>
+				))}
+			</div>
+		</div>
+	</div>
+
+	<!-- Links Modal -->
+	<div id="links-modal" class="modal" aria-hidden="true">
+		<div class="modal-backdrop" data-modal-close></div>
+		<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="links-modal-title">
+			<button type="button" class="modal-close" data-modal-close aria-label="Close modal">&times;</button>
+			<h3 id="links-modal-title">All Links</h3>
+			<div class="links-modal-grid">
+				<div class="links-modal-section">
+					<h4>Social</h4>
+					<ul class="links-list">
+						{socialLinks.map((item) => (
+							<li>
+								<a href={item.href as string} target="_blank" rel="noopener noreferrer">{item.label}</a>
+							</li>
+						))}
+					</ul>
+				</div>
+				<div class="links-modal-section">
+					<h4>Papers</h4>
+					<ul class="links-list">
+						{paperLinks.map((item) => (
+							<li>
+								<a href={item.href as string} target="_blank" rel="noopener noreferrer">{item.label}</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const tabIds = ['publications', 'writing', 'talks', 'media'];
+
+		const activateTab = (targetId) => {
+			const cleaned = targetId.replace('#', '');
+			const activeId = tabIds.includes(cleaned) ? cleaned : tabIds[0];
+
+			tabIds.forEach((tab) => {
+				const panel = document.getElementById(tab);
+				if (panel) {
+					panel.classList.toggle('is-active', tab === activeId);
+				}
+				const link = document.querySelector(`.section-nav a[href="#${tab}"]`);
+				if (link) {
+					link.classList.toggle('active', tab === activeId);
+				}
+			});
+		};
+
+		const setupFilters = () => {
+			document.querySelectorAll('[data-filter-group]').forEach((group) => {
+				const targetName = group.getAttribute('data-filter-group');
+				if (!targetName) return;
+				const targetList = document.querySelector(`[data-filter-target="${targetName}"]`);
+				if (!targetList) return;
+
+				group.addEventListener('click', (event) => {
+					const target = event.target;
+					if (!(target instanceof Element)) return;
+					const button = target.closest('button[data-filter-value]');
+					if (!button) return;
+					const value = button.getAttribute('data-filter-value') || 'all';
+
+					group.querySelectorAll('button[data-filter-value]').forEach((chip) => {
+						chip.classList.toggle('active', chip === button);
+					});
+
+					targetList.querySelectorAll('[data-filter-value]').forEach((item) => {
+						const matches = value === 'all' || item.getAttribute('data-filter-value') === value;
+						item.hidden = !matches;
+					});
+				});
+			});
+		};
+
+		// Modal functionality
+		const openModal = (modalId) => {
+			const modal = document.getElementById(modalId);
+			if (modal) {
+				modal.setAttribute('aria-hidden', 'false');
+				modal.classList.add('is-open');
+				document.body.style.overflow = 'hidden';
+				// Focus the close button
+				const closeBtn = modal.querySelector('.modal-close');
+				if (closeBtn) closeBtn.focus();
+			}
+		};
+
+		const closeModal = (modal) => {
+			modal.setAttribute('aria-hidden', 'true');
+			modal.classList.remove('is-open');
+			document.body.style.overflow = '';
+		};
+
+		const closeAllModals = () => {
+			document.querySelectorAll('.modal.is-open').forEach(closeModal);
+		};
+
+		const setupModals = () => {
+			// Open modal triggers
+			document.querySelectorAll('.modal-trigger').forEach((trigger) => {
+				trigger.addEventListener('click', () => {
+					const modalId = trigger.getAttribute('data-modal');
+					if (modalId) openModal(modalId);
+				});
+			});
+
+			// Close buttons and backdrop clicks
+			document.querySelectorAll('[data-modal-close]').forEach((closer) => {
+				closer.addEventListener('click', () => {
+					const modal = closer.closest('.modal');
+					if (modal) closeModal(modal);
+				});
+			});
+
+			// Escape key closes modals
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape') closeAllModals();
+			});
+
+			// Copy bio button
+			document.querySelectorAll('.copy-bio-btn').forEach((btn) => {
+				btn.addEventListener('click', async () => {
+					const targetId = btn.getAttribute('data-copy-target');
+					const target = targetId ? document.getElementById(targetId) : null;
+					if (!target) return;
+
+					const text = target.innerText || target.textContent || '';
+					try {
+						await navigator.clipboard.writeText(text);
+						const original = btn.textContent;
+						btn.textContent = 'Copied!';
+						btn.classList.add('copied');
+						setTimeout(() => {
+							btn.textContent = original;
+							btn.classList.remove('copied');
+						}, 2000);
+					} catch (err) {
+						console.error('Failed to copy:', err);
+					}
+				});
+			});
+		};
+
+		document.addEventListener('DOMContentLoaded', () => {
+			activateTab(window.location.hash || tabIds[0]);
+			setupFilters();
+			setupModals();
+		});
+
+		window.addEventListener('hashchange', () => {
+			activateTab(window.location.hash);
+		});
+	</script>
+</Layout>
+
+<style>
+	header,
+	section,
+	footer {
+		max-width: 1040px;
+		margin: auto;
+		padding: 1.5rem 1rem;
+	}
+
+	section {
+		margin-bottom: 1rem;
+	}
+
+	h1,
+	h2,
+	h3 {
+		margin: 0.5em 0;
+		color: #2e8b57;
+	}
+
+	h2 {
+		font-size: 1.5rem;
+		margin-top: 0;
+		margin-bottom: 0.75rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 2px solid #e8ebe9;
+	}
+
+.hero-manuscript {
+	padding-bottom: 1.5rem;
+	border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+	max-width: 1100px;
+	margin: 0 auto;
+}
+
+.hero-intro {
+	text-align: center;
+	max-width: 760px;
+	margin: 0 auto 1rem;
+}
+
+.hero-heading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+	margin-bottom: 0.5rem;
+}
+
+.hero-text {
+	text-align: center;
+	max-width: 800px;
+}
+
+.hero-name-row {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.hero-inline-pic {
+	width: 64px;
+	height: 64px;
+	object-fit: cover;
+	border-radius: 50%;
+	box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+}
+
+.hero-bio-block {
+	text-align: left;
+	margin: 0 auto 0.5rem;
+}
+
+.hero-bio {
+	margin-bottom: 0.35rem;
+}
+
+.hero-cta {
+	display: flex;
+	justify-content: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	margin-bottom: 0.5rem;
+}
+
+.hero-btn {
+	padding: 0.3rem 0.75rem;
+	border-radius: 999px;
+	border: 1px solid #2e8b57;
+	background: #2e8b57;
+	color: #fff;
+	font-size: 0.85em;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hero-btn:hover {
+	background: #256d45;
+}
+
+.hero-btn.secondary {
+	background: transparent;
+	color: #2e8b57;
+}
+
+.hero-btn.secondary:hover {
+	background: rgba(46, 139, 87, 0.1);
+}
+
+.hero-btn:focus-visible {
+	outline: 2px solid #2e8b57;
+	outline-offset: 2px;
+}
+
+.hero-btn-small {
+	font-size: 0.75em;
+	letter-spacing: 0.06em;
+}
+
+.hero-btn-email {
+	font-family: 'IBM Plex Mono', monospace;
+}
+
+
+.hero-role {
+	margin: 0.35rem 0 0;
+	color: #5e6470;
+}
+
+.hero-research {
+	margin: 0.25rem 0 0;
+	color: #6b7482;
+	font-size: 0.95em;
+}
+
+.hero-manuscript a {
+	color: #2e8b57;
+	text-decoration: none;
+}
+
+.hero-manuscript a:hover {
+	text-decoration: underline;
+}
+
+
+.hero-table {
+	width: 100%;
+	max-width: 1040px;
+	margin: 0 auto 1rem;
+	padding: 0;
+}
+
+.table-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	gap: 0.75rem 1rem;
+}
+
+.table-row {
+	display: grid;
+	grid-template-columns: 110px 1fr;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.25rem 0;
+	border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.table-label {
+	font-family: 'Crimson Pro', serif;
+	font-size: 0.85em;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #6b7280;
+}
+
+.table-value {
+	text-align: left;
+}
+
+/* Affiliation styling */
+.affiliation-line a.primary {
+	font-weight: 600;
+}
+
+.affiliation-line a.secondary {
+	color: #6b7280;
+}
+
+/* Social icons */
+.social-icons {
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+.social-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #2e8b57;
+	transition: color 0.2s, transform 0.2s;
+}
+
+.social-link:hover {
+	color: #256d45;
+	transform: scale(1.15);
+}
+
+.social-icon {
+	width: 20px;
+	height: 20px;
+}
+
+/* Links cell with expandable */
+.links-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.links-expand {
+	font-size: 0.85em;
+}
+
+.links-expand summary {
+	cursor: pointer;
+	color: #2e8b57;
+	font-weight: 500;
+}
+
+.links-expand summary:hover {
+	text-decoration: underline;
+}
+
+.links-list {
+	list-style: none;
+	margin: 0.5rem 0 0;
+	padding: 0;
+	font-family: 'IBM Plex Mono', monospace;
+	font-size: 0.9em;
+}
+
+.links-list li {
+	padding: 0.2rem 0;
+}
+
+.links-list a {
+	color: #5d6b52;
+	text-decoration: none;
+}
+
+.links-list a:hover {
+	color: #3d5a3a;
+	text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+	.hero-intro {
+		margin: 0 auto 1rem;
+	}
+
+	.hero-heading {
+		flex-direction: column;
+	}
+
+	.hero-text {
+		text-align: center;
+	}
+
+	.table-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+	#recent-summary,
+	#status-board {
+		text-align: center;
+		width: 100%;
+		background-color: #1a202c;
+		color: #fff;
+		padding: 1.3rem;
+		border-radius: 10px;
+		box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+	}
+
+	#recent-summary .grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 1rem;
+	}
+
+	.centered-summary {
+		padding: 0.5em;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.summary-item {
+		font-size: 0.9em;
+		line-height: 1.3;
+		text-align: left;
+	}
+
+	#status-board {
+		background: #fdf8f3;
+		color: #1f2933;
+		padding: 2rem;
+		border-radius: 14px;
+		box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12);
+		text-align: left;
+	}
+
+	.status-header {
+		margin-bottom: 1rem;
+	}
+
+	.status-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 1rem;
+	}
+
+	.status-card {
+		background: #fff;
+		border-radius: 10px;
+		padding: 1rem;
+		box-shadow: inset 0 0 0 1px #f0e6da;
+		font-size: 0.95em;
+		line-height: 1.5;
+	}
+
+	.status-empty {
+		margin: 0;
+		color: #5f6c7b;
+	}
+
+	.section-nav {
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		padding: 1rem 0;
+		border-bottom: 2px solid #ccc;
+		margin-bottom: 1rem;
+	}
+
+	.section-nav a {
+		text-decoration: none;
+		padding: 0.4em 0.9em;
+		border: 1px solid transparent;
+		border-radius: 4px;
+		color: #5d6b52;
+	}
+
+	.section-nav a:hover,
+	.section-nav a.active {
+		border-color: #2e8b57;
+		color: #2e8b57;
+	}
+
+	.tab-panel {
+		display: none;
+		background: #fff;
+		border-left: 4px solid #2e8b57;
+		padding: 1.75rem 1.75rem 1rem;
+		margin-bottom: 2.5rem;
+		border-radius: 0 10px 10px 0;
+		box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+	}
+
+	.tab-panel.is-active {
+		display: block;
+	}
+
+	.filter-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin: 0.5rem 0 1rem;
+	}
+
+	.filter-panel {
+		background: #f8fafc;
+		border: 1px solid #e2e8f0;
+		border-radius: 8px;
+		padding: 0.5rem 0.75rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.filter-panel summary {
+		cursor: pointer;
+		font-weight: 600;
+		color: #2e8b57;
+	}
+
+	.filter-panel[open] {
+		padding-bottom: 0.75rem;
+	}
+
+	.chip {
+		border: 1px solid #cbd5e0;
+		background: #fff;
+		border-radius: 999px;
+		padding: 0.2em 0.9em;
+		font-size: 0.85em;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.chip.active {
+		background: #2e8b57;
+		border-color: #2e8b57;
+		color: #fff;
+	}
+
+	.chip-link {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.2em 0.8em;
+		border-radius: 999px;
+		border: 1px solid #cbd5e0;
+		font-size: 0.85em;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		text-decoration: none;
+		color: #5d6b52;
+		margin-right: 0.35rem;
+	}
+
+	.chip-link:hover {
+		background: #3d5a3a;
+		color: #fff;
+		border-color: #3d5a3a;
+	}
+
+	.section-subtitle {
+		color: #5f6c7b;
+		margin-top: -0.35rem;
+		margin-bottom: 1.3rem;
+		font-size: 0.95em;
+	}
+
+	.cta-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+
+	.cta-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.28em 0.95em;
+		border-radius: 999px;
+		text-decoration: none;
+		font-size: 0.88em;
+		border: 1px solid #2e8b57;
+		color: #2e8b57;
+		background: transparent;
+	}
+
+	.cta-link:hover {
+		background: #2e8b57;
+		color: #fff;
+	}
+
+	.cta-link.muted {
+		background: transparent;
+		color: #2e8b57;
+	}
+
+	.tab-panel {
+		display: none;
+	}
+
+	.tab-panel.is-active {
+		display: block;
+	}
+
+	.row {
+		display: flex;
+		gap: 1rem;
+		margin: 0 auto;
+	}
+
+	.col {
+		flex: 1;
+	}
+
+	.entry-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+.entry {
+	padding: 1rem 1rem 1rem 1.25rem;
+	border-bottom: none;
+	margin-bottom: 0.75rem;
+	text-align: left;
+	background: #fafbfa;
+	border-left: 3px solid #d4e5dc;
+	border-radius: 0 6px 6px 0;
+	transition: border-color 0.2s, background 0.2s;
+}
+
+.entry:hover {
+	border-left-color: #2e8b57;
+	background: #f5f8f6;
+}
+
+.entry:last-child {
+	margin-bottom: 0;
+}
+
+.entry-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin: 0.5rem 0 0;
+}
+
+	/* Compact blog entries */
+	.blog-summary {
+		color: #5f6c7b;
+		margin-bottom: 1rem;
+		font-size: 0.95em;
+	}
+
+	.blog-compact {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.entry-compact {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.75rem;
+		padding: 0.4rem 0.6rem;
+		background: #fafbfa;
+		border-radius: 4px;
+		font-size: 0.9em;
+	}
+
+	.entry-compact a {
+		color: #2e8b57;
+		text-decoration: none;
+		flex: 1;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.entry-compact a:hover {
+		text-decoration: underline;
+	}
+
+	.entry-meta {
+		color: #6b7280;
+		font-size: 0.85em;
+		white-space: nowrap;
+	}
+
+	.blog-more {
+		margin-top: 0.75rem;
+		font-size: 0.9em;
+	}
+
+	.blog-more a {
+		color: #2e8b57;
+	}
+
+	.quick-bio {
+		margin-top: 1rem;
+	}
+
+	.profile-pic {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	a:focus,
+	button:focus,
+	input:focus,
+	select:focus {
+		outline: 2px solid #8b5a2b;
+		outline-offset: 2px;
+	}
+
+	@media (max-width: 800px) {
+		.table-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.table-row {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.row {
+			flex-direction: column;
+		}
+
+		#recent-summary .grid {
+			grid-template-columns: 1fr;
+		}
+
+		.section-nav {
+			flex-direction: column;
+			align-items: stretch;
+		}
+	}
+
+	@media (prefers-color-scheme: dark) {
+		body {
+			background-color: #1a202c;
+			color: #e2e8f0;
+		}
+
+		.section-nav a {
+			color: #63b3ed;
+		}
+
+		.section-nav a:hover {
+			color: #4fd1c5;
+			border-color: #4fd1c5;
+		}
+
+		.chip {
+			background: #1a202c;
+			color: #e2e8f0;
+			border-color: #4a5568;
+		}
+
+		.chip.active {
+			background: #4fd1c5;
+			color: #1a202c;
+			border-color: #4fd1c5;
+		}
+
+		.filter-panel {
+			background: #2d3748;
+			border-color: #4a5568;
+		}
+
+		#status-board {
+			background: #222b3a;
+			color: #e2e8f0;
+			box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+		}
+
+		.status-card {
+			background: #1b2433;
+			box-shadow: inset 0 0 0 1px #2f3b50;
+		}
+
+		.cta-link.ghost {
+			color: #63b3ed;
+			border-color: #63b3ed;
+		}
+
+		.tab-panel {
+			background: #1b2433;
+			box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+		}
+		.table-row {
+			border-color: #2f3b50;
+		}
+
+		/* Social icons dark mode */
+		.social-link {
+			color: #4fd1c5;
+		}
+
+		.social-link:hover {
+			color: #63b3ed;
+		}
+
+		.affiliation-line a.secondary {
+			color: #a0aec0;
+		}
+
+		.links-expand summary {
+			color: #4fd1c5;
+		}
+
+		.links-list a {
+			color: #63b3ed;
+		}
+
+		.links-list a:hover {
+			color: #4fd1c5;
+		}
+
+		/* Entry cards dark mode */
+		.entry {
+			background: #1b2433;
+			border-left-color: #2f3b50;
+		}
+
+		.entry:hover {
+			background: #222b3a;
+			border-left-color: #4fd1c5;
+		}
+
+		.entry h3 {
+			color: #e2e8f0;
+		}
+
+		.entry p {
+			color: #a0aec0;
+		}
+
+		.chip-link {
+			color: #8fbc8f;
+			border-color: #4a5568;
+		}
+
+		.chip-link:hover {
+			background: #6b8e6b;
+			color: #1a202c;
+			border-color: #6b8e6b;
+		}
+
+		/* Compact blog dark mode */
+		.blog-summary {
+			color: #a0aec0;
+		}
+
+		.entry-compact {
+			background: #1b2433;
+		}
+
+		.entry-compact a {
+			color: #4fd1c5;
+		}
+
+		.entry-meta {
+			color: #718096;
+		}
+
+		.blog-more a {
+			color: #4fd1c5;
+		}
+	}
+
+	/* Modal styles */
+	.modal {
+		display: none;
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.modal.is-open {
+		display: flex;
+	}
+
+	.modal-backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		cursor: pointer;
+	}
+
+	.modal-content {
+		position: relative;
+		background: #fff;
+		border-radius: 12px;
+		padding: 1.5rem 2rem;
+		max-width: 560px;
+		width: 90%;
+		max-height: 85vh;
+		overflow-y: auto;
+		box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+		animation: modalIn 0.2s ease-out;
+	}
+
+	@keyframes modalIn {
+		from {
+			opacity: 0;
+			transform: scale(0.95) translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
+	}
+
+	.modal-close {
+		position: absolute;
+		top: 0.75rem;
+		right: 0.75rem;
+		background: none;
+		border: none;
+		font-size: 1.5rem;
+		cursor: pointer;
+		color: #6b7280;
+		line-height: 1;
+		padding: 0.25rem;
+		transition: color 0.2s;
+	}
+
+	.modal-close:hover {
+		color: #1f2933;
+	}
+
+	.modal-content h3 {
+		margin: 0 0 1rem;
+		font-size: 1.25rem;
+		color: #2e8b57;
+	}
+
+	.modal-content h4 {
+		margin: 0 0 0.5rem;
+		font-size: 0.9rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: #6b7280;
+	}
+
+	.modal-content p {
+		margin: 0 0 1rem;
+		line-height: 1.6;
+	}
+
+	.modal-actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid #e2e8f0;
+	}
+
+	.modal-actions-top {
+		margin-top: 0;
+		margin-bottom: 1rem;
+		padding-top: 0;
+		padding-bottom: 1rem;
+		border-top: none;
+		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.bio-text {
+		line-height: 1.7;
+	}
+
+	.bio-text p {
+		margin: 0 0 1rem;
+	}
+
+	.bio-text p:last-child {
+		margin-bottom: 0;
+	}
+
+	.copy-bio-btn {
+		cursor: pointer;
+	}
+
+	.copy-bio-btn.copied {
+		background: #2e8b57;
+		color: #fff;
+		border-color: #2e8b57;
+	}
+
+	.links-modal-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1.5rem;
+	}
+
+	.links-modal-section .links-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.links-modal-section .links-list li {
+		padding: 0.35rem 0;
+	}
+
+	.links-modal-section .links-list a {
+		color: #5d6b52;
+		text-decoration: none;
+	}
+
+	.links-modal-section .links-list a:hover {
+		color: #3d5a3a;
+		text-decoration: underline;
+	}
+
+	/* Modal trigger buttons */
+	.modal-trigger {
+		background: none;
+		border: none;
+		color: #5d6b52;
+		cursor: pointer;
+		font-weight: 600;
+		font-size: inherit;
+		font-family: inherit;
+		padding: 0;
+	}
+
+	.modal-trigger:hover {
+		color: #3d5a3a;
+		text-decoration: underline;
+	}
+
+	.bio-trigger {
+		margin-left: 0.35rem;
+	}
+
+	/* Dark mode modal */
+	@media (prefers-color-scheme: dark) {
+		.modal-backdrop {
+			background: rgba(0, 0, 0, 0.7);
+		}
+
+		.modal-content {
+			background: #1b2433;
+			color: #e2e8f0;
+		}
+
+		.modal-close {
+			color: #a0aec0;
+		}
+
+		.modal-close:hover {
+			color: #e2e8f0;
+		}
+
+		.modal-content h3 {
+			color: #4fd1c5;
+		}
+
+		.modal-content h4 {
+			color: #a0aec0;
+		}
+
+		.modal-actions {
+			border-top-color: #2f3b50;
+		}
+
+		.modal-actions-top {
+			border-bottom-color: #2f3b50;
+		}
+
+		.links-modal-section .links-list a {
+			color: #8fbc8f;
+		}
+
+		.links-modal-section .links-list a:hover {
+			color: #a8d4a8;
+		}
+
+		.modal-trigger {
+			color: #8fbc8f;
+		}
+
+		.copy-bio-btn.copied {
+			background: #6b8e6b;
+			color: #1a202c;
+			border-color: #6b8e6b;
+		}
+	}
+</style>

@@ -1,0 +1,52 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  citation_key: string;
+  entry_type: string;
+  authors?: string[];
+  year?: string;
+  venue?: string;
+  journal?: string;
+  url?: string;
+  abstract?: string;
+  tags?: string[];
+}
+
+const { id, title, citation_key, entry_type, authors, year, venue, journal, url, abstract, tags } = Astro.props;
+const displayVenue = venue || journal;
+
+// Filter out collection tags for display (but keep them in data attr for filtering)
+const isCollectionTag = (tag: string) => tag.startsWith('dc:') || tag.startsWith('collection:');
+const displayTags = tags?.filter(tag => !isCollectionTag(tag)) || [];
+---
+
+<details class="reference-card" data-citation-key={citation_key} data-entry-type={entry_type} data-year={year} data-tags={tags?.join(',') || ''}>
+  <summary>
+    <span class="title">{title}</span>
+    <span class="meta">
+      {year && <span class="year">{year}</span>}
+      <span class="entry-type">{entry_type}</span>
+    </span>
+  </summary>
+  <div class="details">
+    {authors && authors.length > 0 && (
+      <p class="authors">{authors.join(', ')}</p>
+    )}
+    {abstract && (
+      <p class="abstract">{abstract}</p>
+    )}
+    {displayTags.length > 0 && (
+      <div class="tags">
+        {displayTags.map((tag) => (
+          <a href={`/tags/${tag}`} class="tag">{tag}</a>
+        ))}
+      </div>
+    )}
+    <div class="links">
+      <a href={`/reference/${id}`}>View details</a>
+      {url && <a href={url} target="_blank" rel="noopener">Source</a>}
+      {displayVenue && <span style="color: var(--text-muted)">{displayVenue}</span>}
+    </div>
+  </div>
+</details>

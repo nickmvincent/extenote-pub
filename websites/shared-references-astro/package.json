@@ -1,0 +1,18 @@
+{
+  "name": "shared-references-astro",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "verify": "bun run scripts/verify-references.ts",
+    "verify:all": "bun run scripts/verify-references.ts --all",
+    "verify:dry": "bun run scripts/verify-references.ts --dry-run"
+  },
+  "dependencies": {
+    "astro": "^5.16.6",
+    "gray-matter": "^4.0.3"
+  }
+}

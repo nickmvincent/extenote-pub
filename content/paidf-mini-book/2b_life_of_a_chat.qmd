@@ -1,0 +1,73 @@
+---
+type: paidf_chapter
+title: The Life of a Chat
+slug: 2b_life_of_a_chat
+visibility: public
+---
+Status: first draft complete.
+
+The goal of this Section is to provide a worked example of what exactly happens to one of your chats in a system like the public ai utility interface.
+
+::: {.callout-note collapse=true title="Model Reference (01i)"}
+Stages: capture `C_i`, prompt `S_i`, consent `A_i`, transform `T_i`, publish `P_i^k`, with PR workflow state `M_i`.
+:::
+
+First, what happens when you visit the site?
+
+- You visit publicai.co
+- You sign up
+- Either you create a username and password (these are stored in our database) OR you sign in with Google
+- Either way, you now have an account. This "account data" is stored in database, but it's never available to outside partners. It's just stored there so you can log in, keep track of your chats, etc. On other platforms your account might also be linked to third party data, used to create an advertising profile, etc. (Although we're not trying to be scary here: AI-focused companies like OpenAI generally treat your account data the same as we do for now. It's companies that also sell ads or other products where things get a bit more fuzzy).
+
+
+Ok, now you have an account. Here's a simplified view of what your account record looks like in our database:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  USER RECORD (example with fake data)                       │
+├─────────────────────────────────────────────────────────────┤
+│  user_id:        usr_a1b2c3d4e5f6                           │
+│  created_at:     2024-03-15 14:23:01 UTC                    │
+│  auth_method:    google_oauth                               │
+│  email_hash:     [hashed - not stored in plain text]        │
+│  display_name:   "DataContributor42"                        │
+│  flywheel_opted_in: false                                   │
+│  default_license:   null                                    │
+│  chats_count:       0                                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+This is the "admin view" of your account—the essential metadata we store. Note that we hash sensitive identifiers and don't store passwords in plain text. The `flywheel_opted_in` field starts as `false`; you explicitly enable it if you want to contribute data.
+
+Now you start a new chat!
+
+- You write a "Prompt" (aka an "Input")
+  - This might be: "Tell me something similar about Switzerland and Singapore". Let's use this as our running example
+  - Note that in LLM systems, you have a lot of freedom when you write your prompt, so you might accidentally or intentionally include personal information or otherwise sensitive information
+  - While we provide some tools (and are working on shipping more tools) to help with this, there's no right or wrong answers as to whether a chat is 100% "safe" or "intended". Perhaps you *want* to tell the AI that you're a man located in western Canada; you probably don't want to give it your credit card number (though there are exceptions if you want an agent to buy something on your behalf).
+  - So now you have a prompt. It's just what computer scientists call a "string" -- it's a bunch of text
+- If you're using the Inference Utility, we send your Prompt to a "compute endpoint" so you can get a corresponding output
+  - Basically, your prompt goes "into a machine" and an "Output" comes out the other end
+  - The inference utility takes advantage of donated compute from a number of organizations
+  - In some cases, we send it directly to the AI operator's compute cluster for "inference"
+  - In other cases, we have a copy of the AI operator's "model weights" on our own compute and we send the prompt there 
+  - Exactly what we do depends on the model you're using, how many others are using the Utility at the same time, etc.
+  - In general, we don't want you to have to worry about this, but if you're interested it's all open source
+
+- So now the AI model takes your "Prompt"
+  - To learn more about exactly what happens -- it's more or less just a LOT of number crunching -- check out 3Blue1Brown videos
+  - We send the Output back to you!
+
+
+- Your chat history keeps track of all the Input/Output pairings, organized by "Chats"
+  - By default, nobody outside of the Utility Interface can see your chats. We only access them internally as needed to operate the service and investigate security or legal issues.
+  - We may compute high‑level, aggregate statistics about usage (for example, total volume or broad topic distributions) without exposing individual chat content.
+  - You can opt in to the public Data Flywheel: choose specific chats to contribute to a public Hugging Face dataset under a license you select. This is a per‑chat, public opt‑in. Private research access is not part of the initial launch.
+
+::: {.callout-note collapse=true title="Model Mapping for Opt‑In"}
+UI may show a prompt (`S_i=1`), you grant consent (`A_i=1`), checks run (`T_i=1`), and a PR is opened; publication occurs on merge (`P_i^git=1`).
+:::
+
+- You can delete Chats at any time
+
+- You can export all your chats to store them somewhere else, pass them to other AI products, etc.

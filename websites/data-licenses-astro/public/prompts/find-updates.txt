@@ -1,0 +1,30 @@
+Goal: Find and summarize updates to AI data licensing, preference signals, enforcement tools, and adoption.
+
+Context sources (seed):
+- Initiatives JSON: https://datalicenses.org/data/initiatives.json
+- Look for: status changes, new deployments, policy shifts, spec updates, evidence of use.
+
+Instructions:
+1) Crawl official sources per item (website, repo, spec, press page). Include dates and links.
+2) Prefer primary sources; cross-check with reputable coverage.
+3) Capture: what changed, when, who announced, scope (users/data/money), and implications.
+4) Note compliance/enforcement realities (is it opt-in/opt-out, blocking vs legal terms, known non-compliance).
+5) Output one JSON object per item with fields:
+   {
+     "title": string,
+     "date": ISO-8601,
+     "change": string,
+     "source": url,
+     "secondary": [url],
+     "adoption": { "usersCount": string?, "dataVolume": string?, "moneyVolume": string? }
+   }
+6) Then produce a human-readable summary of the top 5 notable updates.
+
+Tips:
+- Use site: filters for org domains (e.g., site:rslstandard.org, site:creativecommons.org, site:ietf.org/aipref).
+- Include terms like: update, release, v, roadmap, adoption, partnership, enforcement, robots.txt, ai.txt, tollgate, certification.
+- When evidence is weak, mark as "claim (unverified)".
+
+Deliverables:
+1) JSON lines of updates (one per line).
+2) Short summary list (bullets) of top updates with links.

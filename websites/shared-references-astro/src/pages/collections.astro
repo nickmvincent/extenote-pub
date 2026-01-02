@@ -1,0 +1,497 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+// Load paper collections from shared-references
+import { promises as fs } from 'node:fs';
+import { basename, join, resolve } from 'node:path';
+
+interface PaperCollection {
+  slug: string;
+  title: string;
+  include_tags: string[];
+  body?: string;
+}
+
+interface Reference {
+  id: string;
+  citation_key: string;
+  title: string;
+  authors: string[];
+  year: string;
+  venue?: string;
+  url?: string;
+  tags: string[];
+}
+
+// Parse frontmatter manually
+function parseFrontmatter(raw: string): { data: Record<string, unknown>; body: string } {
+  const match = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+  if (!match) return { data: {}, body: raw.trim() };
+
+  // Simple YAML parser for our needs
+  const yamlStr = match[1];
+  const data: Record<string, unknown> = {};
+  let currentKey = '';
+  let inArray = false;
+  let arrayItems: string[] = [];
+
+  for (const line of yamlStr.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    if (line.match(/^[a-z_]+:/i) && !line.startsWith('  ')) {
+      // Save previous array if any
+      if (inArray && currentKey) {
+        data[currentKey] = arrayItems;
+        arrayItems = [];
+        inArray = false;
+      }
+
+      const colonIdx = line.indexOf(':');
+      currentKey = line.slice(0, colonIdx).trim();
+      const value = line.slice(colonIdx + 1).trim();
+
+      if (value === '') {
+        // Could be start of array or object
+        inArray = true;
+      } else {
+        data[currentKey] = value.replace(/^['"]|['"]$/g, '');
+      }
+    } else if (trimmed.startsWith('- ') && inArray) {
+      arrayItems.push(trimmed.slice(2).replace(/^['"]|['"]$/g, ''));
+    }
+  }
+
+  // Save last array if any
+  if (inArray && currentKey) {
+    data[currentKey] = arrayItems;
+  }
+
+  const body = raw.slice(match[0].length).trim();
+  return { data, body };
+}
+
+// Load paper collections from shared-references
+const COLLECTIONS_DIR = resolve(process.cwd(), '../../content/shared-references/paper-collections');
+const collections: PaperCollection[] = [];
+
+try {
+  const files = await fs.readdir(COLLECTIONS_DIR);
+  for (const file of files) {
+    if (!file.endsWith('.md')) continue;
+    const raw = await fs.readFile(join(COLLECTIONS_DIR, file), 'utf8');
+    const { data, body } = parseFrontmatter(raw);
+
+    if (data.type !== 'paper_collection') continue;
+
+    collections.push({
+      slug: file.replace(/\.md$/, ''),
+      title: data.title as string || file.replace(/\.md$/, ''),
+      include_tags: (data.include_tags as string[]) || [],
+      body: body || undefined,
+    });
+  }
+} catch (e) {
+  console.error('Error loading collections:', e);
+}
+
+collections.sort((a, b) => a.title.localeCompare(b.title));
+
+// Load all references
+const rawReferences = await getCollection('shared-references');
+const allRefs = new Map<string, Reference>();
+
+for (const ref of rawReferences) {
+  if (!ref.data.title) continue;
+  const d = ref.data;
+  let authors: string[] = [];
+  if (d.authors) authors = d.authors;
+  else if (d.author) authors = [d.author];
+
+  const citationKey = d.citation_key || d.citekey || ref.id;
+  allRefs.set(citationKey, {
+    id: ref.id,
+    citation_key: citationKey,
+    title: d.title,
+    authors,
+    year: d.year || '',
+    venue: d.venue,
+    url: d.url,
+    tags: d.tags || [],
+  });
+}
+
+// Get the priority number for a reference
+// Looks for tags like 'priority:1', 'priority:2', etc.
+function getPriority(ref: Reference): number {
+  if (!ref.tags) return Infinity;
+
+  for (const tag of ref.tags) {
+    const lower = tag.toLowerCase();
+    if (lower.startsWith('priority:')) {
+      const num = parseInt(lower.slice('priority:'.length), 10);
+      if (!isNaN(num)) return num;
+    }
+  }
+  return Infinity;
+}
+
+// Resolve collections to their papers
+function getCollectionPapers(collection: PaperCollection): Reference[] {
+  const papers: Reference[] = [];
+  const tagSet = new Set(collection.include_tags.map(t => t.toLowerCase()));
+
+  for (const ref of allRefs.values()) {
+    if (ref.tags.some(t => tagSet.has(t.toLowerCase()))) {
+      papers.push(ref);
+    }
+  }
+
+  // Sort: priority-tagged papers first (by priority number), then by year
+  papers.sort((a, b) => {
+    const aPriority = getPriority(a);
+    const bPriority = getPriority(b);
+
+    // Sort by priority first (lower number = higher priority)
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+
+    // If same priority (or both unprioritized), sort by year descending
+    return parseInt(b.year || '0') - parseInt(a.year || '0');
+  });
+
+  return papers;
+}
+
+const collectionsWithPapers = collections.map(c => ({
+  ...c,
+  papers: getCollectionPapers(c),
+}));
+
+// Stats
+const totalPapers = allRefs.size;
+const collectionTags = new Set<string>();
+for (const c of collections) {
+  for (const t of c.include_tags) collectionTags.add(t.toLowerCase());
+}
+const papersInCollections = new Set<string>();
+for (const c of collectionsWithPapers) {
+  for (const p of c.papers) papersInCollections.add(p.citation_key);
+}
+---
+
+<Layout title="Collections | Shared References">
+  <div class="collections-header">
+    <h2>Paper Collections</h2>
+    <div class="header-ornament"></div>
+    <p class="subtitle">
+      Curated reading lists organized by research area.
+      <strong>{papersInCollections.size}</strong> of <strong>{totalPapers}</strong> references catalogued.
+    </p>
+  </div>
+
+  <div class="collections-grid">
+    {collectionsWithPapers.map((collection) => (
+      <article class="collection-card">
+        <header>
+          <h3>❦ {collection.title}</h3>
+          <span class="paper-count">{collection.papers.length} papers</span>
+        </header>
+        {collection.body && <p class="description">{collection.body}</p>}
+        {collection.papers.length > 0 ? (
+          <ul class="paper-list">
+            {collection.papers.slice(0, 5).map((paper) => {
+              const priority = getPriority(paper);
+              const hasPriority = priority !== Infinity;
+              return (
+                <li class={hasPriority ? 'hero' : ''}>
+                  <a href={`/reference/${paper.id}`}>
+                    {paper.title}
+                    {hasPriority && <span class="hero-badge">#{priority}</span>}
+                  </a>
+                  <span class="meta">{paper.authors[0]?.split(',')[0]} · {paper.year}</span>
+                </li>
+              );
+            })}
+            {collection.papers.length > 5 && (
+              <li class="more"><a href={`/collections/${collection.slug}`}>View all {collection.papers.length} papers →</a></li>
+            )}
+          </ul>
+        ) : (
+          <p class="empty">No papers yet</p>
+        )}
+        <div class="collection-tags">
+          {collection.include_tags.map(tag => (
+            <span class="collection-tag">{tag}</span>
+          ))}
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <div class="database-stats">
+    <h3>Library Registry</h3>
+    <div class="registry-divider"></div>
+    <div class="stats-grid">
+      <div class="stat">
+        <span class="stat-value">{totalPapers}</span>
+        <span class="stat-label">Total References</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{collections.length}</span>
+        <span class="stat-label">Collections</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{papersInCollections.size}</span>
+        <span class="stat-label">Catalogued</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{totalPapers - papersInCollections.size}</span>
+        <span class="stat-label">Uncatalogued</span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .collections-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .collections-header h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .header-ornament {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.8rem;
+    margin: 0.25rem 0 0.75rem;
+  }
+
+  .header-ornament::before {
+    content: '─── ✦ ───';
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    margin: 0;
+    font-style: italic;
+  }
+
+  .collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .collection-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-ornate);
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .collection-card:hover {
+    border-left-color: var(--accent);
+  }
+
+  .collection-card header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+
+  .collection-card h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .paper-count {
+    background: var(--bg-inset);
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .description {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 1rem;
+    font-style: italic;
+  }
+
+  .paper-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+  }
+
+  .paper-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dotted var(--border);
+  }
+
+  .paper-list li:last-child {
+    border-bottom: none;
+  }
+
+  .paper-list li.hero {
+    background: var(--type-bg);
+    margin: 0 -0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-left: 2px solid var(--gold);
+  }
+
+  .paper-list a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  .paper-list a:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+  }
+
+  .hero-badge {
+    background: var(--gold);
+    color: var(--bg-dark);
+    font-size: 0.65rem;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .meta {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+    font-style: italic;
+  }
+
+  .more {
+    font-size: 0.85rem;
+    font-style: italic;
+    padding-top: 0.5rem;
+  }
+
+  .more a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .more a:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+
+  .collection-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .collection-tag {
+    background: var(--tag-bg);
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--tag-text);
+    font-family: 'Courier Prime', 'Courier New', monospace;
+    border: 1px solid var(--border);
+  }
+
+  .database-stats {
+    background: var(--bg-inset);
+    border: 2px solid var(--border);
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .database-stats::before {
+    content: '◆';
+    position: absolute;
+    top: -0.5rem;
+    left: 1.5rem;
+    background: var(--bg-inset);
+    padding: 0 0.5rem;
+    color: var(--border-ornate);
+    font-size: 0.8rem;
+  }
+
+  .database-stats h3 {
+    margin: 0;
+    font-size: 1rem;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .registry-divider {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.7rem;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .registry-divider::before {
+    content: '── ✦ ──';
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--accent-warm);
+  }
+
+  .stat-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 600px) {
+    .collections-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

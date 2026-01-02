@@ -1,0 +1,284 @@
+---
+type: book_chapter
+title: The Data Pipeworks
+visibility: public
+---
+# The Data Pipeworks {#sec-data-pipeworks}
+
+## Overview
+
+The previous chapter established that language models produce rankings over tokens. But where do these rankings come from? Why does one token rank higher than another? The answer, invariably, traces back to data—to human acts of creating, recording, and sharing information.
+
+This chapter presents a five-stage model—the "Data Pipeworks"—describing how human knowledge and values flow to deployed AI systems. The metaphor is intentional: like physical pipeworks, this system has sources, transformations, flows, and crucially, feedback loops. Understanding this infrastructure is essential for governance, because **each stage represents a potential intervention point**.
+
+The five stages are:
+
+1. **Knowledge and Values**: The "reality signal"—facts and preferences from human activity
+2. **Records**: Signals transformed into structured data via interfaces and sensors
+3. **Datasets**: Records aggregated by organizations under constraints
+4. **Models**: Datasets compressed into input-output mappings through training
+5. **Deployed Systems**: Models embedded in products that affect the world
+
+And the critical feature: Stage 5 feeds back to Stage 1. Deployed systems change the world, which changes the knowledge and values that flow through the system.
+
+## Background Research
+
+### Data Flow and Pipeline Metaphors
+
+The metaphor of data "flowing" through systems has deep roots in information theory and systems engineering. Shannon's foundational work on communication [@shannon1948] established the paradigm of information traveling through channels with noise and distortion. In the context of machine learning, this metaphor has been extended to capture how raw observations become actionable model outputs.
+
+Recent work on machine learning pipelines emphasizes the complexity of data transformations between collection and deployment. Sculley et al.'s influential analysis of "technical debt" in ML systems [@sculley2015] revealed that model code often constitutes a small fraction of real-world ML infrastructure—the majority involves data collection, verification, feature extraction, and monitoring. The Data Pipeworks model builds on this insight by formalizing the stages of transformation and identifying governance leverage points at each stage.
+
+### Data as Resource: Political Economy Perspectives
+
+Scholars in political economy have increasingly framed data as a resource with properties distinct from traditional commodities. Zuboff's concept of "surveillance capitalism" [@zuboff2019] positions behavioral data as raw material extracted from human experience. Couldry and Mejias extend this with the notion of "data colonialism" [@couldry2019], arguing that data extraction represents a new form of appropriation.
+
+However, data differs from physical resources in crucial ways. It is non-rivalrous (my use doesn't diminish yours), has near-zero marginal cost of reproduction, and gains value through aggregation [@varian2018]. These properties create the economic dynamics explored in later chapters: individual data contributions have negligible value, while aggregated datasets command enormous prices. The Pipeworks model makes these dynamics tractable by showing exactly where aggregation occurs (Stage 3) and who controls that process.
+
+### Knowledge Flows in Cybernetics and Systems Theory
+
+The Data Pipeworks also draws on cybernetic traditions that predate modern AI. Wiener's vision of circular causal systems [@wiener1950] anticipated the feedback loops central to our model—where deployed systems affect the very reality they measure. Beer's viable system model [@beer1972] similarly emphasized how information flows between nested organizational levels, with each level both receiving signals from and sending constraints to adjacent levels.
+
+Contemporary work in human computation [@vonahn2004; @law2011] has formalized some of these relationships, showing how computational systems can be designed to harness human cognitive labor. The Data Pipeworks extends this by treating all AI systems—not just explicit crowdsourcing platforms—as nodes in larger human-machine information circuits.
+
+### Commons and Collective Action
+
+The social dilemmas identified in this chapter connect to Ostrom's foundational work on common-pool resources [@ostrom1990]. Training data exhibits commons-like properties: contributions are non-excludable once published online, and overexploitation (through training without reciprocity) degrades the resource for future use. Hess and Ostrom's later work on "knowledge commons" [@hess2007] is particularly relevant, as it addresses information goods that can be "enclosed" by digital fences or kept open through institutional design.
+
+The "model collapse" phenomenon [@shumailov2024] represents a particularly stark tragedy of the commons: when everyone free-rides on AI outputs rather than contributing original data, the quality of future AI systems degrades. This dynamic validates the commons framing and motivates the governance interventions discussed in Chapters 7 and 8.
+
+### Dataset Documentation and Transparency
+
+Finally, the Pipeworks model builds on recent efforts to systematize dataset documentation. Gebru et al.'s "Datasheets for Datasets" [@gebru2021] proposed standardized disclosure of dataset characteristics, paralleling product safety documentation. The Data Provenance Initiative [@longpre2023] has audited licensing and attribution practices across major AI datasets, revealing widespread gaps in documentation.
+
+These efforts align with Stage 3 of the Pipeworks—the aggregation of records into datasets—and suggest that governance interventions at this stage could substantially improve transparency. The Foundation Model Transparency Index [@bommasani2023; @bommasani2024] extends this to the model level (Stage 4), creating benchmarks for disclosure across the full pipeline.
+
+## The Five Stages
+
+### Stage 1: Knowledge and Values
+
+Human activity generates what we might call a "Reality Signal"—the facts people know, the preferences they hold, the skills they've developed, the judgments they make. This stage represents everything that humans could potentially contribute to AI systems: every piece of knowledge in someone's head, every preference that guides a decision, every skill embodied in practice.
+
+This stage is:
+
+**Not directly computable or measurable.** We can't plug a sensor into human knowledge. We can only observe it indirectly, through what people choose to record. The Reality Signal is a theoretical construct—useful for analysis, but never directly accessible.
+
+**The theoretical upper bound on what AI could "know."** No matter how clever the model architecture or how large the training budget, an AI system cannot contain information that no human ever recorded. If expertise exists only in the minds of practitioners who never wrote it down, that expertise is invisible to AI.
+
+**Constantly changing.** New discoveries are made. Preferences shift. Skills develop. The Reality Signal of 2024 differs from that of 2004, which differs from that of 1984. This dynamism has important implications: AI systems trained on past data reflect past knowledge and values, which may no longer apply.
+
+Consider some examples of Stage 1 content:
+
+- A chef's intuitive understanding of which flavors pair well—embodied knowledge that may never be fully articulated
+- A voter's preferences about climate policy, taxation, and social issues—partially expressed, mostly latent
+- An engineer's mental model of how a complex system fails under stress—developed through years of experience
+- A community's shared norms about appropriate behavior—implicit, contested, evolving
+
+All of this could, in principle, flow to AI systems. Very little of it actually does. The gap between Stage 1 and what reaches Stage 5 is vast.
+
+### Stage 2: Creating Records
+
+For knowledge and values to enter the Data Pipeworks, someone must create a record. A record is a structured, storable representation of some fragment of the Reality Signal. Records are created through interfaces—technologies that translate human activity into data.
+
+This stage involves a transformation function: Signal → Record. The function is lossy, shaped by:
+
+**Interface design.** What *can* be recorded depends on what the interface allows. Twitter's character limits produce different records than long-form blogs. A survey with checkboxes captures different information than one with open-ended responses. A "like" button records less than a written review. The interface is a bottleneck—it determines which aspects of the Reality Signal can flow through.
+
+**Incentives.** Who contributes, and when, depends on incentives. Stack Overflow users answer questions partly for reputation points. Wikipedia editors contribute partly from public-spiritedness. Instagram users post partly for social validation. If the incentive structure changes, the records change. When Stack Overflow's incentive structure is undermined by AI (why answer questions when ChatGPT will?), the flow of records changes.
+
+**Technical constraints.** Bandwidth, storage, and processing impose limits. Video was rare online when bandwidth was scarce. High-fidelity sensor data requires storage capacity. Real-time recording requires processing power. Technical constraints shape what gets recorded and at what quality.
+
+Consider some examples of Stage 2 transformations:
+
+- A researcher's understanding → a peer-reviewed paper (filtered through journal conventions, page limits, peer review)
+- A user's preference → a click on a search result (reduced to a single bit: clicked or not)
+- An expert's judgment → a label on a training example (compressed into a category)
+- A person's opinion → a tweet (constrained by character limits, shaped by platform affordances)
+
+In each case, information is lost. The paper doesn't capture everything the researcher knows. The click doesn't explain *why* the user preferred that result. The label doesn't convey the annotator's uncertainty. The tweet simplifies the opinion.
+
+Here is a provocative claim: **interface design is a form of AI**—or at least, it shapes AI outcomes as much as model architecture does. Two platforms training recommendation systems on user behavior will develop different models not because of different ML techniques, but because of different interfaces. Platform A with thumbs-up/thumbs-down captures coarse preference signals. Platform B with rich emotional reactions and written reviews captures fine-grained signals. Platform B's model will develop richer representations—not because of better ML, but because of richer interfaces.
+
+This suggests that interface design deserves far more attention from both researchers and policymakers than it currently receives.
+
+### Stage 3: Datasets
+
+Records don't become training data automatically. They must be aggregated into datasets by organizations making deliberate choices under constraints.
+
+Dataset construction involves selection, filtering, and transformation:
+
+**Selection.** Which records to include? Organizations choose based on availability (what can we access?), relevance (what's useful for our purpose?), and cost (what can we afford?). A company scraping the web includes publicly accessible pages. A company licensing data includes what licensors provide. A company running annotation projects includes what annotators produce.
+
+**Filtering.** Which records to exclude? Legal constraints remove copyrighted content (sometimes). Privacy constraints remove personal information (sometimes). Quality filters remove low-quality content. Content policies remove harmful material. Each filter shapes the resulting dataset.
+
+**Transformation.** How are records processed? Tokenization splits text into subwords. Normalization standardizes formats. Deduplication removes repeated content. Each transformation changes what the model will learn.
+
+The constraints shaping these choices include:
+
+**Legal constraints.** Copyright law determines what can be copied for training (a contested question). Privacy law (GDPR, CCPA) constrains use of personal data. Licensing agreements specify permitted uses. These constraints vary by jurisdiction and are actively contested.
+
+**Economic constraints.** Data has costs—acquiring it, storing it, processing it. Large-scale training requires substantial infrastructure. These costs advantage well-funded organizations and shape what data is practically available.
+
+**Social constraints.** Content policies reflect organizational values and public pressure. Some content is excluded not because it's illegal but because it's controversial. These norms vary across organizations and time.
+
+Consider a concrete example: the construction of a major language model's training dataset. The organization might:
+
+1. Start with Common Crawl (a freely available web scrape)
+2. Add licensed content from publishers (paid agreements)
+3. Add proprietary data from user interactions (terms of service)
+4. Filter for quality using perplexity scoring
+5. Filter for safety using keyword blocklists and classifiers
+6. Deduplicate to remove repeated content
+7. Weight sources to balance representation
+
+Each step involves discretionary choices. Different organizations make different choices. The resulting datasets—and thus the resulting models—reflect these choices.
+
+**The key insight**: Dataset construction is where individual records become collective resources. A single Stack Overflow answer has negligible standalone value. Millions of answers, aggregated and processed, become enormously valuable. This aggregation is controlled by a small number of organizations, which is the source of the power asymmetry that motivates later chapters on collective bargaining.
+
+### Stage 4: Models
+
+Training transforms datasets into models. This is a compression operation: the dataset may contain trillions of tokens, while the model contains billions of parameters—a compression ratio of 100:1 to 10,000:1.
+
+What gets compressed? The statistical regularities in the data. If "the capital of France is Paris" appears frequently in training data, the model learns to assign high probability to "Paris" following "The capital of France is." If certain reasoning patterns appear frequently, the model learns to reproduce them.
+
+The compression is shaped by:
+
+**Architecture.** The number of layers, attention heads, and embedding dimensions determines the model's capacity. Larger models can capture more regularities; smaller models must be more selective. The transformer architecture imposes particular inductive biases about what patterns are easy to learn.
+
+**Training objective.** Language models are trained to predict the next token. This objective is remarkably general—it works across languages, domains, and tasks—but it is still a particular objective. RLHF adds an objective to match human preferences. The objectives shape what the model learns to do well.
+
+**Compute allocation.** How much computation is spent on training determines how thoroughly the model extracts regularities from the data. Scaling laws suggest predictable relationships between compute, data, and model performance. Given fixed compute, tradeoffs exist between model size and training duration.
+
+The connection to ranking is direct: training adjusts the model so that its rankings match the empirical distribution in the data. If "helpful" responses appear more frequently after certain prompts in the training data, the model learns to rank "helpful" tokens highly in those contexts.
+
+**Compression is not neutral.** Some regularities are preserved; others are lost. The compression reflects what the training objective values. Information that doesn't help predict the next token is discarded. Rare patterns may be forgotten in favor of common ones. The model is not a perfect mirror of the data—it's a biased compression.
+
+### Stage 5: Deployed Systems
+
+Models don't help users directly. They're embedded in deployed systems—products with interfaces, safety filters, retrieval components, and business models.
+
+A deployed system includes:
+
+**The model.** The core capability, but not the whole product. GPT-4 is a model; ChatGPT is a deployed system that includes GPT-4.
+
+**The interface.** How users interact. A chat interface shapes interaction differently than an API. Mobile apps shape interaction differently than desktop apps. Voice interfaces shape interaction differently than text.
+
+**Retrieval and tools.** Many modern systems use Retrieval-Augmented Generation (RAG) to ground responses in retrieved documents. Others use tool calls to access external APIs, run code, or search the web. These components extend capabilities beyond what's in the model's weights.
+
+**Safety filters.** Deployed systems typically include input/output filters that block certain requests or responses. These operate on top of whatever the model learned during training.
+
+**Business model.** How value is captured shapes what the system is optimized for. Ad-supported systems optimize for engagement. Subscription systems optimize for perceived value. API systems optimize for usage volume. These incentives flow back to influence all earlier stages.
+
+Deployed systems affect the world in ways that create feedback to Stage 1:
+
+**They produce outputs that enter the information ecosystem.** ChatGPT responses are posted to forums, copied into documents, incorporated into articles. These AI-generated texts become part of the web that future AI systems train on.
+
+**They change behavior.** When ChatGPT can answer programming questions, fewer people ask on Stack Overflow. When AI can generate first drafts, writers change how they write. When AI can summarize search results, users change how they search.
+
+**They affect incentives.** If AI-generated content ranks well in search, incentives to create original content change. If AI assistance increases productivity, labor market incentives change. If AI outputs compete with human outputs, economic arrangements change.
+
+This is the feedback loop—Stage 5 affects Stage 1—that makes the Data Pipeworks a dynamic system rather than a static pipeline.
+
+## Feedback Loops
+
+The critical feature of the Data Pipeworks is that it's not a one-way flow. Stage 5 affects Stage 1 in multiple ways:
+
+### Synthetic Data: Model Outputs as Training Data
+
+Model outputs increasingly become training data for future models. This happens directly (training on model outputs) and indirectly (training on web content that includes AI-generated text).
+
+The consequences are significant. Shumailov et al. [@shumailov2024] document "model collapse"—when models are trained on outputs from previous model generations, quality degrades over time. The distribution becomes increasingly distorted, and rare but important patterns are lost. This is an instability in the feedback loop: a positive feedback cycle that degrades quality.
+
+The dynamics are subtle. A small amount of synthetic data may be harmless or even helpful. But as AI-generated content proliferates online, the proportion of synthetic data in training sets grows. Without careful curation—which has costs—future models may capture less of the original Reality Signal.
+
+### Crowding Out: Model Outputs Replace Human Content
+
+When AI systems become good at answering questions, people stop asking (and answering) on human platforms. Stack Overflow traffic has declined since ChatGPT's release. When AI systems become good at generating text, demand for human writing may decline.
+
+This creates a second feedback loop: AI capabilities reduce incentives to create human records, which reduces the quality/quantity of training data for future AI, which either degrades future AI or forces it to rely more on synthetic data.
+
+The dynamics depend on degree. A small amount of AI assistance might enhance human productivity without reducing human output. But substitution effects at scale could meaningfully affect the flow of human knowledge into the pipeworks.
+
+### Behavioral Change: AI Shapes What People Do
+
+Deployed AI systems change how people behave, which changes the Reality Signal itself:
+
+- If AI summarizes news, people may read less deeply, developing less sophisticated understanding
+- If AI writes first drafts, people may edit more than compose, developing different skills
+- If AI recommends content, people may explore less, developing narrower interests
+- If AI provides information on demand, people may memorize less, changing what they know
+
+These behavioral changes affect what flows into Stage 2. If people know less, they record less. If people read less, they develop fewer opinions to express. If people create less, there's less to create records of.
+
+This is not necessarily catastrophic—it may involve tradeoffs—but it's a genuine dynamic. The AI systems of 2034 will train on data generated by humans who grew up with the AI systems of 2024. This recursive dependency means current AI deployment decisions have long-term consequences for future AI capabilities.
+
+## Implications
+
+The Data Pipeworks model yields three insights that are often missing from AI discourse.
+
+### Primacy of Human Factors
+
+Stage 1—Knowledge and Values—is the irreducible foundation. Everything downstream depends on it.
+
+The technical sophistication of Stages 2-5 can obscure this. When we discuss model architectures, training objectives, and deployment infrastructure, it's easy to forget that the entire system is parasitic on human acts of knowing, valuing, and recording. A trillion-parameter model trained on a century of human writing is not autonomous—it's a compression of that writing, nothing more.
+
+This has concrete policy implications:
+
+- **Quality at Stage 1 determines quality at Stage 5.** No amount of clever filtering, architecture, or fine-tuning can extract knowledge that wasn't captured in the first place.
+- **Diversity at Stage 1 determines diversity at Stage 5.** If the underlying records reflect narrow perspectives, so will the models.
+- **Incentives at Stage 1 matter most.** If the feedback loop from Stage 5 destroys incentives to create knowledge, the entire system degrades.
+
+Much AI governance focuses on Stages 4-5 (model training, deployment safety). The Pipeworks model suggests equal attention to Stages 1-2: who creates knowledge, under what conditions, with what incentives?
+
+### Interfaces as Core AI
+
+Stage 2—where signals become records—is arguably the most consequential and least discussed stage.
+
+Interface design determines what can be recorded. A platform with character limits captures different signals than one with long-form posts. A survey with checkboxes captures different signals than one with open response. A sensor that samples 10 times per second captures different signals than one sampling 1000 times per second.
+
+Here is the provocative claim: **interface design is a form of AI**—or at least, it shapes AI outcomes as much as model architecture does.
+
+Consider two platforms training recommendation systems on user behavior:
+
+- Platform A has thumbs-up/thumbs-down feedback
+- Platform B has rich emotional reactions plus written reviews
+
+Platform B's model will develop richer representations of user preferences—not because of better ML, but because of richer interfaces.
+
+This suggests:
+
+- **Interface design deserves more ML research attention.** The function $g$ that maps signals to records is undertheorized.
+- **Interfaces are governance levers.** Mandating certain interface features (e.g., provenance tracking, consent mechanisms) affects downstream models.
+- **Historical interface choices constrain current AI.** Much training data reflects interface limitations from years past.
+
+### Social Dilemmas
+
+The feedback loop from Stage 5 to Stage 1 creates collective action problems.
+
+**The contribution dilemma**: If AI systems can produce adequate answers, why contribute to Stack Overflow? But if everyone reasons this way, the training data degrades, and future AI systems get worse. Individual rationality leads to collective harm—a classic tragedy of the commons.
+
+**The quality dilemma**: If AI outputs flood the information ecosystem, the signal-to-noise ratio for future training data decreases. Each organization training on web data has an incentive to let others maintain quality while free-riding on outputs. But if all organizations behave this way, we get the "model collapse" scenario that researchers have documented.
+
+**The disclosure dilemma**: Individual data contributors face pressure to provide data to remain competitive (workers using AI tools that send data to providers). But collective withholding might improve bargaining position. Without coordination mechanisms, the Nash equilibrium may be full disclosure even when collective restraint would be better.
+
+These dilemmas are not hypothetical. Stack Overflow traffic has declined measurably since ChatGPT's release. Model collapse research shows training on synthetic data degrades performance. The feedback loops are real, and they create genuine social dilemmas requiring governance response.
+
+The Pipeworks model makes these dynamics visible. Without a clear picture of how human knowledge flows to AI systems—and flows back to affect future knowledge creation—these dilemmas remain abstract. With the model, they become tractable targets for policy.
+
+## Summary
+
+The Data Pipeworks describes how human knowledge and values flow to AI systems:
+
+1. **Knowledge and Values** (Stage 1) represent the raw material—everything humans know and prefer
+2. **Records** (Stage 2) are created when interfaces translate human activity into storable data
+3. **Datasets** (Stage 3) aggregate records under legal, economic, and social constraints
+4. **Models** (Stage 4) compress datasets into parameters through training
+5. **Deployed Systems** (Stage 5) embed models in products that affect the world
+
+The feedback loop from Stage 5 to Stage 1 creates dynamic behavior: synthetic data, crowding out, and behavioral change. These dynamics generate social dilemmas that motivate the governance interventions discussed in later chapters.
+
+The model suggests that AI governance should attend not just to models and deployment (Stages 4-5) but to the entire pipeline—especially the human factors at Stages 1-2 that determine what's available to flow through the system.
+
+## For Further Detail
+
+See Appendix B for formal treatment through ML, information theory, and control theory lenses.

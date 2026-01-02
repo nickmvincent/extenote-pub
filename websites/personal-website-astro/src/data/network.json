@@ -1,0 +1,34 @@
+{
+  "projectName": "personal-website",
+  "projectTitle": "Personal Website",
+  "links": {
+    "website": "https://nickmvincent.com"
+  },
+  "relatedProjects": [
+    {
+      "name": "shared-references",
+      "title": "Shared References",
+      "website": "https://shared-references.pages.dev"
+    },
+    {
+      "name": "data-leverage-blogs",
+      "title": "Data Leverage Blogs",
+      "website": "https://data-leverage-blogs-quarto.pages.dev"
+    }
+  ],
+  "discussions": [
+    {
+      "provider": "github",
+      "url": "https://github.com/nickmvincent/extenote-content-public/discussions/6",
+      "label": "GitHub Discussions",
+      "description": "Threaded conversations with markdown support, reactions, and notifications."
+    },
+    {
+      "provider": "whitewind",
+      "url": "https://whtwnd.com/nickmvincent.bsky.social/mjlnze2a",
+      "label": "WhiteWind",
+      "description": "Long-form posts on the ATProto/Bluesky network."
+    }
+  ],
+  "generatedAt": "2026-01-02T17:25:01.879Z"
+}

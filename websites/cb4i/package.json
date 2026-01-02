@@ -1,0 +1,16 @@
+{
+  "name": "cb4i",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "cf:deploy": "npx wrangler pages deploy dist --project-name cb4i"
+  },
+  "dependencies": {
+    "astro": "^5.13.7",
+    "gray-matter": "^4.0.3"
+  }
+}

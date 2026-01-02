@@ -1,0 +1,139 @@
+---
+import NetworkFooter from '../../../../helpers/astro/NetworkFooter.astro';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = 'Personal Website',
+	description = ''
+}: Props = Astro.props;
+
+const site = Astro.site ?? null;
+const currentUrl = site ? new URL(Astro.url.pathname, site) : Astro.url;
+const canonicalUrl = currentUrl?.href ?? '';
+const socialImage = site ? new URL('/favicon.svg', site).href : '/favicon.svg';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		{canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+		<meta property="og:image" content={socialImage} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={socialImage} />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&display=swap"
+		/>
+		<slot name="head" />
+	</head>
+	<body>
+		<a href="#recent-summary" class="skip-link">Skip to main content</a>
+		<slot />
+		<NetworkFooter
+			links={[
+				{ href: 'https://shared-references.pages.dev/projects', label: 'More projects →' },
+			]}
+		/>
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		font-family: 'Crimson Pro', Georgia, serif;
+		color: #333;
+		background-color: #f8f9fa;
+		font-size: 17px;
+		line-height: 1.55;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	body {
+		margin: 0;
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		font-size: 1rem;
+		line-height: 1.6;
+	}
+
+	.skip-link {
+		position: absolute;
+		left: -999px;
+		top: auto;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+	}
+
+	.skip-link:focus {
+		left: 1rem;
+		top: 1rem;
+		width: auto;
+		height: auto;
+		padding: 0.4rem 0.9rem;
+		background: #fff;
+		border: 2px solid #2e8b57;
+		border-radius: 6px;
+		text-decoration: none;
+		color: #1f2933;
+		z-index: 1000;
+	}
+
+	a {
+		color: #5d6b52;
+	}
+
+	a:hover,
+	a:focus {
+		color: #3d5a3a;
+	}
+
+	.network-footer {
+		margin-top: 4rem;
+		padding: 2rem 1.5rem;
+		border-top: 1px solid #e2e8f0;
+		background: #fff;
+		text-align: center;
+		font-size: 0.875rem;
+	}
+	.network-footer-content {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+	.network-label {
+		color: #666;
+		margin-right: 0.5rem;
+	}
+	.network-links {
+		display: inline;
+	}
+	.network-links a {
+		color: #5d6b52;
+		text-decoration: none;
+		margin: 0 0.5rem;
+	}
+	.network-links a:hover {
+		color: #3d5a3a;
+		text-decoration: underline;
+	}
+</style>

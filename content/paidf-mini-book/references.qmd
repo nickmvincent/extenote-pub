@@ -1,0 +1,10 @@
+---
+type: paidf_chapter
+title: References
+slug: references
+visibility: public
+---
+Status: first draft complete - auto-generated references list.
+
+::: {#refs}
+:::

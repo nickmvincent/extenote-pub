@@ -1,0 +1,195 @@
+---
+type: book_chapter
+title: "Introduction: The Giant Ranking Exercise"
+visibility: public
+---
+# Introduction: The Giant Ranking Exercise {#sec-introduction}
+
+## The Unifying Lens
+
+The discourse around "AI" often treats search engines, recommendation systems, and generative models as fundamentally different technologies requiring separate analytical frames. Google is about *finding* information. TikTok is about *surfacing* entertainment. ChatGPT is about *generating* content. Different verbs, different products, different concerns.
+
+This fragmentation obscures shared dynamics and limits our ability to reason coherently about governance.
+
+This book argues for a unifying lens: **all of these systems perform variations on the same core task—ranking information and delivering it to users.** What varies is the granularity of information being ranked, the social and institutional processes by which that information was created, and the economic arrangements that flow from these choices.
+
+This framing yield concrete insights:
+
+1. A technically grounded account of how generative AI might compete directly with search and recommendation
+2. An explanation for how generative AI will disrupt existing economic arrangements
+3. A framework for understanding evaluation challenges
+4. Policy implications, with particular focus on collective bargaining over information
+
+## Platforms as Information Rankers
+
+It is useful to think of a wide variety of platforms—Google, TikTok, Spotify, Amazon, YouTube, and now ChatGPT—as delivering the same fundamental service. They take **bundles of information**, rank these bundles, and deliver them to users.
+
+These bundles vary along several dimensions:
+
+**Content, format, and length**: An HTML page with links is different from a set of audio files, which is different from a 30-second video with associated comments.
+
+**Social and institutional processes of creation**: A Wikipedia article is created differently from a TikTok video. In many cases, understanding the full "context of creation" is challenging, but critically important. The provenance of information often determines its actual value (in a cert)
+
+**Effort signaling**: We often want to know that "effort" was put into the information we consume. A book represents months or years of work. A peer-reviewed paper represents sustained investigation plus community vetting. A curated playlist represents taste developed over time. Bundles signal costly investment, which is part of what makes them valuable.
+
+If we pick two large platforms—let's say, Google and TikTok—we can understand both as competing in the same giant ranking exercise. The candidate set for each platform is different, though the overall information needs may overlap. 
+
+Consider: Users could use either platform to search for restaurant recommendations in Chicago. For this population of users, these platforms compete directly for attention. In both cases, the set of outputs is constrained by all available discrete bundles of information that people have created (with constraints on content, format, length, social processes, and institutional processes).
+
+## Enter Generative AI
+
+On one hand, generative AI tools seem incredibly *different* from existing platforms. Isn't this difference why generative AI has received massive attention in the press, academic literature, and from investors?
+
+On the other hand, even early generative AI tools threatened to compete with Google and TikTok. And newer ones do so much more explicitly—either by adding search to chat tools (ChatGPT with deep research, Perplexity) or by adding generative outputs to search tools (Google AI Overviews, Bing Chat).
+
+So what changed?
+
+One way to think about this: Generative AI is indeed competing in the same giant ranking exercise as prior platforms. But generative AI "frees us" from the need to rank over discrete bundles of information. Instead, we can begin to rank increasingly **granular chunks** of information.
+
+Rather than explicitly optimizing whether someone will click a link or dwell on a video, generative AI systems rank using a mixture of:
+
+- What's statistically likely to come next in a sequence of tokens
+- What sequences are likely to be judged "good" by humans (via RLHF)
+
+The critical assertion: **An output from ChatGPT can and should be thought of as an evolution of "ten blue links."**
+
+Both serve the same function—delivering ranked information in response to a query. Both compete for the same user attention. Both are downstream of the same human acts of information creation.
+
+## What We Lose When We Go Granular
+
+In many ways, working with more granular information enables new capabilities. Writing customized poems or bespoke code simply isn't possible when our candidate set is fixed. Personalization at scale becomes feasible.
+
+However, as upstream models move away from working with discrete bundles of information, this creates new technical and social challenges for downstream systems. It's striking that many "fixes" for generative AI's weaknesses involve trying to *re-establish bundling*:
+
+- **Citations**: Link outputs to specific source documents
+- **Retrieval-augmented generation**: Ground outputs in retrieved bundles
+- **Tool use**: Defer to authoritative external sources
+
+The serious issues facing generative AI systems can be understood in terms of characteristics we lose from going too granular:
+
+| What Bundles Provide | What's Lost with Chunks |
+|---------------------|------------------------|
+| Clear authorship | Attribution becomes difficult |
+| Institutional provenance | Factuality harder to verify |
+| Effort signaling | Quality harder to assess |
+| Economic arrangements (ads, subscriptions, royalties) | Compensation mechanisms break |
+
+We can check the edit history of a Wikipedia article. We can see who wrote a book and what their credentials are. We can't do the equivalent for a generative AI output—yet.
+
+Critically, by ranking chunks (tokens) and not bundles (webpages, songs, books), we break almost all of the economic arrangements that incentivized the creation of bundles in the first place. This neatly explains much of the furor around generative AI, copyright, and intellectual property more broadly.
+
+## The Human Foundation
+
+Each act of AI utility—each time you use ChatGPT, or Google, or TikTok, and derive value—ultimately stems from some human act (or set of human acts) somewhere that involved processing, assessing, and recording information.
+
+To state plainly: Wikipedia is useful because someone spent time reading sources and typing out important information.
+
+When you use Google to find a Wikipedia article, the *most upstream* value creation came from that same act of writing. Google's employees provided you with additional value by creating a mapping between your query and the article. Google's users also contributed, through their queries and clicks that refined these mappings.
+
+There's an interesting debate about how to allocate credit among all these parties. But from a counterfactual perspective, they all play a role—and the original acts of writing, typing, and recording come first, at least chronologically.
+
+Every helpful interaction with AI (that involves consuming information) can be viewed as reaping the harvest of cascading attempts to rank information. This framing suggests challenges with creating sustainable economics (why did people create the original records? Will they keep doing it?). It also suggests a "grand mission" inherent to AI—working in service of the eternal human quest to mark trails, create records, share stories, and create shared meaning.
+
+Both the positive and negative aspects of this framing are largely missing from current AI discourse.
+
+## Agents: The Second Critical Use Case
+
+So far we've discussed AI systems that rank chunks to produce **outputs for users to consume**. But there's a second critical use case: AI systems that rank possible **decisions** in order to **act in the world**.
+
+### Agents as Decision Rankers
+
+When an LLM-based agent decides what to do next, it uses the exact same softmax mechanism that produces text. The model ranks:
+
+- Which tool to call (search, calculator, code executor)
+- What arguments to pass to that tool
+- Whether to continue or stop
+- What action to take in an environment
+
+At each decision point, the agent produces a probability distribution over possible actions—a ranking. The action taken is sampled from this ranking, just as a token is sampled from a token ranking.
+
+This extension matters because **everything we said about chunk-ranking applies to decision-ranking**:
+
+| Chunk Ranking (Outputs) | Decision Ranking (Actions) |
+|------------------------|---------------------------|
+| Ranking over vocabulary tokens | Ranking over possible actions |
+| Training data shapes which tokens rank highly | Training data shapes which actions rank highly |
+| Data shift → different output | Data shift → different behavior |
+| Economic implications for content creators | Safety and power implications for everyone |
+
+### Causal Data Dependence in Both Cases
+
+Here is the central insight: **In both use cases—outputs and actions—there is always causal dependence on data.**
+
+Some shift in the training data could cause:
+- A different token to rank highest (and thus different output)
+- A different action to rank highest (and thus different behavior)
+
+This causal dependence is not metaphorical. It's demonstrable through experiments: change the training data, and the rankings change. This is what membership inference attacks and training data extraction studies reveal empirically.
+
+**This is why data is central to policy.** If we want AI systems to behave differently—to produce different outputs or make different decisions—we must attend to the data that shapes their rankings. Collective bargaining over data isn't just about compensation; it's about having a voice in what AI systems do and how they act.
+
+### The Stakes for Agentic AI
+
+If AI agents are deployed at scale—making decisions in healthcare triage, legal document review, financial trading, infrastructure management—then the training data that shapes their decision rankings has profound consequences.
+
+A hospital using an AI agent for triage is, in effect, using a decision-ranker whose rankings are causally shaped by data from past medical decisions. If that training data reflects historical biases or gaps, the agent will rank biased or incomplete decision options highly.
+
+The governance framework we develop in this book—focused on who contributes data, under what terms, with what oversight—becomes even more urgent when AI systems rank decisions rather than just chunks.
+
+### What About Pure Reinforcement Learning?
+
+Does reinforcement learning break this human dependency? Generally, no.
+
+Consider AlphaZero, which learned superhuman chess through self-play with minimal human input:
+
+- Someone had to write down the rules of chess in a formal manner
+- Someone designed the neural network architecture
+- Someone designed the training procedure (MCTS, etc.)
+
+The "minimal human data" was the rules, but the rules encode millennia of human game-playing. The capability is superhuman, but the task definition is human.
+
+More directly: If an AI agent uses an LLM for reasoning (as most modern agents do), every person who contributed to that LLM's training becomes implicated in the agent's actions. A robot acting in the world is not "person-free"—if it uses an LLM trained on millions of people's data, it's *massively collective*.
+
+Reinforcement learning and synthetic data can move us along a spectrum of human dependency, but do not break the fundamental reliance on human acts of recording—at least for systems we care about governing today.
+
+## Preview: What Follows
+
+This book develops the ranking framework in detail and traces its implications:
+
+**Part I: The Framework**
+
+- **Chapter 2: The Ranking Mechanism** provides the technical grounding. We show that "ranking" is not metaphor—it's mechanistically accurate. LLMs produce probability distributions over vocabularies via softmax. RLHF explicitly optimizes rankings via Bradley-Terry. The generation process is iterated ranking.
+
+- **Chapter 3: The Data Pipeworks** provides the full mechanistic account of how human knowledge flows to AI outputs. We describe five stages: Knowledge/Values → Records → Datasets → Models → Deployed Systems. We analyze each stage through ML, information theory, and control theory lenses.
+
+**Part II: Evidence and Implications**
+
+- **Chapter 4: Empirical Evidence** grounds the framework in measurable phenomena: Stack Overflow's decline, membership inference results, labor market exposure studies.
+
+- **Chapter 5: The Evaluation Problem** shows how the ranking framing clarifies why AI evaluation is hard—the "double-check paradox," benchmark gaming, and dataset documentation as quality signal.
+
+- **Chapter 6: Economic Disruption and Power Concentration** analyzes why the ranking framing predicts economic disruption and what dynamics drive concentration.
+
+**Part III: Interventions**
+
+- **Chapter 7: Data Rules and Collective Bargaining** lays out concrete policy infrastructure: the "same boat" argument for why AI companies might support data rules, the case for collective bargaining, and standardized contract templates.
+
+- **Chapter 8: Balancing Markets and Commons** addresses the tension between stricter data rules and open knowledge, proposing resolution strategies that preserve commons while enabling markets.
+
+- **Chapter 9: Conclusion and Research Agenda** summarizes the framework and identifies open questions.
+
+**Appendices** provide technical depth, formalisms, extended counterarguments, and empirical study references.
+
+## A Note on Scope and Humility
+
+This book makes claims at different levels of confidence:
+
+**High confidence**: LLMs mechanistically rank tokens via softmax. Training data affects outputs (demonstrable through extraction). Platforms compete for attention.
+
+**Moderate confidence**: Economic disruption will be significant. Feedback loops (model collapse, traffic siphoning) are concerning. Collective bargaining is worth attempting.
+
+**Lower confidence**: Specific predictions about labor market outcomes. Whether proposed interventions will succeed. Long-term equilibria.
+
+We try to be clear about which claims are definitional, which are well-evidenced, and which are defensible positions in ongoing debates.
+
+The goal is not to provide definitive answers but useful frameworks. AI governance is contested terrain. We hope this book contributes tools for thinking—not conclusions to accept uncritically.

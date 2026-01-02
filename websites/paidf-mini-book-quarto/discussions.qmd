@@ -1,0 +1,21 @@
+---
+title: "Discussions & Network"
+---
+
+## Join the Discussion
+
+- [GitHub Discussions](https://github.com/nickmvincent/extenote-content-public/discussions/8) — Threaded conversations with markdown support, reactions, and notifications.
+- [WhiteWind](https://whtwnd.com/nickmvincent.bsky.social/mjlqopwo) — Long-form posts on the ATProto/Bluesky network.
+
+## Related Projects
+
+- [Shared References](https://shared-references.pages.dev)
+
+## Project Links
+
+- [GitHub Repository](https://github.com/nickmvincent/paidf_consultation)
+- [Live Site](https://nickmvincent.github.io/paidf_consultation)
+
+---
+
+*Generated on 2026-01-01*

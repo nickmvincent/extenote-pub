@@ -1,0 +1,1107 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHARED REFERENCES - Dual Theme System
+   Classic (Medieval Manuscript) + Futuristic (Cyberpunk)
+   Light + Dark modes for each
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CLASSIC LIGHT (Default - Medieval Manuscript)
+   ───────────────────────────────────────────────────────────────────────────── */
+:root,
+[data-aesthetic="classic"][data-mode="light"] {
+  --font-heading: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+  --font-body: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+  --font-mono: 'Courier Prime', 'Courier New', monospace;
+
+  /* Backgrounds */
+  --bg: #f5f1eb;
+  --bg-card: #faf8f4;
+  --bg-dark: #2c2416;
+  --bg-inset: #efe9df;
+
+  /* Text */
+  --text: #2c2416;
+  --text-muted: #6b5d4d;
+  --text-light: #f5f1eb;
+
+  /* Accents */
+  --accent: #4a5d4a;
+  --accent-hover: #3a4a3a;
+  --accent-warm: #8b4513;
+
+  /* Decorative */
+  --border: #d4cdc0;
+  --border-ornate: #8b7355;
+  --gold: #b8860b;
+
+  /* Tags & Types */
+  --tag-bg: #e8e4d9;
+  --tag-text: #4a5d4a;
+  --type-bg: #f0e6d3;
+  --type-text: #8b4513;
+
+  /* Verification colors */
+  --verified-manual-bg: #e8f0e8;
+  --verified-manual-text: #3a5d3a;
+  --verified-valid-bg: #e8eef5;
+  --verified-valid-text: #3a4a5d;
+  --verified-mismatch-bg: #f5f0e0;
+  --verified-mismatch-text: #7a6530;
+  --verified-notfound-bg: #f5e8e8;
+  --verified-notfound-text: #6b3a3a;
+  --verified-outdated-bg: #f0e8f5;
+  --verified-outdated-text: #5a4a6a;
+  --verified-error-bg: #f5e8e8;
+  --verified-error-text: #8b3a3a;
+  --verified-stale-bg: #f0f0e8;
+  --verified-stale-text: #6a6a5a;
+
+  --ornament-1: '═══════ ❧ ═══════';
+  --ornament-2: '─────── ✦ ───────';
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CLASSIC DARK (Medieval Manuscript - Dark)
+   ───────────────────────────────────────────────────────────────────────────── */
+[data-aesthetic="classic"][data-mode="dark"] {
+  --bg: #1a1612;
+  --bg-card: #252018;
+  --bg-dark: #0f0d0a;
+  --bg-inset: #1f1a14;
+
+  --text: #e8e0d4;
+  --text-muted: #a89880;
+  --text-light: #f5f1eb;
+
+  --accent: #8aaa8a;
+  --accent-hover: #a0c0a0;
+  --accent-warm: #c08050;
+
+  --border: #3a3228;
+  --border-ornate: #6a5a48;
+  --gold: #d4a855;
+
+  --tag-bg: #2a2520;
+  --tag-text: #8aaa8a;
+  --type-bg: #302818;
+  --type-text: #c08050;
+
+  --verified-manual-bg: #1a2a1a;
+  --verified-manual-text: #8aaa8a;
+  --verified-valid-bg: #1a2028;
+  --verified-valid-text: #8a9aaa;
+  --verified-mismatch-bg: #2a2518;
+  --verified-mismatch-text: #b0a060;
+  --verified-notfound-bg: #2a1a1a;
+  --verified-notfound-text: #aa7a7a;
+  --verified-outdated-bg: #251a2a;
+  --verified-outdated-text: #a08ab0;
+  --verified-error-bg: #2a1a1a;
+  --verified-error-text: #cc7a7a;
+  --verified-stale-bg: #252520;
+  --verified-stale-text: #9a9a7a;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FUTURISTIC LIGHT (Cyberpunk - Light)
+   ───────────────────────────────────────────────────────────────────────────── */
+[data-aesthetic="futuristic"][data-mode="light"] {
+  --font-heading: 'Orbitron', 'Arial Black', sans-serif;
+  --font-body: 'JetBrains Mono', 'SF Mono', monospace;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  --bg: #f0f4f8;
+  --bg-card: #ffffff;
+  --bg-dark: #0a1628;
+  --bg-inset: #e4ecf4;
+
+  --text: #0a1628;
+  --text-muted: #4a5568;
+  --text-light: #f0f4f8;
+
+  --accent: #0891b2;
+  --accent-hover: #0e7490;
+  --accent-warm: #d946ef;
+
+  --border: #cbd5e1;
+  --border-ornate: #0891b2;
+  --gold: #d946ef;
+
+  --tag-bg: #e0f2fe;
+  --tag-text: #0891b2;
+  --type-bg: #fce7f3;
+  --type-text: #d946ef;
+
+  --verified-manual-bg: #e0f2fe;
+  --verified-manual-text: #0891b2;
+  --verified-valid-bg: #d1fae5;
+  --verified-valid-text: #059669;
+  --verified-mismatch-bg: #fef3c7;
+  --verified-mismatch-text: #d97706;
+  --verified-notfound-bg: #fee2e2;
+  --verified-notfound-text: #dc2626;
+  --verified-outdated-bg: #f3e8ff;
+  --verified-outdated-text: #9333ea;
+  --verified-error-bg: #fee2e2;
+  --verified-error-text: #b91c1c;
+  --verified-stale-bg: #f3f4f6;
+  --verified-stale-text: #6b7280;
+
+  --ornament-1: '//======= DATA LEVERAGE =======//';
+  --ornament-2: '< ─────── ◆ ─────── >';
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FUTURISTIC DARK (Cyberpunk - Dark)
+   ───────────────────────────────────────────────────────────────────────────── */
+[data-aesthetic="futuristic"][data-mode="dark"] {
+  --font-heading: 'Orbitron', 'Arial Black', sans-serif;
+  --font-body: 'JetBrains Mono', 'SF Mono', monospace;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  --bg: #0a0e14;
+  --bg-card: #131920;
+  --bg-dark: #050709;
+  --bg-inset: #0d1117;
+
+  --text: #e6edf3;
+  --text-muted: #7d8590;
+  --text-light: #e6edf3;
+
+  --accent: #00d4ff;
+  --accent-hover: #00ffff;
+  --accent-warm: #ff00ff;
+
+  --border: #21262d;
+  --border-ornate: #00d4ff;
+  --gold: #ff00ff;
+
+  --tag-bg: #0d1f2d;
+  --tag-text: #00d4ff;
+  --type-bg: #1f0d2d;
+  --type-text: #ff00ff;
+
+  --verified-manual-bg: #0d1f2d;
+  --verified-manual-text: #00d4ff;
+  --verified-valid-bg: #0d2d1f;
+  --verified-valid-text: #00ff88;
+  --verified-mismatch-bg: #2d2a0d;
+  --verified-mismatch-text: #ffcc00;
+  --verified-notfound-bg: #2d0d0d;
+  --verified-notfound-text: #ff4444;
+  --verified-outdated-bg: #1f0d2d;
+  --verified-outdated-text: #cc66ff;
+  --verified-error-bg: #2d0d0d;
+  --verified-error-text: #ff6666;
+  --verified-stale-bg: #1a1a18;
+  --verified-stale-text: #888877;
+
+  --ornament-1: '//======= DATA LEVERAGE =======//';
+  --ornament-2: '< ─────── ◆ ─────── >';
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE STYLES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.7;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}
+
+[data-aesthetic="futuristic"] {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+[data-aesthetic="classic"] a:hover {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+[data-aesthetic="futuristic"] a:hover {
+  text-decoration: none;
+  text-shadow: 0 0 8px var(--accent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DECORATIVE ELEMENTS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ornament {
+  text-align: center;
+  color: var(--border-ornate);
+  font-size: 0.9rem;
+  letter-spacing: 0.5em;
+  margin: 0.5rem 0;
+}
+
+.ornament::before {
+  content: var(--ornament-1);
+}
+
+[data-aesthetic="futuristic"] .ornament {
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+}
+
+.divider {
+  text-align: center;
+  color: var(--border-ornate);
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  margin: 1.5rem 0;
+}
+
+.divider::before {
+  content: var(--ornament-2);
+}
+
+[data-aesthetic="futuristic"] .divider {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+.flourish-left::before {
+  content: '❦ ';
+  color: var(--gold);
+}
+
+.flourish-right::after {
+  content: ' ❦';
+  color: var(--gold);
+}
+
+[data-aesthetic="futuristic"] .flourish-left::before {
+  content: '> ';
+}
+
+[data-aesthetic="futuristic"] .flourish-right::after {
+  content: ' <';
+}
+
+/* Decorative card border */
+.card-ornate {
+  position: relative;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+}
+
+.card-ornate::before,
+.card-ornate::after {
+  content: '◈';
+  position: absolute;
+  color: var(--border-ornate);
+  font-size: 0.7rem;
+}
+
+.card-ornate::before {
+  top: -0.4rem;
+  left: 1rem;
+  background: var(--bg-card);
+  padding: 0 0.25rem;
+}
+
+.card-ornate::after {
+  bottom: -0.4rem;
+  right: 1rem;
+  background: var(--bg-card);
+  padding: 0 0.25rem;
+}
+
+[data-aesthetic="futuristic"] .card-ornate::before,
+[data-aesthetic="futuristic"] .card-ornate::after {
+  content: '◆';
+}
+
+/* Drop cap for abstracts */
+.drop-cap::first-letter {
+  float: left;
+  font-size: 3.5em;
+  line-height: 0.8;
+  padding-right: 0.1em;
+  color: var(--accent-warm);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   HEADER
+   ───────────────────────────────────────────────────────────────────────────── */
+
+header {
+  text-align: center;
+  padding: 1.5rem 0 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-aesthetic="futuristic"] header {
+  border-bottom: 1px solid var(--border-ornate);
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] header {
+  background: linear-gradient(180deg, rgba(0, 212, 255, 0.05) 0%, transparent 100%);
+  box-shadow: 0 1px 20px rgba(0, 212, 255, 0.1);
+}
+
+header h1 {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+[data-aesthetic="futuristic"] header h1 {
+  font-size: 1.4rem;
+  letter-spacing: 0.3em;
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] header h1 a {
+  text-shadow: 0 0 20px var(--accent);
+}
+
+header h1 a {
+  color: var(--text);
+}
+
+header h1 a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+header nav {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+[data-aesthetic="futuristic"] header nav {
+  gap: 1.5rem;
+  font-size: 0.85rem;
+}
+
+header nav a {
+  color: var(--text-muted);
+  text-transform: lowercase;
+  letter-spacing: 0.1em;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid transparent;
+}
+
+[data-aesthetic="futuristic"] header nav a {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 500;
+}
+
+header nav a:hover {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom-color: var(--accent);
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] header nav a:hover {
+  text-shadow: 0 0 10px var(--accent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FILTER BAR (Card Catalog Style)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  margin-bottom: 2rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-aesthetic="futuristic"] .filter-bar {
+  border-radius: 0;
+  border: 1px solid var(--border-ornate);
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] .filter-bar {
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.1), inset 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+.filter-bar input,
+.filter-bar select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+[data-aesthetic="futuristic"] .filter-bar input,
+[data-aesthetic="futuristic"] .filter-bar select {
+  border-radius: 0;
+  border: 1px solid var(--border-ornate);
+}
+
+.filter-bar input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-bar input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+[data-aesthetic="futuristic"] .filter-bar input::placeholder {
+  font-style: normal;
+}
+
+.filter-bar select {
+  min-width: 120px;
+  cursor: pointer;
+}
+
+.filter-bar button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-ornate);
+  border-radius: 2px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+[data-aesthetic="futuristic"] .filter-bar button {
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+}
+
+.filter-bar button:hover {
+  background: var(--accent);
+  color: var(--text-light);
+  border-color: var(--accent);
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] .filter-bar button:hover {
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.filter-bar .count {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-left: auto;
+  font-style: italic;
+}
+
+[data-aesthetic="futuristic"] .filter-bar .count {
+  font-style: normal;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   EMPTY STATE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: 2px;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+[data-aesthetic="futuristic"] .empty-state {
+  border-radius: 0;
+  border: 1px solid var(--border-ornate);
+}
+
+.empty-state p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-style: italic;
+}
+
+[data-aesthetic="futuristic"] .empty-state p {
+  font-style: normal;
+}
+
+.empty-state button {
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--border-ornate);
+  border-radius: 2px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+[data-aesthetic="futuristic"] .empty-state button {
+  border-radius: 0;
+}
+
+.empty-state button:hover {
+  background: var(--accent);
+  color: var(--text-light);
+  border-color: var(--accent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REFERENCE CARDS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.references-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reference-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-ornate);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+[data-aesthetic="futuristic"] .reference-card {
+  border-left: none;
+  border: 1px solid var(--border);
+}
+
+.reference-card:hover {
+  border-left-color: var(--accent);
+}
+
+[data-aesthetic="futuristic"] .reference-card:hover {
+  border-color: var(--accent);
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] .reference-card:hover {
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.reference-card[open] {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] .reference-card[open] {
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+}
+
+.reference-card summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.reference-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.reference-card summary::before {
+  content: '▸';
+  color: var(--text-muted);
+  margin-right: 0.5rem;
+  transition: transform 0.2s, color 0.2s;
+}
+
+[data-aesthetic="futuristic"] .reference-card summary::before {
+  content: '>';
+}
+
+.reference-card[open] summary::before {
+  transform: rotate(90deg);
+  color: var(--accent);
+}
+
+.reference-card .title {
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+  min-width: 200px;
+}
+
+[data-aesthetic="futuristic"] .reference-card .title {
+  font-size: 0.95rem;
+}
+
+.reference-card .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.reference-card .year {
+  font-weight: 500;
+  color: var(--accent-warm);
+}
+
+[data-aesthetic="futuristic"] .reference-card .year {
+  color: var(--accent);
+}
+
+.reference-card .entry-type {
+  padding: 0.15rem 0.5rem;
+  background: var(--type-bg);
+  color: var(--type-text);
+  border-radius: 2px;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+[data-aesthetic="futuristic"] .reference-card .entry-type {
+  border-radius: 0;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+}
+
+.reference-card .details {
+  padding: 0 1.25rem 1.25rem;
+  padding-left: 2.5rem;
+  border-top: 1px dashed var(--border);
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+}
+
+[data-aesthetic="futuristic"] .reference-card .details {
+  border-top: 1px solid var(--border-ornate);
+}
+
+.reference-card .authors {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+}
+
+[data-aesthetic="futuristic"] .reference-card .authors {
+  font-style: normal;
+}
+
+.reference-card .abstract {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.reference-card .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag {
+  padding: 0.2rem 0.6rem;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border-radius: 2px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+}
+
+[data-aesthetic="futuristic"] .tag {
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.7rem;
+}
+
+.tag:hover {
+  background: var(--accent);
+  color: var(--text-light);
+  text-decoration: none;
+  border-color: var(--accent);
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] .tag:hover {
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.reference-card .links {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+  padding-top: 0.5rem;
+  border-top: 1px dotted var(--border);
+}
+
+[data-aesthetic="futuristic"] .reference-card .links {
+  border-top: 1px solid var(--border);
+}
+
+.reference-card .links a {
+  color: var(--accent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DETAIL PAGE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.reference-detail {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  padding: 2rem;
+  position: relative;
+}
+
+[data-aesthetic="futuristic"] .reference-detail {
+  border: 1px solid var(--border-ornate);
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] .reference-detail {
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+/* Corner ornaments */
+.reference-detail::before {
+  content: '◆';
+  position: absolute;
+  top: -0.5rem;
+  left: 2rem;
+  background: var(--bg-card);
+  padding: 0 0.5rem;
+  color: var(--border-ornate);
+  font-size: 0.8rem;
+}
+
+.reference-detail h1 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+[data-aesthetic="futuristic"] .reference-detail h1 {
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+}
+
+[data-aesthetic="futuristic"][data-mode="dark"] .reference-detail h1 {
+  text-shadow: 0 0 15px var(--accent);
+}
+
+.reference-detail .meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dotted var(--border);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+[data-aesthetic="futuristic"] .reference-detail .meta-row {
+  border-bottom: 1px solid var(--border-ornate);
+}
+
+.reference-detail .year {
+  font-weight: 600;
+  color: var(--accent-warm);
+}
+
+[data-aesthetic="futuristic"] .reference-detail .year {
+  color: var(--accent);
+}
+
+.reference-detail .entry-type {
+  padding: 0.15rem 0.5rem;
+  background: var(--type-bg);
+  color: var(--type-text);
+  border-radius: 2px;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+[data-aesthetic="futuristic"] .reference-detail .entry-type {
+  border-radius: 0;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+}
+
+.reference-detail .field {
+  margin-bottom: 1.5rem;
+}
+
+.reference-detail .field-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.reference-detail .field-value {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.reference-detail .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+[data-aesthetic="futuristic"] .back-link {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+/* Citation key styling */
+.citation-key {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+[data-aesthetic="futuristic"] .citation-key {
+  border-radius: 0;
+  border-left: 2px solid var(--accent);
+}
+
+/* Verification badges */
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 2px;
+  cursor: help;
+  border: 1px solid transparent;
+}
+
+[data-aesthetic="futuristic"] .verification-badge {
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.65rem;
+}
+
+.verification-badge .icon {
+  font-size: 0.85rem;
+}
+
+.verified-manual {
+  background: var(--verified-manual-bg);
+  color: var(--verified-manual-text);
+  border-color: var(--verified-manual-text);
+}
+
+.verified-valid {
+  background: var(--verified-valid-bg);
+  color: var(--verified-valid-text);
+  border-color: var(--verified-valid-text);
+}
+
+.verified-mismatch {
+  background: var(--verified-mismatch-bg);
+  color: var(--verified-mismatch-text);
+  border-color: var(--verified-mismatch-text);
+}
+
+.verified-notfound {
+  background: var(--verified-notfound-bg);
+  color: var(--verified-notfound-text);
+  border-color: var(--verified-notfound-text);
+}
+
+.verified-outdated {
+  background: var(--verified-outdated-bg);
+  color: var(--verified-outdated-text);
+  border-color: var(--verified-outdated-text);
+}
+
+.verified-unknown {
+  background: var(--bg-inset);
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+.verified-error {
+  background: var(--verified-error-bg);
+  color: var(--verified-error-text);
+  border-color: var(--verified-error-text);
+}
+
+.verified-stale {
+  background: var(--verified-stale-bg);
+  color: var(--verified-stale-text);
+  border-color: var(--verified-stale-text);
+}
+
+.verification-description {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0.5rem 0 1rem 0;
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--border-ornate);
+}
+
+/* Load More Pagination */
+.load-more-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 2rem 0;
+  padding: 1rem;
+}
+
+.load-more-wrapper button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.load-more-wrapper button:hover {
+  background: var(--accent);
+  color: var(--text-light);
+  border-color: var(--accent);
+}
+
+.load-more-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  body {
+    padding: 1rem;
+  }
+
+  html {
+    font-size: 16px;
+  }
+
+  [data-aesthetic="futuristic"] {
+    font-size: 14px;
+  }
+
+  header h1 {
+    font-size: 1.3rem;
+    letter-spacing: 0.1em;
+  }
+
+  [data-aesthetic="futuristic"] header h1 {
+    font-size: 1.1rem;
+  }
+
+  header nav {
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .filter-bar input,
+  .filter-bar select {
+    width: 100%;
+  }
+
+  .filter-bar .count {
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .reference-detail {
+    padding: 1.25rem;
+  }
+
+  .ornament::before {
+    content: '══ ❧ ══';
+  }
+
+  [data-aesthetic="futuristic"] .ornament::before {
+    content: '// DATA //';
+  }
+}

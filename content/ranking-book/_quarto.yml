@@ -1,0 +1,54 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "Ranking All the Way Down"
+  subtitle: "A Data-Centric Theory of AI and Its Governance"
+  author: "Nick Vincent"
+  date: "2025"
+  chapters:
+    - index.qmd
+    - part: "Part I: The Framework"
+      chapters:
+        - chapters/01-introduction.qmd
+        - chapters/00-related-work.qmd
+        - chapters/02-ranking-mechanism.qmd
+        - chapters/03-data-pipeworks.qmd
+    - part: "Part II: Evidence and Implications"
+      chapters:
+        - chapters/04-empirical-evidence.qmd
+        - chapters/05-evaluation-problem.qmd
+        - chapters/06-economic-disruption.qmd
+    - part: "Part III: Interventions"
+      chapters:
+        - chapters/07-data-rules.qmd
+        - chapters/08-markets-and-commons.qmd
+        - chapters/09-conclusion.qmd
+    - part: "Appendices"
+      chapters:
+        - appendices/a-technical-ranking.qmd
+        - appendices/b-pipeworks-formalisms.qmd
+        - appendices/c-counterarguments.qmd
+        - appendices/d-empirical-studies.qmd
+        - appendices/e-physics-experiments.qmd
+        - appendices/f-glossary.qmd
+    - references.qmd
+
+bibliography: references.bib
+csl: apa.csl
+
+format:
+  html:
+    theme: cosmo
+    code-fold: true
+    toc: true
+    number-sections: true
+  pdf:
+    documentclass: scrbook
+    papersize: letter
+    fontsize: 11pt
+    include-in-header:
+      - text: |
+          \usepackage{amsmath}
+          \usepackage{amssymb}

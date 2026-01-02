@@ -1,0 +1,24 @@
+{
+  "projectName": "data-napkin-math",
+  "projectTitle": "Data Napkin Math",
+  "links": {
+    "github": "https://github.com/nickmvincent/data_napkin_math",
+    "website": "https://exploringai.org"
+  },
+  "relatedProjects": [],
+  "discussions": [
+    {
+      "provider": "github",
+      "url": "https://github.com/nickmvincent/extenote-content-public/discussions/4",
+      "label": "GitHub Discussions",
+      "description": "Threaded conversations with markdown support, reactions, and notifications."
+    },
+    {
+      "provider": "whitewind",
+      "url": "https://whtwnd.com/nickmvincent.bsky.social/mjlnz44a",
+      "label": "WhiteWind",
+      "description": "Long-form posts on the ATProto/Bluesky network."
+    }
+  ],
+  "generatedAt": "2026-01-01T16:14:45.215Z"
+}

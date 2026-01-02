@@ -1,0 +1,71 @@
+---
+import Layout from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+const base = import.meta.env.BASE_URL;
+
+const allCourses = await getCollection("courses");
+const courses = allCourses.filter(c => c.data.type === "course");
+
+// Group by course_number (without term/year suffix)
+const courseGroups = new Map();
+for (const course of courses) {
+  const num = course.data.course_number || "Other";
+  if (!courseGroups.has(num)) {
+    courseGroups.set(num, []);
+  }
+  courseGroups.get(num).push(course);
+}
+---
+
+<Layout title="Courses" description="Course materials and syllabi for Nick Vincent's courses.">
+  <nav>
+    <a href={base}>Courses</a>
+    <a href="https://nickmvincent.com">Main Site</a>
+    <a href="https://github.com/nickmvincent">GitHub</a>
+  </nav>
+
+  <main>
+    <h1>Courses</h1>
+    <p>
+      Course materials, syllabi, reading lists, and assignments for courses taught by
+      <a href="https://nickmvincent.com">Nick Vincent</a> at Simon Fraser University.
+    </p>
+
+    <h2>Current & Recent Courses</h2>
+
+    {Array.from(courseGroups.entries()).map(([courseNum, offerings]) => (
+      <div class="card">
+        <h3>{courseNum}</h3>
+        {offerings.map((course: any) => (
+          <div style="margin-top: 0.5rem;">
+            <a href={`${base}/courses/${course.data.slug}`}>
+              <strong>{course.data.course_title}</strong>
+              {course.data.term && course.data.year && (
+                <span style="color: var(--text-muted);"> — {course.data.term} {course.data.year}</span>
+              )}
+            </a>
+            {course.data.level && (
+              <span class="tag">{course.data.level}</span>
+            )}
+            {course.data.description && (
+              <p style="margin: 0.5rem 0 0; font-size: 0.9rem; color: var(--text-muted);">
+                {course.data.description.slice(0, 200)}...
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    ))}
+
+    <h2>Resources</h2>
+    <ul>
+      <li><a href="https://github.com/nickmvincent">Course GitHub Repositories</a></li>
+      <li><a href="https://nickmvincent.com">Personal Website</a></li>
+    </ul>
+  </main>
+
+  <footer>
+    <p>Nick Vincent · Simon Fraser University · School of Computing Science</p>
+  </footer>
+</Layout>

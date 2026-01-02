@@ -1,0 +1,7 @@
+content/
+docs/
+.quarto/
+src/
+index.qmd
+
+/.quarto/

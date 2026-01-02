@@ -1,0 +1,92 @@
+---
+type: paidf_chapter
+title: Upstream data and data contribution
+slug: 01g_upstream
+visibility: public
+---
+Status: first draft complete.
+
+Data flywheels and contribution pathways are one part of the broader "data strategy" for an AI product or organization. Another key factor in making the full public AI pipeline transparent is telling users about **upstream data**—where the AI models and their training data come from in the first place.
+
+Typically, Terms of Service for an application or flywheel tell users where their data *will go*; but it can also be valuable to tell users where the data and AI *came from*. This bidirectional transparency is a distinguishing feature of public AI systems.
+
+## What is "upstream" in this context?
+
+When we talk about upstream data, we mean:
+
+1. **Pre-training data**: The massive datasets (web crawls, books, code repositories, etc.) used to train foundation models
+2. **Fine-tuning data**: Curated datasets used to specialize or align models for specific tasks
+3. **Model provenance**: Which organizations trained the models, under what conditions, and with what objectives
+4. **Data supply chains**: The often-complex path from original data creation to model training
+
+For public AI systems, transparency about upstream sources serves multiple goals: it helps users make informed choices, supports accountability, enables research into model behavior, and can build trust in the overall system.
+
+## AI builder attribution
+
+In each interaction between users and a public AI system, we want to attribute the organization who did the hard work of building and training the model. Ideally, we also want to attribute the original data creators, though practical constraints often make this challenging.
+
+Key considerations for AI builder attribution:
+
+- **Interface-level branding**: Custom text, logos, and model cards within the AI interface can provide organization-specific attribution, ensuring all model builders receive appropriate credit
+- **Cross-promotion potential**: Public AI systems can highlight other interfaces and endpoints—something private AI systems are typically less willing to do
+- **Maintaining partnerships**: Getting attribution right is important so that model developers remain engaged with the public ecosystem rather than retreating to their own proprietary interfaces
+- **Version tracking**: As models are updated, attribution should reflect which version is being used and any significant changes
+
+## Data attribution
+
+Another way that public AI platforms can differentiate themselves from private AI is by heavily emphasizing data attribution. This might involve:
+
+- **Data cards and documentation**: Showing users standardized documentation about training datasets, including their sources, curation methods, and known limitations [@gebru_datasheets_2018]
+- **Trace-back features**: Incorporating tools like OlmoTrace [@liu2025olmotrace] that allow users to see which training examples influenced a particular model response
+- **Dataset lineage**: Providing clear documentation of how datasets were assembled, filtered, and processed
+- **Creator acknowledgment**: Where possible, attributing specific contributions to individuals or communities who created training data
+
+### Challenges in data attribution
+
+Full data attribution faces significant practical challenges:
+
+- **Scale**: Modern foundation models train on billions of data points, making individual attribution infeasible
+- **Derived works**: Much training data is itself derived from other sources, creating complex attribution chains
+- **Privacy tensions**: Detailed attribution could conflict with contributor privacy preferences
+- **Aggregation effects**: Model capabilities emerge from the aggregate of training data, not individual examples
+
+Despite these challenges, even partial or aggregate attribution can provide value—acknowledging major data sources, highlighting community contributions, and being transparent about what is and isn't known about training data provenance.
+
+## Why does upstream transparency matter?
+
+Telling users about upstream data is a key part of system-wide transparency. This matters for several reasons:
+
+### Building trust and incentivizing contribution
+
+Transparency on both fronts (model builders and data sources) can provide further incentive to users to contribute data themselves. Users may be more willing to contribute if they:
+
+- See that their contributions will join a corpus with clear provenance
+- Specifically want to support certain organizations providing models or data
+- Understand how their contributions relate to the broader ecosystem
+
+### Enabling informed choices
+
+Users can make better decisions about which AI systems to use when they understand:
+
+- What data the models were trained on (and potential biases this introduces)
+- Which organizations are involved in the supply chain
+- What values and objectives guided model development
+
+### Supporting research and accountability
+
+Upstream transparency enables:
+
+- Academic research into model behavior and failure modes
+- Third-party audits and evaluations
+- Regulatory compliance and accountability mechanisms
+- Community oversight and governance
+
+## Connections to data valuation and collective action
+
+There are a number of exciting connections between upstream transparency and other areas of research:
+
+- **Data valuation**: Methods for quantifying the contribution of individual data points or subsets to model performance [@ghorbani2019datashapley; @koh2017understanding] could eventually inform attribution and compensation schemes
+- **Collective action**: Understanding upstream data flows helps communities organize around their collective data contributions and exercise data leverage [@vincent2021datalev]
+- **Data intermediaries**: Organizations that help individuals understand and manage their data contributions benefit from clear upstream documentation
+
+These connections suggest that investing in upstream transparency today can enable more sophisticated governance and participation mechanisms in the future.

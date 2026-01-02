@@ -1,0 +1,8 @@
+---
+type: readme
+title: Todos
+visibility: public
+---
+- #todo: talk about the convergence of "feedback data" in the flywheel and "content data"
+- #todo: talk about user reputation
+- #todo: talk about machine unlearning in EC section

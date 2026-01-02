@@ -1,0 +1,10 @@
+---
+title: "Archive"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: table
+  fields: [date, title]
+  date-format: "YYYY-MM-DD"
+page-layout: full
+---

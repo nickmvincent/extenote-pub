@@ -1,0 +1,37 @@
+/* Custom styles for Data Leverage Blog */
+
+/* Hover states for blog post titles in listings */
+.quarto-listing-default .listing-title,
+.quarto-listing-default .listing-title a,
+h3.listing-title a,
+.listing-item .listing-title a {
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.quarto-listing-default .listing-title:hover,
+.quarto-listing-default .listing-title a:hover,
+h3.listing-title a:hover,
+.listing-item .listing-title a:hover {
+  color: var(--bs-link-hover-color, #0056b3);
+  text-decoration: underline;
+}
+
+/* Add subtle background on post card hover */
+.quarto-listing-default .listing-item {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin: -0.5rem;
+}
+
+.quarto-listing-default .listing-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .quarto-listing-default .listing-item:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+}

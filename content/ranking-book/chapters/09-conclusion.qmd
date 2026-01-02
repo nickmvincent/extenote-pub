@@ -1,0 +1,203 @@
+---
+type: book_chapter
+title: Conclusion and Research Agenda
+visibility: public
+---
+# Conclusion and Research Agenda {#sec-conclusion}
+
+## Summary of the Framework
+
+This book has advanced two interlocking frameworks for understanding AI and its governance.
+
+### The Ranking Framework
+
+AI systems—search engines, recommendation algorithms, generative models, and AI agents—all perform the same fundamental task: **ranking information and delivering it to users**.
+
+Google ranks webpages. TikTok ranks videos. ChatGPT ranks tokens. Despite their apparent differences, these systems compete in a shared space: providing ranked information in response to user needs. The ranking framework unifies them under a common description.
+
+Generative AI introduced a shift in granularity. Traditional platforms ranked *bundles*—complete documents, videos, or images created by identifiable authors. Generative AI ranks *chunks*—individual tokens, assembled into novel sequences with no clear authorship.
+
+This shift:
+
+**Enables new capabilities.** Custom poems, bespoke code, personalized explanations—outputs that aren't possible when candidates are fixed bundles. Generative AI can produce exactly what the context requires, not just retrieve the closest match.
+
+**Breaks existing economic arrangements.** Bundles came with built-in attribution, provenance, and economic mechanisms. A book has an author who receives royalties. A webpage has a publisher who earns from ads. Chunks have none of this. The economic infrastructure that incentivized knowledge creation doesn't apply when outputs are token-level compositions.
+
+**Creates evaluation challenges.** We can check Wikipedia's edit history. We can assess a paper's citations. We can investigate an author's credentials. For generated text, these verification mechanisms don't exist. The granularity that enables flexibility defeats provenance.
+
+The ranking framework isn't just a description—it's a lens for governance. If AI systems rank information, then *what they rank* is the intervention point. Training data shapes rankings. Control over training data shapes AI behavior. This is why the Data Pipeworks matters.
+
+### The Data Pipeworks
+
+Human knowledge and values flow to AI systems through five stages:
+
+1. **Knowledge and Values**: The "Reality Signal"—everything humans know and prefer
+2. **Records**: Interfaces transform signals into storable data
+3. **Datasets**: Organizations aggregate records under constraints
+4. **Models**: Training compresses datasets into parameters
+5. **Deployed Systems**: Products embed models and affect the world
+
+Each stage filters and transforms. Each stage represents a governance opportunity.
+
+Critically, Stage 5 feeds back to Stage 1. Deployed systems:
+- Produce outputs that become future training data (synthetic data)
+- Crowd out human contributions (Stack Overflow decline)
+- Change human behavior (what people learn, create, and value)
+
+This feedback loop creates the social dilemmas that motivate governance: if everyone relies on AI outputs rather than creating original knowledge, the system that depends on original knowledge degrades.
+
+The Pipeworks framework clarifies:
+- **Where human factors enter**: Stages 1 and 2 determine what's available downstream
+- **Where aggregation occurs**: Stage 3 is where individual records become collective resources
+- **Where feedback creates risk**: The Stage 5 → Stage 1 loop affects long-term system health
+- **Where governance can act**: Every stage offers intervention points
+
+## Key Claims Revisited
+
+This book makes claims at different confidence levels. Revisiting them with explicit epistemic status:
+
+### High Confidence
+
+**LLMs mechanistically rank tokens via softmax.** This is definitional—it follows from how the systems work. At each generation step, the model produces a probability distribution over the vocabulary. Higher probabilities mean higher ranks. This is not metaphor; it is mechanism.
+
+**Training data causally affects outputs.** Membership inference and extraction attacks demonstrate this empirically. Specific training examples leave detectable traces in model behavior. The connection between data and output is not just theoretical—it's measurable.
+
+**AI systems compete with human knowledge platforms.** Stack Overflow's 25% decline post-ChatGPT is the clearest example. Traffic siphoning from search to AI overviews is another. Platforms that provide information face direct competition from systems that synthesize information from training data.
+
+### Moderate Confidence
+
+**Economic disruption from generative AI will be significant.** Task exposure studies suggest broad effects. Productivity experiments show large gains. Early labor market signals (freelance writing decline) align with predictions. But long-term equilibria remain uncertain. The direction of disruption seems clear; the magnitude is not.
+
+**Power concentration is the default trajectory.** Feedback loops between AI deployment, data accumulation, and capability improvement favor incumbents. This is the logic of platform economics applied to AI. But countervailing forces (open-weight models, competition, antitrust) exist. The concentration tendency is real; whether it dominates is contingent on governance.
+
+**Collective bargaining for information could help.** Historical precedents (labor unions, music licensing, news bargaining) suggest organized data contributors could gain leverage. The logic is sound. But the institutional infrastructure doesn't exist, and building it faces coordination challenges. Worth trying; success is uncertain.
+
+### Lower Confidence
+
+**Specific predictions about labor market outcomes.** Will AI cause mass unemployment or primarily augment workers? The evidence is preliminary. RCTs show productivity gains; translation to employment effects is unclear. Caution about strong claims is warranted.
+
+**Whether proposed interventions will succeed.** Collective bargaining, standardized contracts, commons registries—these are proposals, not tested policies. They could work. They could fail. They could have unintended consequences. The goal is to articulate promising directions, not to guarantee outcomes.
+
+**Long-term equilibria under different governance regimes.** How will AI development and economic arrangements stabilize? This depends on technological trajectories, policy choices, and social adaptation that can't be predicted with confidence.
+
+## Open Questions
+
+The framework raises as many questions as it answers. Key research directions include:
+
+### Empirical Questions
+
+**Long-term labor market effects.** Beyond productivity studies and early signals, what actually happens to employment, wages, and job quality over years? This requires longitudinal research that tracks workers over time.
+
+**Optimal collective size for bargaining.** Should data collectives be small (focused sectors) or large (broad coverage)? How does size affect leverage, transaction costs, and member benefit? Empirical study of existing and pilot collectives could inform design.
+
+**Effectiveness of different contract structures.** Do per-token fees, revenue shares, or flat licenses work best for different content types? What enforcement mechanisms actually prevent unauthorized use? These are testable questions once contracts exist at scale.
+
+**Model collapse dynamics.** How severe is degradation from synthetic data? Under what conditions is some synthetic data acceptable? What's the tipping point? This affects predictions about the sustainability of current AI development.
+
+### Technical Questions
+
+**Better data valuation methods.** Current approaches (ablation, Shapley, influence functions) are either computationally infeasible or imprecise. Can we develop practical methods that provide reasonable valuations at scale?
+
+**Provenance tracking at scale.** How can we track where data came from and what permissions apply across billions of documents and images? Watermarking, fingerprinting, and metadata approaches each have limitations.
+
+**Attribution in generated outputs.** When an AI system produces output, can we identify which training data contributed? Can this be done without revealing proprietary training details? Technical methods for attribution would enable many governance mechanisms.
+
+### Institutional Questions
+
+**International coordination mechanisms.** AI development is global; data governance is jurisdictional. How can international frameworks enable consistent rules without being captured by the interests of powerful nations or corporations?
+
+**Role of public AI institutions.** Should governments develop AI? Fund commons? Regulate markets? Provide compute? Different models have different implications for innovation, access, and accountability.
+
+**Transition from current to proposed arrangements.** How do we get from today's chaotic data ecosystem to one with clear rules and functioning institutions? What's the sequence? Who leads? What are the political economy obstacles?
+
+### Theoretical Questions
+
+**How AI agents change bargaining dynamics.** If AI agents increasingly act in the world—not just producing outputs for humans to consume—how does this change the analysis? Do agents trained on human data inherit obligations to human data contributors?
+
+**Measurement of power concentration.** How do we operationalize "concentration" in AI? Market share in model providers? Control over training data? Influence over rankings? The theoretical concept needs measurement operationalization.
+
+**Long-term equilibria under different governance regimes.** What are the stable end-states under free-for-all versus structured governance? Can we model the dynamics formally and identify conditions for different outcomes?
+
+## Research Agenda
+
+Based on the framework and open questions, a research agenda for the coming years:
+
+### Near-Term Priorities (1-3 years)
+
+**Document data ecosystems.** Track the health of knowledge commons. How much new content is being contributed to Wikipedia, Stack Overflow, GitHub? How much is AI-generated? What's happening to contributor populations? Early warning systems for commons degradation.
+
+**Develop valuation tools.** Make data contribution measurable, even if imperfect. Create practical methods that can provide reference valuations for negotiation. Accept that precision isn't achievable; aim for defensible approximations.
+
+**Design contract templates.** Draft standardized contracts for different use cases (training, retrieval, evaluation) and different parties (commercial, research, nonprofit). Gather feedback, refine, and seek adoption.
+
+**Build collective infrastructure.** Create pilot data collectives in specific sectors—journalists, programmers, artists. Test low-friction joining mechanisms. Learn what works.
+
+### Medium-Term Priorities (3-7 years)
+
+**Evaluate interventions.** As collective bargaining and data rules emerge, study their effects. Randomized trials where feasible; careful observational studies where not. Did the intervention improve outcomes for contributors? For users? For AI development?
+
+**International harmonization.** Work toward consistent rules across jurisdictions. This requires diplomacy, model laws, and international institutions. Progress will be slow, but the alternative—fragmented rules that enable regulatory arbitrage—is worse.
+
+**Public AI development.** Demonstrate alternative governance models through public AI projects. Show that transparent data practices, contributor compensation, and public benefit missions are compatible with capable AI systems.
+
+### Long-Term Priorities (7+ years)
+
+**Democratic AI governance.** Develop scalable mechanisms for public input into AI development priorities. This might involve citizen assemblies, participatory technology assessment, or novel democratic forms suited to technical decisions.
+
+**Sustainable data economics.** Ensure that knowledge creation continues. This means incentives for human contribution even as AI becomes more capable. It may require new institutional forms—data cooperatives, public funding for commons, mandatory contribution requirements.
+
+**Power distribution monitoring.** Track and address concentration. Create ongoing assessment of who controls AI capabilities and data resources. Build institutions with authority to intervene when concentration threatens competition, innovation, or democratic governance.
+
+## The Coalition
+
+A final observation: the interests supporting better data governance are broader than often assumed.
+
+**Creators** want compensation and agency. Writers, artists, programmers, and researchers who contribute to training data want recognition and fair treatment.
+
+**Most AI companies** want protection too. They want protection from model stealing, legal clarity about training data, and enforcement against competitors who free-ride. The "same boat" argument from Chapter 7 suggests AI companies have interests in data rules.
+
+**Open knowledge advocates** want reciprocity. They're happy to share knowledge but troubled when sharing feeds commercial extraction that undermines the commons. Clear rules that preserve open contribution while limiting extractive use could satisfy them.
+
+**Readers and users** want access to trustworthy information. Paraphrased, synthesized content without provenance doesn't serve truth-seeking. Users benefit from systems that can explain their sources and be held accountable.
+
+The main opponents are:
+- Those who expect to win the current free-for-all (first-movers who've already accumulated advantages)
+- Those ideologically committed to extremes ("information must be entirely free" or "everything must be propertized")
+
+Both groups are smaller than they appear. Most people, organizations, and even most AI companies might accept governance that balances interests. The political economy challenge is coordination, not fundamental opposition.
+
+## Closing Thoughts
+
+As AI systems proliferate, we collectively run more computations that assign weights over all information humans have ever recorded. Every query to ChatGPT triggers a ranking. Every recommendation shapes what people see. Every AI agent decision reflects rankings learned from human-generated data.
+
+The ranking framework clarifies:
+- **The mechanism**: Token-level ranking via softmax at each generation step
+- **The disruption**: Moving from bundles to chunks breaks economic arrangements built for bundles
+- **The intervention point**: The information being ranked—the training data—is where governance has leverage
+
+The Data Pipeworks reveals:
+- **Where human factors enter**: Every stage, but especially Stages 1-2
+- **Where feedback loops create risks**: Model collapse, crowding out, behavioral change
+- **Where governance can act**: Interfaces, datasets, models, and deployed systems each offer intervention points
+
+Neither framework provides definitive answers. Both provide tools for thinking. They clarify what's at stake, identify leverage points, and suggest directions for action.
+
+The window for shaping AI governance is open now. Technical development is rapid but not yet locked in. Social understanding is developing. Regulatory attention is high. These conditions won't last forever. Eventually, technical paths will be harder to change, business models will be entrenched, and political attention will move elsewhere.
+
+This is not an argument for hasty action. Poorly designed governance could cause harm. But it is an argument for serious engagement—for developing and testing proposals while the window remains open.
+
+The goal of this book has been to contribute tools for that engagement. The ranking framework and Data Pipeworks are conceptual resources, not final solutions. The proposals for collective bargaining and data rules are starting points, not blueprints. The research agenda identifies directions, not destinations.
+
+If these frameworks prove useful—if they help researchers, policymakers, and practitioners think more clearly about AI and its governance—the book will have served its purpose. The actual work of building better institutions will require many hands, many iterations, and many failures before success.
+
+That work is worth attempting. The alternative—allowing AI development to proceed without governance, trusting that market forces and technological progress will produce good outcomes—is a bet we've made before with technology, and it hasn't always paid off.
+
+The ranking framing suggests that whoever controls what gets ranked highly controls, in a meaningful sense, what information people receive. The Data Pipeworks suggests that the source of that control is training data—the accumulated record of human knowledge and values. Getting the governance of that resource right matters for what AI becomes and who it serves.
+
+We don't know what the right answers are. But we know the questions are worth asking, and the frameworks this book develops can help structure the inquiry. What remains is the hard work of collective action—organizing, bargaining, legislating, and building—to shape AI's trajectory toward better outcomes.
+
+The invitation is open.
+
+---
+
+*Feedback welcome at the book's repository or via the author's contact information.*

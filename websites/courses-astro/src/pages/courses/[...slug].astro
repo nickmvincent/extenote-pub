@@ -1,0 +1,195 @@
+---
+import Layout from "../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { marked } from "marked";
+
+const base = import.meta.env.BASE_URL;
+
+export async function getStaticPaths() {
+  const courses = await getCollection("courses");
+  const syllabi = await getCollection("syllabi");
+  const assignments = await getCollection("assignments");
+  const readingLists = await getCollection("readingLists");
+
+  const paths = [];
+
+  // Course pages
+  for (const course of courses) {
+    if (course.data.type === "course") {
+      paths.push({
+        params: { slug: course.data.slug },
+        props: {
+          entry: course,
+          type: "course",
+          relatedSyllabi: syllabi.filter(s => s.data.course_slug === course.data.slug),
+          relatedAssignments: assignments.filter(a => a.data.course_slug === course.data.slug),
+          relatedReadings: readingLists.filter(r => r.data.course_slug === course.data.slug),
+        },
+      });
+    }
+  }
+
+  // Syllabi pages
+  for (const syllabus of syllabi) {
+    paths.push({
+      params: { slug: `syllabi/${syllabus.data.slug}` },
+      props: { entry: syllabus, type: "syllabus" },
+    });
+  }
+
+  // Assignment pages
+  for (const assignment of assignments) {
+    paths.push({
+      params: { slug: `assignments/${assignment.data.slug}` },
+      props: { entry: assignment, type: "assignment" },
+    });
+  }
+
+  // Reading list pages
+  for (const reading of readingLists) {
+    paths.push({
+      params: { slug: `readings/${reading.data.slug}` },
+      props: { entry: reading, type: "reading_list" },
+    });
+  }
+
+  return paths;
+}
+
+const { entry, type, relatedSyllabi, relatedAssignments, relatedReadings } = Astro.props;
+const { data } = entry;
+
+// Get the raw markdown content
+const rawContent = entry.body || "";
+const htmlContent = marked(rawContent);
+
+const title = data.title || data.course_title || data.slug;
+---
+
+<Layout title={title}>
+  <nav>
+    <a href={base}>Courses</a>
+    <a href="https://nickmvincent.com">Main Site</a>
+  </nav>
+
+  <main>
+    <div class="breadcrumb">
+      <a href={base}>Courses</a>
+      {type !== "course" && data.course_slug && (
+        <>
+          <span> / </span>
+          <a href={`${base}/courses/${data.course_slug}`}>{data.course_slug}</a>
+        </>
+      )}
+      <span> / {title}</span>
+    </div>
+
+    <h1>{title}</h1>
+
+    {type === "course" && (
+      <>
+        {data.course_number && (
+          <p style="font-size: 1.1rem; color: var(--text-muted);">
+            {data.course_number}
+            {data.term && data.year && ` · ${data.term} ${data.year}`}
+            {data.institution && ` · ${data.institution}`}
+          </p>
+        )}
+
+        {data.description && (
+          <p style="margin: 1rem 0;">{data.description}</p>
+        )}
+
+        {data.topics && data.topics.length > 0 && (
+          <div style="margin: 1rem 0;">
+            {data.topics.map((topic: string) => (
+              <span class="tag">{topic}</span>
+            ))}
+          </div>
+        )}
+
+        {(data.website_url || data.repo_url) && (
+          <p>
+            {data.website_url && <a href={data.website_url}>Course Website</a>}
+            {data.website_url && data.repo_url && " · "}
+            {data.repo_url && <a href={data.repo_url}>GitHub Repository</a>}
+          </p>
+        )}
+
+        {relatedSyllabi && relatedSyllabi.length > 0 && (
+          <>
+            <h2>Syllabus</h2>
+            <ul>
+              {relatedSyllabi.map((s: any) => (
+                <li><a href={`${base}/courses/syllabi/${s.data.slug}`}>{s.data.title}</a></li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {relatedReadings && relatedReadings.length > 0 && (
+          <>
+            <h2>Reading Lists</h2>
+            <ul>
+              {relatedReadings.map((r: any) => (
+                <li><a href={`${base}/courses/readings/${r.data.slug}`}>{r.data.title}</a></li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {relatedAssignments && relatedAssignments.length > 0 && (
+          <>
+            <h2>Assignments</h2>
+            <ul>
+              {relatedAssignments.sort((a: any, b: any) => (a.data.assignment_number || 0) - (b.data.assignment_number || 0)).map((a: any) => (
+                <li>
+                  <a href={`${base}/courses/assignments/${a.data.slug}`}>{a.data.title}</a>
+                  {a.data.due_date && (
+                    <span style="color: var(--text-muted);"> — Due: {new Date(a.data.due_date).toLocaleDateString()}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </>
+    )}
+
+    {type === "assignment" && data.due_date && (
+      <p style="color: var(--text-muted);">
+        <strong>Due:</strong> {new Date(data.due_date).toLocaleDateString()}
+        {data.points_possible && ` · ${data.points_possible} points`}
+      </p>
+    )}
+
+    <article set:html={htmlContent} />
+  </main>
+
+  <footer>
+    <p>Nick Vincent · Simon Fraser University</p>
+  </footer>
+</Layout>
+
+<style>
+  article {
+    margin-top: 2rem;
+  }
+
+  article :global(h1) {
+    font-size: 1.75rem;
+    margin-top: 2rem;
+  }
+
+  article :global(h2) {
+    font-size: 1.4rem;
+    margin-top: 1.75rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.25rem;
+  }
+
+  article :global(h3) {
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+  }
+</style>

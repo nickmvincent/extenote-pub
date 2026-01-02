@@ -1,0 +1,296 @@
+---
+type: book_chapter
+title: The Evaluation Problem
+visibility: public
+---
+# The Evaluation Problem {#sec-evaluation-problem}
+
+## Overview
+
+How do you know if an AI system is good?
+
+This question seems simple but conceals deep difficulties. Traditional software evaluation is tractable: does the program produce the correct output for given inputs? But generative AI systems produce outputs that aren't straightforwardly correct or incorrect. A response can be grammatical, fluent, confident, and completely wrong. It can be factually accurate but stylistically inappropriate. It can be helpful for one user and harmful for another.
+
+The ranking framework developed in earlier chapters offers a lens on this problem: **what we evaluate is whether a model ranks information appropriately for a given context.** This framing clarifies both why evaluation is hard and what interventions might help.
+
+This chapter examines:
+
+1. **The double-check paradox**: AI products disclaim accuracy while selling assistance. What does this imply?
+2. **Bar charts and vibes**: How do people actually choose between AI systems? Not through careful evaluation.
+3. **Dataset documentation as quality signal**: If benchmarks fail, can transparency about training data inform choices?
+4. **Connections to collective bargaining**: How evaluation challenges motivate the data rules in later chapters.
+
+## Background Research
+
+### A Brief History of AI Evaluation
+
+The challenge of evaluating intelligent systems predates modern machine learning. Turing's famous "imitation game" [@turing1950] proposed evaluating machine intelligence through indistinguishability from humans—a criterion that has proven both influential and problematic. The Turing test privileged deception over competence and offered no gradations between pass and fail.
+
+Modern ML evaluation emerged from pattern recognition and statistical learning traditions. Early benchmarks like MNIST [@lecun1998] for digit recognition established a template: standardized datasets, held-out test sets, and leaderboards tracking performance improvements. This paradigm proved extraordinarily productive for narrow tasks but strained under the weight of general-purpose language models.
+
+The emergence of large language models required new evaluation approaches. The NLP community developed diverse benchmarks covering reading comprehension (SQuAD [@rajpurkar2016]), commonsense reasoning (Winograd Schema Challenge [@levesque2012]), and multi-task performance (SuperGLUE [@wang2019]). Yet these benchmarks quickly saturated: models approached human-level performance, raising questions about whether the benchmarks measured genuine understanding or exploitable statistical regularities.
+
+### Benchmark Critique and Goodhart's Law
+
+The limitations of benchmark-driven development have received sustained attention. Goodhart's Law—"when a measure becomes a target, it ceases to be a good measure"—applies forcefully to AI evaluation [@kiela2021]. Organizations optimizing for benchmark performance may achieve high scores through means that don't generalize to real-world utility.
+
+Several mechanisms undermine benchmark validity:
+
+**Benchmark contamination** occurs when test data appears in training corpora. Given the scale of modern training datasets, ensuring non-contamination is increasingly difficult [@dodge2021]. Studies have documented substantial overlap between benchmark test sets and web-scraped training data, inflating reported performance.
+
+**Annotation artifacts** are statistical patterns that correlate with correct answers but don't reflect the underlying task. Gururangan et al. [@gururangan2018] showed that models could achieve above-chance performance on natural language inference by attending only to hypothesis sentences, ignoring premises entirely. Such artifacts allow benchmark success without genuine task competence.
+
+**Task saturation** describes benchmarks where model performance approaches or exceeds human baselines, limiting their discriminative power. Once a benchmark is "solved," it no longer distinguishes between models or tracks further progress.
+
+### Human Evaluation and Its Discontents
+
+Human evaluation offers an alternative to automated benchmarks but introduces its own challenges. Clark et al.'s analysis [@clark2021] of human evaluation in NLG research found widespread methodological problems: small sample sizes, non-representative annotators, ambiguous instructions, and lack of statistical power.
+
+More fundamentally, human evaluation conflates multiple dimensions of quality. Evaluators rating generated text may respond to fluency, factual accuracy, originality, style, and appropriateness differently, with overall ratings obscuring which dimensions drive judgments. This makes it difficult to diagnose model weaknesses or compare models with different strength profiles.
+
+The advent of LLM-as-judge approaches—using language models to evaluate other language models—adds further complexity [@zheng2023]. While scalable and consistent, model-based evaluation may inherit systematic biases from the evaluating model and creates circularity concerns when models evaluate themselves or their close relatives.
+
+### Trust, Reliability, and Automation Bias
+
+Research on trust in automated systems provides context for the double-check paradox explored in this chapter. Parasuraman and Riley's foundational work [@parasuraman1997] identified patterns of "automation bias"—the tendency to over-rely on automated recommendations even when they conflict with other information sources.
+
+More recent work on AI reliance [@buccinca2021] has examined how interface design affects human deference to AI suggestions. Explanations intended to promote appropriate trust can paradoxically increase over-reliance by providing rationalization for accepting AI outputs. The warning labels on AI products ("may make mistakes") represent a minimal intervention whose effectiveness remains empirically uncertain.
+
+### Dataset Documentation as Evaluation Infrastructure
+
+The connection between data documentation and model evaluation has gained recognition. Bender and Friedman's "data statements" proposal [@bender2018] argued that NLP systems should be accompanied by documentation specifying their training data's demographic and linguistic characteristics. This enables users to assess whether models are appropriate for their use cases.
+
+The Foundation Model Transparency Index [@bommasani2023; @bommasani2024] operationalized this insight at scale, evaluating foundation model developers across 100+ indicators covering data, methods, and downstream use. Initial findings revealed substantial variation in transparency practices and low scores across most dimensions—suggesting that evaluation infrastructure remains underdeveloped relative to model capabilities.
+
+### The Ranking Connection
+
+The ranking framework developed in earlier chapters suggests a specific perspective on evaluation: what we evaluate is whether a model ranks information appropriately for a given context. This framing highlights that:
+
+1. **Evaluation is context-dependent**: A ranking that is appropriate for one use case may be inappropriate for another. No single benchmark can capture appropriateness across contexts.
+
+2. **Training data shapes rankings**: If a model learned to rank certain information highly from its training data, it will tend to reproduce those rankings. Evaluating output quality without considering input data is incomplete.
+
+3. **Evaluation itself requires ranking**: Choosing what to evaluate, how to weight different criteria, and which benchmarks to trust all involve ranking decisions. Evaluation is not neutral or objective but reflects evaluator priorities.
+
+## The Double-Check Paradox
+
+Every major AI product includes a disclaimer. Examine the fine print, and you'll find variations on the same message:
+
+- **ChatGPT**: "ChatGPT can make mistakes. Check important info."
+- **Gemini**: "Gemini can make mistakes, so double-check it."
+- **Claude**: Links to a dedicated help page explaining limitations
+- **Copilot**: "AI-generated content may be incorrect"
+
+These aren't buried in terms of service. They're displayed prominently in interfaces, sometimes beneath every response. The disclaimers are so ubiquitous that users become habituated to them—background noise rather than actionable guidance.
+
+### The Paradox
+
+Consider what these disclaimers actually say. If ChatGPT "can make mistakes," and users should "check important info," what exactly is ChatGPT providing?
+
+The implied workflow is: AI generates output → user verifies output → user uses verified output. But this raises questions:
+
+**If verification is necessary, what justifies the cost?** ChatGPT Plus costs $20/month. Claude Pro costs $20/month. Enterprise contracts cost substantially more. If users must independently verify every important claim, they're paying for a first draft that requires full expert review. The value proposition depends on this review being cheaper than generating the content from scratch—but for many domains, verification is as costly as generation.
+
+**What does "double-checking" actually mean?** The interfaces don't specify. For a legal question, does double-checking mean consulting a lawyer? Searching legal databases? Reading the cited cases (if any are cited)? For a medical question, does it mean consulting a physician? For a coding question, does it mean running the code? The vagueness allows users to believe they've "checked" while doing much less than true verification would require.
+
+**Why do hallucinated citations persist?** If users were actually double-checking, obvious errors would be caught. Yet lawyers have filed briefs citing cases that don't exist—not obscure precedents that might be misremembered, but wholly fabricated citations that any legal database search would reveal. The fact that these errors reach court filings suggests the double-check rarely happens.
+
+### What's Actually Happening
+
+The disclaimers serve legal and reputational functions for AI companies. They shift responsibility to users: "We told you to verify; you failed to do so; the error is yours." This may be legally effective while being practically hollow.
+
+Users, meanwhile, engage in bounded verification. They double-check when checking is easy (running code, doing a quick search) and skip verification when checking is hard (evaluating medical advice, assessing legal arguments). The disclaimer creates a fiction of shared responsibility while actual practice involves extensive unverified reliance.
+
+The research on automation bias predicts exactly this pattern. Users tend to accept AI outputs when those outputs are fluent and confident, even when the underlying claims are unverified or false. Warning labels don't overcome this bias—they provide cover for it.
+
+### Through the Ranking Lens
+
+The ranking framework illuminates why this happens. AI systems rank tokens to produce fluent, coherent text. They're optimized (through RLHF) to produce responses that users rate highly. But the ranking that produces highly-rated responses is not the same as the ranking that produces true responses.
+
+A confident, well-structured, grammatically perfect response ranks highly in user evaluations even if its factual claims are false. The system has learned to rank style and confidence highly because that's what training data and human feedback rewarded. Factual accuracy is one input to human ratings but not the dominant one—as the Kabir et al. Stack Overflow study showed, users preferred ChatGPT's style even when its answers were wrong.
+
+The disclaimer paradox is thus a consequence of optimizing for the wrong ranking. We've trained systems to rank outputs that humans rate highly, but human ratings don't reliably track factual accuracy. The solution isn't better disclaimers—it's changing what the system is optimized to rank highly.
+
+## Bar Charts and Vibes
+
+How do users, enterprises, and developers actually choose between AI systems? The answer reveals a gap between how evaluation *should* work and how it *does* work.
+
+### The Official Story: Benchmarks
+
+AI companies release benchmark results: performance on MMLU, HellaSwag, GSM8K, HumanEval, and dozens of other standardized tests. These appear in blog posts, technical reports, and marketing materials as bar charts showing one model outperforming another.
+
+The implication is clear: you should choose the model with the tallest bars. Higher benchmark scores indicate better capabilities. Evaluation is objective and quantitative.
+
+But this story has problems:
+
+**Goodhart's Law applies.** Companies optimize for benchmarks. Some of this optimization is legitimate (improving genuine capabilities), but some is not (training on test data, finding artifacts to exploit). High benchmark scores may not reflect real-world performance.
+
+**Benchmarks don't match use cases.** A benchmark measuring coding performance may not predict email-writing quality. A benchmark measuring factual recall may not predict creative writing ability. Users choosing models for specific tasks have no guarantee that aggregate benchmark scores reflect task-specific performance.
+
+**Benchmarks saturate and become uninformative.** When multiple models score 85-90% on a benchmark, the differences are within noise. New benchmarks replace old ones, but the churn makes historical comparison difficult.
+
+**The benchmark ecosystem lacks trust.** Different organizations report results under different conditions. Prompting strategies, evaluation metrics, and data splits vary. Without standardization and independent verification, benchmark claims are difficult to validate.
+
+### The Actual Story: Vibes
+
+In practice, decisions appear driven by factors that have little to do with benchmark performance.
+
+**Brand recognition.** ChatGPT was first to market at scale. "ChatGPT" has become a generic term for AI chat, like "Kleenex" for tissues. This brand advantage persists regardless of whether competitors have superior capabilities.
+
+**Social proof.** People use what their friends, colleagues, and Twitter followees use. Vibes spread through social networks independent of evaluation evidence.
+
+**Interface and experience.** Subtle differences in response speed, interface design, and interaction feel shape preferences. These are real factors but not measured by benchmarks.
+
+**Default and switching costs.** The first AI tool someone tries often becomes their default. Switching requires learning new interfaces, transferring workflows, and accepting uncertainty. Inertia dominates.
+
+This is the "vibes hypothesis": perceived quality, driven by brand, social, and experiential factors, dominates formal evaluation in determining market outcomes.
+
+### Evidence for the Vibes Hypothesis
+
+Consider what would be true if benchmark performance drove adoption:
+
+- The highest-benchmarking models would have the most users
+- Market share would shift rapidly when benchmark leadership changes
+- Users would articulate benchmark-based rationales for their choices
+
+None of these appears true. ChatGPT maintains market leadership despite periods when competitors benchmark higher. Market share shifts slowly. When asked why they use ChatGPT, users cite convenience, familiarity, and "it works for me"—not "its MMLU score is 0.3% higher."
+
+The implications are significant for governance. If vibes dominate, then benchmark manipulation is less concerning (it doesn't affect decisions) but so are benchmark improvements (they don't help users choose). The evaluation infrastructure that benchmarks provide is less functional than it appears.
+
+### What Users Actually Need
+
+What would useful evaluation look like? Users need to know:
+
+1. **For my specific use case, which model performs best?** Generic benchmarks don't answer this. Use-case-specific evaluation requires narrow benchmarks or direct testing.
+
+2. **When will this model fail?** Knowing capability limits matters more than knowing average performance. Edge cases, failure modes, and reliability bounds are undersupplied.
+
+3. **Can I trust this output?** Confidence calibration—knowing when the model knows it's uncertain—would enable appropriate verification. Current systems are poorly calibrated.
+
+4. **What are the risks?** Beyond inaccuracy, what privacy, security, and safety risks does usage create? These are rarely documented.
+
+The vibes-driven evaluation status quo doesn't serve these needs. Neither do current benchmark practices. The gap between what evaluation *provides* and what users *need* represents an opportunity for new approaches.
+
+## Dataset Details as Quality Signals
+
+If benchmarks are gamed and vibes are uninformative, what could serve as a useful quality signal? One possibility: transparency about training data.
+
+### The Proposal
+
+Imagine if AI products advertised their training data composition:
+
+- "Trained on 10,000 hours of expert-annotated medical QA"
+- "Includes responses from 500 board-certified physicians"
+- "Code training data reviewed by senior engineers at major tech companies"
+
+These are data provenance claims. They don't directly measure output quality but provide proxies that might be informative.
+
+The intuition: if you know what went into the model, you can predict what comes out. The ranking framework makes this precise—training data shapes what gets ranked highly in outputs. Models trained on expert data should rank expert-like responses highly. Models trained on amateur data should rank amateur-like responses highly.
+
+### Why This Might Work
+
+Data provenance has advantages over benchmarks:
+
+**Harder to game.** Benchmarks can be gamed through targeted optimization. Data provenance is harder to fake—either you have the data or you don't. Auditing data claims, while challenging, is more tractable than auditing benchmark claims.
+
+**Connects to user intuitions.** Users may understand "trained on medical textbooks and clinical notes" better than "scores 85% on MedQA benchmark." Data descriptions are more legible than benchmark scores.
+
+**Aligns with the Data Pipeworks.** Data provenance addresses Stage 3 of the pipeworks—the crucial aggregation step where records become datasets. Transparency at this stage illuminates what the model has been exposed to.
+
+### Challenges
+
+But data provenance signals also have problems:
+
+**Verification is hard.** How do you audit training data claims? Membership inference attacks provide partial verification but are unreliable at scale. Without audit mechanisms, provenance claims may be as untrustworthy as benchmark claims.
+
+**Quantity vs. quality.** "10,000 hours of expert annotation" could mean high-quality oversight or rushed checkbox-checking. Data quantity doesn't guarantee data quality.
+
+**User interpretation.** Do users actually know what training data composition implies for output quality? The connection requires understanding of how training works, which most users lack.
+
+**Competitive concerns.** Training data composition is often a trade secret. Companies may resist transparency requirements that reveal competitive advantages.
+
+### The Connection to Collective Bargaining
+
+Data provenance as quality signal connects directly to the collective bargaining proposals in later chapters.
+
+If consumers valued data provenance—if they preferred AI systems trained on ethically-sourced, well-compensated data—then there would be market incentive for transparent and fair data practices. Collective bargaining organizations could negotiate on behalf of contributors, and consumers could verify that their preferred systems honored those agreements.
+
+This is a virtuous cycle: data provenance transparency enables consumer choice; consumer choice creates incentives for fair data practices; fair data practices benefit data contributors. The evaluation problem and the data governance problem are linked.
+
+Currently, this cycle doesn't operate because data provenance is opaque. The Foundation Model Transparency Index finds low transparency across the industry. Without transparency, consumers can't reward good practices, and good practices have no market advantage.
+
+## Toward Better Evaluation
+
+What would more functional evaluation infrastructure look like?
+
+### Layered Disclosure
+
+Different users need different information. A layered approach might include:
+
+**Summary layer**: Simple quality indicators accessible to casual users. Star ratings, certification badges, or categorical labels (e.g., "certified for medical use" by relevant authorities).
+
+**Benchmark layer**: Standardized benchmark results with independent verification. Useful for sophisticated users who can interpret scores and understand limitations.
+
+**Provenance layer**: Detailed training data documentation. Sources, contributors, quality assurance processes, demographic characteristics. Useful for domain experts evaluating fitness for purpose.
+
+**Technical layer**: Model architecture, training procedures, known failure modes. Useful for researchers and auditors.
+
+This layered approach serves different audiences without requiring everyone to engage with technical details.
+
+### Independent Auditing
+
+Consumer Reports-style independent testing could verify claims and provide trusted third-party assessments. Such auditing would need to:
+
+- Establish standardized test protocols
+- Access model capabilities (potentially with rate limits to prevent full model theft)
+- Publish results without company interference
+- Update assessments as models change
+
+The Foundation Model Transparency Index represents an early step toward this model, though it currently assesses transparency practices rather than capability claims.
+
+### Use-Case-Specific Evaluation
+
+Generic evaluation may be impossible for general-purpose models. An alternative: domain-specific evaluation by domain experts.
+
+Medical AI could be evaluated by medical boards. Legal AI could be evaluated by bar associations. Educational AI could be evaluated by educational institutions. Each domain brings appropriate expertise and relevant standards.
+
+This fragments evaluation across domains but may produce more meaningful assessments than generic benchmarks. Users in each domain would have trusted authorities providing relevant guidance.
+
+### Failure Mode Documentation
+
+Rather than asking "how good is this model?", we might ask "when does this model fail?" Systematic failure mode documentation would characterize:
+
+- Edge cases where performance degrades
+- Input types that trigger unreliable outputs
+- Confidence calibration (when the model knows it's uncertain)
+- Adversarial vulnerabilities
+
+This negative framing—documenting limitations rather than capabilities—may be more actionable for users deciding whether to rely on AI for specific tasks.
+
+## Evaluation and the Ranking Framework
+
+The ranking framework suggests a unifying perspective on evaluation: we're assessing whether a model ranks information appropriately for given contexts.
+
+This framing has implications:
+
+**Context dependence is fundamental.** The same ranking may be appropriate for one use and inappropriate for another. Evaluation must be relativized to context, which generic benchmarks cannot capture.
+
+**Training data is not an input to evaluation—it is the target of evaluation.** Understanding what data shaped the model's rankings is as important as measuring output quality. Data provenance isn't supplementary to capability evaluation; it's central to it.
+
+**Evaluation requires prioritization.** Choosing what to evaluate, how to weight different criteria, and which failures matter most—these are ranking decisions. Evaluation frameworks embed values, and those values should be explicit.
+
+**The feedback loop matters.** Models optimized to rank highly on evaluations will learn to produce evaluated-highly outputs. If our evaluations don't capture what we actually care about, optimization against them will produce systems that don't serve what we care about. The double-check paradox is a symptom of this misalignment.
+
+## Summary
+
+Evaluating AI systems is difficult, and current approaches are inadequate:
+
+**The double-check paradox** reveals that AI products disclaim accuracy while selling assistance, shifting responsibility to users who largely don't verify. This is a consequence of optimizing for user ratings rather than truth.
+
+**Bar charts and vibes** characterizes actual evaluation: benchmarks that are gamed, ignored, and uninformative compete with brand recognition and social proof that dominate market decisions.
+
+**Dataset documentation as quality signal** offers an alternative approach: if users understood what training data shapes model outputs, they could make more informed choices. This connects evaluation to the data governance proposals in later chapters.
+
+**Better evaluation infrastructure** would include layered disclosure for different audiences, independent auditing, domain-specific evaluation by domain experts, and systematic failure mode documentation.
+
+The ranking framework clarifies that evaluation is fundamentally about assessing whether models rank information appropriately for contexts. This assessment is value-laden, context-dependent, and inextricably linked to training data composition. Improving evaluation requires not just better benchmarks but better data practices—which is the subject of the following chapters.

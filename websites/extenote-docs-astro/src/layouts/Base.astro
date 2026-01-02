@@ -1,0 +1,556 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Extenote",
+  description = "Content management for structured Markdown. Write once, validate everywhere, publish anywhere."
+} = Astro.props;
+
+const siteUrl = "https://extenote.dev";
+const fullTitle = title === "Extenote" ? title : `${title} | Extenote`;
+---
+
+<!DOCTYPE html>
+<html lang="en" data-mode="dark" data-aesthetic="classic">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script is:inline>
+      // Load theme preferences before render to prevent flash
+      (function() {
+        const mode = localStorage.getItem('theme-mode') || 'dark';
+        const aesthetic = localStorage.getItem('theme-aesthetic') || 'classic';
+        document.documentElement.setAttribute('data-mode', mode);
+        document.documentElement.setAttribute('data-aesthetic', aesthetic);
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  /* ═══════════════════════════════════════════════════════════════════════════
+     EXTENOTE DOCS - Dual Theme System
+     Classic (Medieval Manuscript) + Futuristic (Cyberpunk)
+     Light + Dark modes for each
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     CLASSIC LIGHT (Default - Medieval Manuscript)
+     ───────────────────────────────────────────────────────────────────────────── */
+  :root,
+  [data-aesthetic="classic"][data-mode="light"] {
+    --font-heading: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+    --font-body: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Courier Prime', 'Courier New', monospace;
+
+    --bg: #f5f1eb;
+    --bg-card: #faf8f4;
+    --bg-inset: #efe9df;
+
+    --text: #2c2416;
+    --text-muted: #6b5d4d;
+    --text-light: #f5f1eb;
+
+    --accent: #4a5d4a;
+    --accent-hover: #3a4a3a;
+    --accent-warm: #8b4513;
+
+    --border: #d4cdc0;
+    --border-ornate: #8b7355;
+    --gold: #b8860b;
+
+    --tag-bg: #e8e4d9;
+    --tag-text: #4a5d4a;
+
+    --ornament-1: '═══════ ❧ ═══════';
+    --ornament-2: '─────── ✦ ───────';
+    --nav-dot: '·';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     CLASSIC DARK (Medieval Manuscript - Dark)
+     ───────────────────────────────────────────────────────────────────────────── */
+  [data-aesthetic="classic"][data-mode="dark"] {
+    --bg: #1a1612;
+    --bg-card: #252018;
+    --bg-inset: #1f1a14;
+
+    --text: #e8e0d4;
+    --text-muted: #a89880;
+    --text-light: #f5f1eb;
+
+    --accent: #8aaa8a;
+    --accent-hover: #a0c0a0;
+    --accent-warm: #c08050;
+
+    --border: #3a3228;
+    --border-ornate: #6a5a48;
+    --gold: #d4a855;
+
+    --tag-bg: #2a2520;
+    --tag-text: #8aaa8a;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     FUTURISTIC LIGHT (Cyberpunk - Light)
+     ───────────────────────────────────────────────────────────────────────────── */
+  [data-aesthetic="futuristic"][data-mode="light"] {
+    --font-heading: 'Orbitron', 'Arial Black', sans-serif;
+    --font-body: 'JetBrains Mono', 'SF Mono', monospace;
+    --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+    --bg: #f0f4f8;
+    --bg-card: #ffffff;
+    --bg-inset: #e4ecf4;
+
+    --text: #0a1628;
+    --text-muted: #4a5568;
+    --text-light: #f0f4f8;
+
+    --accent: #0891b2;
+    --accent-hover: #0e7490;
+    --accent-warm: #d946ef;
+
+    --border: #cbd5e1;
+    --border-ornate: #0891b2;
+    --gold: #d946ef;
+
+    --tag-bg: #e0f2fe;
+    --tag-text: #0891b2;
+
+    --ornament-1: '//======= EXTENOTE =======//';
+    --ornament-2: '< ─────── ◆ ─────── >';
+    --nav-dot: '|';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     FUTURISTIC DARK (Cyberpunk - Dark)
+     ───────────────────────────────────────────────────────────────────────────── */
+  [data-aesthetic="futuristic"][data-mode="dark"] {
+    --font-heading: 'Orbitron', 'Arial Black', sans-serif;
+    --font-body: 'JetBrains Mono', 'SF Mono', monospace;
+    --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+    --bg: #0a0e14;
+    --bg-card: #131920;
+    --bg-inset: #0d1117;
+
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --text-light: #e6edf3;
+
+    --accent: #00d4ff;
+    --accent-hover: #00ffff;
+    --accent-warm: #ff00ff;
+
+    --border: #21262d;
+    --border-ornate: #00d4ff;
+    --gold: #ff00ff;
+
+    --tag-bg: #0d1f2d;
+    --tag-text: #00d4ff;
+
+    --ornament-1: '//======= EXTENOTE =======//';
+    --ornament-2: '< ─────── ◆ ─────── >';
+    --nav-dot: '|';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     BASE STYLES
+     ───────────────────────────────────────────────────────────────────────────── */
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.7;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+  }
+
+  [data-aesthetic="futuristic"] {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  body {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  a:hover {
+    color: var(--accent-hover);
+  }
+
+  /* Classic link style */
+  [data-aesthetic="classic"] a:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+  }
+
+  /* Futuristic link style */
+  [data-aesthetic="futuristic"] a:hover {
+    text-decoration: none;
+    text-shadow: 0 0 8px var(--accent);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    padding: 0.15rem 0.4rem;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  [data-aesthetic="futuristic"] code {
+    border-radius: 0;
+    border-left: 2px solid var(--accent);
+  }
+
+  pre {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-ornate);
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+
+  [data-aesthetic="futuristic"] pre {
+    border-radius: 0;
+    border: 1px solid var(--border-ornate);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] pre {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.15), inset 0 0 30px rgba(0, 0, 0, 0.3);
+  }
+
+  pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     DECORATIVE ELEMENTS
+     ───────────────────────────────────────────────────────────────────────────── */
+
+  .ornament {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.9rem;
+    letter-spacing: 0.5em;
+    margin: 0.5rem 0;
+  }
+
+  .ornament::before {
+    content: var(--ornament-1);
+  }
+
+  [data-aesthetic="futuristic"] .ornament {
+    font-family: var(--font-mono);
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+  }
+
+  .divider {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    margin: 1.5rem 0;
+  }
+
+  .divider::before {
+    content: var(--ornament-2);
+  }
+
+  [data-aesthetic="futuristic"] .divider {
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     HEADER / NAV
+     ───────────────────────────────────────────────────────────────────────────── */
+
+  .top-nav {
+    text-align: center;
+    padding: 1.5rem 2rem 1rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  [data-aesthetic="futuristic"] .top-nav {
+    border-bottom: 1px solid var(--border-ornate);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .top-nav {
+    background: linear-gradient(180deg, rgba(0, 212, 255, 0.05) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border-ornate);
+    box-shadow: 0 1px 20px rgba(0, 212, 255, 0.1);
+  }
+
+  .brand {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+
+  [data-aesthetic="futuristic"] .brand {
+    font-size: 1.4rem;
+    letter-spacing: 0.3em;
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .brand a {
+    text-shadow: 0 0 20px var(--accent);
+  }
+
+  .brand a,
+  .brand span {
+    color: var(--text);
+  }
+
+  .brand a:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nav-ornament {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.9rem;
+    letter-spacing: 0.5em;
+    margin: 0.5rem 0;
+  }
+
+  .nav-ornament::before {
+    content: var(--ornament-1);
+  }
+
+  [data-aesthetic="futuristic"] .nav-ornament {
+    font-family: var(--font-mono);
+    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+  }
+
+  .nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+  }
+
+  [data-aesthetic="futuristic"] .nav-links {
+    gap: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-transform: lowercase;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid transparent;
+  }
+
+  [data-aesthetic="futuristic"] .nav-links a {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 500;
+  }
+
+  .nav-links a:hover {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom-color: var(--accent);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .nav-links a:hover {
+    text-shadow: 0 0 10px var(--accent);
+  }
+
+  .nav-links a[aria-current="page"] {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .nav-dot {
+    color: var(--border-ornate);
+  }
+
+  .nav-dot::before {
+    content: var(--nav-dot);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     THEME TOGGLE
+     ───────────────────────────────────────────────────────────────────────────── */
+
+  .theme-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .toggle-btn {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.6rem;
+    font-family: inherit;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  [data-aesthetic="classic"] .toggle-btn {
+    border-radius: 2px;
+  }
+
+  [data-aesthetic="futuristic"] .toggle-btn {
+    border-radius: 0;
+    font-family: var(--font-mono);
+  }
+
+  .toggle-btn:hover {
+    background: var(--accent);
+    color: var(--text-light);
+    border-color: var(--accent);
+  }
+
+  .toggle-btn.active {
+    background: var(--accent);
+    color: var(--text-light);
+    border-color: var(--accent);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .toggle-btn:hover,
+  [data-aesthetic="futuristic"][data-mode="dark"] .toggle-btn.active {
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     FOOTER
+     ───────────────────────────────────────────────────────────────────────────── */
+
+  .site-footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+    font-size: 0.9rem;
+  }
+
+  [data-aesthetic="classic"] .site-footer {
+    font-style: italic;
+  }
+
+  [data-aesthetic="futuristic"] .site-footer {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    border-top: 1px solid var(--border-ornate);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .site-footer {
+    text-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     RESPONSIVE
+     ───────────────────────────────────────────────────────────────────────────── */
+
+  @media (max-width: 600px) {
+    html {
+      font-size: 16px;
+    }
+
+    [data-aesthetic="futuristic"] {
+      font-size: 14px;
+    }
+
+    .brand {
+      font-size: 1.3rem;
+      letter-spacing: 0.1em;
+    }
+
+    [data-aesthetic="futuristic"] .brand {
+      font-size: 1.1rem;
+    }
+
+    .nav-links {
+      gap: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .nav-ornament::before {
+      content: '══ ❧ ══';
+    }
+
+    [data-aesthetic="futuristic"] .nav-ornament::before {
+      content: '// EXTENOTE //';
+    }
+
+    .theme-controls {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+  }
+</style>

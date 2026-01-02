@@ -1,0 +1,168 @@
+---
+---
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>Extenote is open source software. Built for researchers, writers, and content creators.</p>
+  </div>
+
+  <div class="theme-controls">
+    <div class="theme-toggle">
+      <span class="toggle-label">Mode:</span>
+      <button class="toggle-btn" data-mode="light" id="mode-light">Light</button>
+      <button class="toggle-btn" data-mode="dark" id="mode-dark">Dark</button>
+    </div>
+    <div class="theme-toggle">
+      <span class="toggle-label">Style:</span>
+      <button class="toggle-btn" data-aesthetic="classic" id="aesthetic-classic">Classic</button>
+      <button class="toggle-btn" data-aesthetic="futuristic" id="aesthetic-futuristic">Cyber</button>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle functionality
+  function initThemeToggle() {
+    const html = document.documentElement;
+
+    // Update button states
+    function updateButtons() {
+      const mode = html.getAttribute('data-mode');
+      const aesthetic = html.getAttribute('data-aesthetic');
+
+      document.querySelectorAll('.toggle-btn[data-mode]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+      });
+
+      document.querySelectorAll('.toggle-btn[data-aesthetic]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-aesthetic') === aesthetic);
+      });
+    }
+
+    // Mode toggle
+    document.getElementById('mode-light')?.addEventListener('click', () => {
+      html.setAttribute('data-mode', 'light');
+      localStorage.setItem('theme-mode', 'light');
+      updateButtons();
+    });
+
+    document.getElementById('mode-dark')?.addEventListener('click', () => {
+      html.setAttribute('data-mode', 'dark');
+      localStorage.setItem('theme-mode', 'dark');
+      updateButtons();
+    });
+
+    // Aesthetic toggle
+    document.getElementById('aesthetic-classic')?.addEventListener('click', () => {
+      html.setAttribute('data-aesthetic', 'classic');
+      localStorage.setItem('theme-aesthetic', 'classic');
+      updateButtons();
+    });
+
+    document.getElementById('aesthetic-futuristic')?.addEventListener('click', () => {
+      html.setAttribute('data-aesthetic', 'futuristic');
+      localStorage.setItem('theme-aesthetic', 'futuristic');
+      updateButtons();
+    });
+
+    // Initialize button states
+    updateButtons();
+  }
+
+  // Run on page load
+  initThemeToggle();
+
+  // Also run after Astro page transitions (if using View Transitions)
+  document.addEventListener('astro:after-swap', initThemeToggle);
+</script>
+
+<style>
+  .site-footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  .footer-content {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  [data-aesthetic="classic"] .footer-content {
+    font-style: italic;
+  }
+
+  [data-aesthetic="futuristic"] .footer-content {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  .theme-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .toggle-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .toggle-btn {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.6rem;
+    font-family: inherit;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  [data-aesthetic="classic"] .toggle-btn {
+    border-radius: 2px;
+  }
+
+  [data-aesthetic="futuristic"] .toggle-btn {
+    border-radius: 0;
+    font-family: var(--font-mono);
+  }
+
+  .toggle-btn:hover {
+    background: var(--accent);
+    color: var(--text-light);
+    border-color: var(--accent);
+  }
+
+  .toggle-btn.active {
+    background: var(--accent);
+    color: var(--text-light);
+    border-color: var(--accent);
+  }
+
+  [data-aesthetic="futuristic"][data-mode="dark"] .toggle-btn:hover,
+  [data-aesthetic="futuristic"][data-mode="dark"] .toggle-btn.active {
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  @media (max-width: 600px) {
+    .theme-controls {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+  }
+</style>

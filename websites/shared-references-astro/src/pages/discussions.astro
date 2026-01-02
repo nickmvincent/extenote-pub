@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+import NetworkDiscussions from '../../../../helpers/astro/NetworkDiscussions.astro';
+import type { NetworkData } from '../../../../helpers/network-data';
+
+// Use static import - Vite can resolve this at build time
+import networkData from '../data/network.json';
+---
+
+<Layout title="Discussions & Network">
+  <NetworkDiscussions
+    networkData={networkData as NetworkData}
+    backLinkHref="/"
+    backLinkLabel="← Back to browse"
+    containerTag="section"
+    headingTag="h2"
+    sectionHeadingTag="h3"
+    hideProjectLinks={true}
+    hideRelatedProjects={true}
+    classes={{
+      container: 'container',
+      subtitle: 'subtitle',
+      section: 'card',
+      description: 'description',
+      muted: 'muted',
+    }}
+  />
+</Layout>
+
+<style>
+  .container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-ornate);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .card ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .card li {
+    margin-bottom: 0.5rem;
+  }
+
+  .muted {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .description {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+</style>

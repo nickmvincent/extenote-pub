@@ -1,0 +1,395 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { promises as fs } from 'node:fs';
+import { join, resolve } from 'node:path';
+
+interface PaperCollection {
+  slug: string;
+  title: string;
+  include_tags: string[];
+  body?: string;
+}
+
+interface Reference {
+  id: string;
+  citation_key: string;
+  title: string;
+  authors: string[];
+  year: string;
+  venue?: string;
+  url?: string;
+  tags: string[];
+}
+
+// Parse frontmatter manually
+function parseFrontmatter(raw: string): { data: Record<string, unknown>; body: string } {
+  const match = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+  if (!match) return { data: {}, body: raw.trim() };
+
+  const yamlStr = match[1];
+  const data: Record<string, unknown> = {};
+  let currentKey = '';
+  let inArray = false;
+  let arrayItems: string[] = [];
+
+  for (const line of yamlStr.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    if (line.match(/^[a-z_]+:/i) && !line.startsWith('  ')) {
+      if (inArray && currentKey) {
+        data[currentKey] = arrayItems;
+        arrayItems = [];
+        inArray = false;
+      }
+
+      const colonIdx = line.indexOf(':');
+      currentKey = line.slice(0, colonIdx).trim();
+      const value = line.slice(colonIdx + 1).trim();
+
+      if (value === '') {
+        inArray = true;
+      } else {
+        data[currentKey] = value.replace(/^['"]|['"]$/g, '');
+      }
+    } else if (trimmed.startsWith('- ') && inArray) {
+      arrayItems.push(trimmed.slice(2).replace(/^['"]|['"]$/g, ''));
+    }
+  }
+
+  if (inArray && currentKey) {
+    data[currentKey] = arrayItems;
+  }
+
+  const body = raw.slice(match[0].length).trim();
+  return { data, body };
+}
+
+export async function getStaticPaths() {
+  // Must be inside getStaticPaths - Astro extracts this function into a separate module
+  const COLLECTIONS_DIR = resolve(process.cwd(), '../../content/shared-references/paper-collections');
+  const collections: { slug: string; title: string; include_tags: string[]; body?: string }[] = [];
+
+  try {
+    const files = await fs.readdir(COLLECTIONS_DIR);
+    for (const file of files) {
+      if (!file.endsWith('.md')) continue;
+      const raw = await fs.readFile(join(COLLECTIONS_DIR, file), 'utf8');
+
+      const match = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+      if (!match) continue;
+
+      const yamlStr = match[1];
+      const data: Record<string, unknown> = {};
+      let currentKey = '';
+      let inArray = false;
+      let arrayItems: string[] = [];
+
+      for (const line of yamlStr.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+
+        if (line.match(/^[a-z_]+:/i) && !line.startsWith('  ')) {
+          if (inArray && currentKey) {
+            data[currentKey] = arrayItems;
+            arrayItems = [];
+            inArray = false;
+          }
+
+          const colonIdx = line.indexOf(':');
+          currentKey = line.slice(0, colonIdx).trim();
+          const value = line.slice(colonIdx + 1).trim();
+
+          if (value === '') {
+            inArray = true;
+          } else {
+            data[currentKey] = value.replace(/^['"]|['"]$/g, '');
+          }
+        } else if (trimmed.startsWith('- ') && inArray) {
+          arrayItems.push(trimmed.slice(2).replace(/^['"]|['"]$/g, ''));
+        }
+      }
+
+      if (inArray && currentKey) {
+        data[currentKey] = arrayItems;
+      }
+
+      if (data.type !== 'paper_collection') continue;
+
+      const body = raw.slice(match[0].length).trim();
+
+      collections.push({
+        slug: file.replace(/\.md$/, ''),
+        title: data.title as string || file.replace(/\.md$/, ''),
+        include_tags: (data.include_tags as string[]) || [],
+        body: body || undefined,
+      });
+    }
+  } catch (e) {
+    console.error('Error loading collections:', e);
+  }
+
+  return collections.map(c => ({
+    params: { slug: c.slug },
+    props: { collection: c }
+  }));
+}
+
+const { collection } = Astro.props;
+
+// Load all references
+const rawReferences = await getCollection('shared-references');
+const allRefs = new Map<string, Reference>();
+
+for (const ref of rawReferences) {
+  if (!ref.data.title) continue;
+  const d = ref.data;
+  let authors: string[] = [];
+  if (d.authors) authors = d.authors;
+  else if (d.author) authors = [d.author];
+
+  const citationKey = d.citation_key || d.citekey || ref.id;
+  allRefs.set(citationKey, {
+    id: ref.id,
+    citation_key: citationKey,
+    title: d.title,
+    authors,
+    year: d.year || '',
+    venue: d.venue,
+    url: d.url,
+    tags: d.tags || [],
+  });
+}
+
+// Get priority for sorting
+function getPriority(ref: Reference): number {
+  if (!ref.tags) return Infinity;
+  for (const tag of ref.tags) {
+    const lower = tag.toLowerCase();
+    if (lower.startsWith('priority:')) {
+      const num = parseInt(lower.slice('priority:'.length), 10);
+      if (!isNaN(num)) return num;
+    }
+  }
+  return Infinity;
+}
+
+// Get papers for this collection
+const tagSet = new Set(collection.include_tags.map((t: string) => t.toLowerCase()));
+const papers: Reference[] = [];
+
+for (const ref of allRefs.values()) {
+  if (ref.tags.some(t => tagSet.has(t.toLowerCase()))) {
+    papers.push(ref);
+  }
+}
+
+// Sort: priority-tagged papers first, then by year
+papers.sort((a, b) => {
+  const aPriority = getPriority(a);
+  const bPriority = getPriority(b);
+  if (aPriority !== bPriority) {
+    return aPriority - bPriority;
+  }
+  return parseInt(b.year || '0') - parseInt(a.year || '0');
+});
+---
+
+<Layout title={`${collection.title} | Collections`}>
+  <div class="collection-header">
+    <a href="/collections" class="back-link">← Back to Collections</a>
+    <h2>❦ {collection.title}</h2>
+    <div class="header-ornament"></div>
+    {collection.body && <p class="description">{collection.body}</p>}
+    <p class="paper-count">{papers.length} papers in this collection</p>
+  </div>
+
+  <div class="collection-tags">
+    <span class="tag-label">Tags:</span>
+    {collection.include_tags.map((tag: string) => (
+      <a href={`/tags/${encodeURIComponent(tag)}`} class="collection-tag">{tag}</a>
+    ))}
+  </div>
+
+  {papers.length > 0 ? (
+    <ul class="paper-list">
+      {papers.map((paper) => {
+        const priority = getPriority(paper);
+        const hasPriority = priority !== Infinity;
+        return (
+          <li class={hasPriority ? 'hero' : ''}>
+            <a href={`/reference/${paper.id}`} class="paper-title">
+              {paper.title}
+              {hasPriority && <span class="hero-badge">#{priority}</span>}
+            </a>
+            <div class="paper-meta">
+              <span class="authors">{paper.authors.join(', ')}</span>
+              {paper.venue && <span class="venue">· {paper.venue}</span>}
+              <span class="year">· {paper.year}</span>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  ) : (
+    <p class="empty">No papers in this collection yet.</p>
+  )}
+</Layout>
+
+<style>
+  .collection-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .back-link:hover {
+    color: var(--accent);
+  }
+
+  .collection-header h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .header-ornament {
+    text-align: center;
+    color: var(--border-ornate);
+    font-size: 0.8rem;
+    margin: 0.25rem 0 0.75rem;
+  }
+
+  .header-ornament::before {
+    content: '─── ✦ ───';
+  }
+
+  .description {
+    color: var(--text-muted);
+    font-style: italic;
+    max-width: 60ch;
+    margin: 0 auto 0.75rem;
+    line-height: 1.6;
+  }
+
+  .paper-count {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .collection-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+  }
+
+  .tag-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+  }
+
+  .collection-tag {
+    background: var(--tag-bg);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--tag-text);
+    font-family: 'Courier Prime', 'Courier New', monospace;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+
+  .collection-tag:hover {
+    border-color: var(--accent);
+  }
+
+  .paper-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .paper-list li {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .paper-list li:hover {
+    background: var(--bg-inset);
+  }
+
+  .paper-list li.hero {
+    background: var(--type-bg);
+    border-left: 3px solid var(--gold);
+  }
+
+  .paper-title {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .paper-title:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+  }
+
+  .hero-badge {
+    background: var(--gold);
+    color: var(--bg-dark);
+    font-size: 0.65rem;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .paper-meta {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  .authors {
+    color: var(--text);
+  }
+
+  .venue, .year {
+    color: var(--text-muted);
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 2rem;
+  }
+
+  @media (max-width: 600px) {
+    .collection-header h2 {
+      font-size: 1.3rem;
+    }
+  }
+</style>

@@ -1,0 +1,57 @@
+---
+type: paidf_chapter
+title: Code
+slug: 2e_code
+visibility: public
+status: draft
+---
+
+::: {.callout-warning}
+## Work in Progress
+This chapter is incomplete. Code snippets and detailed explanations will be added as the reference implementation matures.
+:::
+
+::: {.callout-note collapse=true title="Model Reference (01i): Schema and Workflow"}
+`ψ(x_i)` is the schema mapping from an interaction to a structured payload (messages/content, metadata, `L_i`, `U_i`, `name_i`, `uid`). The PR workflow state is `M_i∈{open,merged,closed}`; publish to Git occurs on merge (`P_i^git=1`).
+:::
+
+This chapter provides reference code snippets from the Flywheel Action implementation. The full source code is maintained in the `src` directory; this chapter highlights key components for readers who want to understand the implementation details.
+
+> **Note:** This chapter is a work in progress. Code snippets and detailed explanations will be added as the reference implementation matures.
+
+## Core Components
+
+### Interaction Schema
+
+The interaction schema defines how user contributions are structured:
+
+```python
+# Placeholder: interaction schema definition
+# See src/schemas/ for the full implementation
+```
+
+### Consent Flow
+
+The consent workflow manages user permissions:
+
+```python
+# Placeholder: consent flow logic
+# See src/consent/ for the full implementation
+```
+
+### Data Export
+
+Export utilities for contributing data to the public AI commons:
+
+```python
+# Placeholder: export utilities
+# See src/export/ for the full implementation
+```
+
+## Integration Points
+
+*Details on API endpoints, webhooks, and third-party integrations will be documented here.*
+
+## Testing
+
+*Testing strategies and example test cases will be documented here.*

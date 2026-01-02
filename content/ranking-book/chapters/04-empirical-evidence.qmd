@@ -1,0 +1,308 @@
+---
+type: book_chapter
+title: Empirical Evidence
+visibility: public
+---
+# Empirical Evidence {#sec-empirical-evidence}
+
+## Overview
+
+The previous chapters presented a framework: AI systems rank information, and this ranking is causally shaped by training data that flows through the Data Pipeworks. But is this framework useful? Does it predict observable phenomena? Can we measure the dynamics it describes?
+
+This chapter grounds the framework in empirical evidence. We examine three categories of phenomena:
+
+1. **Platform competition**: How do AI systems compete with existing knowledge platforms? The Stack Overflow case provides direct evidence.
+
+2. **Training data ↔ output coupling**: Can we demonstrate that training data affects outputs? Membership inference, extraction attacks, and model collapse studies say yes.
+
+3. **Labor market exposure**: How broadly does AI affect work? Task-level analyses and productivity experiments provide initial answers.
+
+A note on uncertainty: Measuring AI's societal effects is difficult. Natural experiments are imperfect. Randomized trials are narrow. Observational studies face confounding. We try to be clear about what's well-established versus preliminary. Where multiple studies using different methods converge, we can be more confident. Where evidence is sparse or contested, we maintain appropriate uncertainty.
+
+## Background Research
+
+### Methodological Approaches to Studying AI's Societal Impact
+
+Measuring the effects of AI systems presents significant methodological challenges. Unlike controlled laboratory experiments, real-world AI deployments occur against a backdrop of confounding factors: economic cycles, competing technologies, and shifting user preferences. Researchers have developed several approaches to address these challenges.
+
+**Natural experiments** exploit the sudden introduction of AI systems to compare before-and-after outcomes. The release of ChatGPT in November 2022 created a particularly clean natural experiment: its rapid adoption allowed researchers to compare platform activity, labor market outcomes, and information-seeking behavior in windows immediately before and after release [@delriochanona2024stackoverflow; @burtch2024]. These studies benefit from the clarity of the intervention but struggle to isolate ChatGPT's effects from simultaneous trends.
+
+**Randomized controlled trials (RCTs)** in workplace settings provide stronger causal identification. Noy and Zhang [@noy2023] randomly assigned writing tasks to workers with and without ChatGPT access, measuring productivity differences directly. Peng et al. [@peng2023] conducted similar experiments with GitHub Copilot. While these studies offer clean causal estimates, they may not capture longer-term dynamics like skill atrophy or organizational restructuring.
+
+**Econometric approaches** using panel data and instrumental variables attempt to estimate causal effects from observational data. Studies of labor market exposure typically rely on occupation-level measures of task composition combined with assessments of which tasks AI systems can perform [@eloundou2023; @felten2023]. These methods face well-known identification challenges but can cover broader populations than RCTs.
+
+### Platform Economics and Two-Sided Markets
+
+Understanding AI's effects on platforms like Stack Overflow requires grounding in platform economics. Rochet and Tirole's foundational work [@rochet2003] established that two-sided platforms face distinct dynamics: they must attract both content creators and content consumers, with each side's participation depending on the other's.
+
+Stack Overflow exemplifies these dynamics. Answerers invest effort because questioners create an audience; questioners participate because answerers provide solutions. When a third party (ChatGPT) can provide answers without requiring human answerers, the platform's value proposition to answerers diminishes. This helps explain the concentrated decline among newer users [@burtch2024]: experienced users may have social capital and reputation investments that sustain participation, while newer users face straightforward substitution calculus.
+
+### Labor Economics of Automation
+
+Research on AI's labor market effects inherits frameworks from decades of automation economics. Autor, Levy, and Murnane's "task model" [@autor2003] decomposed jobs into constituent tasks, allowing predictions about which would be automated. This approach underlies modern exposure assessments like GPTs are GPTs [@eloundou2023].
+
+Three key findings from this literature inform our analysis:
+
+1. **Routine-biased technological change**: Early automation primarily affected routine tasks (both cognitive and manual), while non-routine tasks proved resistant [@autor2015]. Generative AI challenges this pattern by performing well on some non-routine cognitive tasks.
+
+2. **Skill-biased effects**: New technologies often complement high-skill work while substituting for low-skill work, increasing wage inequality [@acemoglu2011]. Initial evidence on generative AI suggests a different pattern: lower-skilled workers may see larger productivity gains [@noy2023].
+
+3. **Adjustment frictions**: Even when automation creates aggregate gains, displaced workers often face prolonged unemployment and wage losses [@autor2024]. Labor market institutions and transition support matter for distributional outcomes.
+
+### Training Data and Model Behavior
+
+The empirical relationship between training data composition and model outputs has received increasing attention. Early work on membership inference [@shokri2017] established that models leak information about their training data, enabling attacks that can determine whether specific examples were included. More recent work has extended these techniques to large language models [@carlini2021; @hayes2025].
+
+The "model collapse" literature [@shumailov2024; @alemohammad2024] provides perhaps the most direct evidence of training-output coupling. When models are recursively trained on their own outputs, performance degrades in predictable ways. This finding has immediate policy relevance: if AI-generated content increasingly populates the web, future models trained on web data may inherit accumulated errors.
+
+### Measurement and Data Quality
+
+A recurring theme across these studies is measurement uncertainty. Platform activity metrics (traffic, posts, engagement) may not capture underlying knowledge creation or learning. Productivity measures in RCTs may not reflect long-term skill development. Exposure assessments rely on expert judgment that may be miscalibrated.
+
+The empirical studies reviewed in this chapter should be read with these limitations in mind. Where multiple studies using different methods converge on similar findings—as with Stack Overflow's post-ChatGPT decline—we can have greater confidence. Where results depend on single studies or contested methodologies, appropriate uncertainty should be maintained.
+
+## Platform Competition: Stack Overflow
+
+The Stack Overflow case provides our cleanest natural experiment for platform competition between AI and human knowledge systems.
+
+### The Decline
+
+Del Rio-Chanona et al. [@delriochanona2024stackoverflow] documented a striking pattern: within six months of ChatGPT's November 2022 release, Stack Overflow activity declined by approximately 25%. This wasn't a gradual trend—it was a sharp discontinuity coinciding with ChatGPT's launch.
+
+The methodology compared Stack Overflow's trajectory to platforms where ChatGPT was restricted (like those in China), providing a control group. The difference-in-differences design helps isolate ChatGPT's effect from general trends in programming Q&A. The finding has been replicated and extended by other researchers.
+
+Burtch et al. [@burtch2024] examined who stopped contributing. The decline was concentrated among newer users—those with less reputation and fewer previous contributions. Experienced users, with accumulated reputation and social ties, continued participating at closer to pre-ChatGPT rates. This pattern suggests that users with less platform-specific investment found it easier to substitute ChatGPT for Stack Overflow.
+
+Interestingly, the questions that remained became more complex. Simple, routine questions—the kind ChatGPT handles well—disappeared. The questions still posted to Stack Overflow tended to be harder, more nuanced, requiring deeper expertise. The platform effectively moved upmarket, handling the long tail that AI couldn't.
+
+### Interpretation Through the Ranking Framework
+
+The Stack Overflow case illustrates the ranking framework in action. Stack Overflow ranks bundles—complete question-answer pairs, each authored by identifiable humans, each with votes and comments providing quality signals. ChatGPT ranks chunks—tokens that compose into answers, drawing on patterns learned from millions of such Q&A pairs (including Stack Overflow itself).
+
+From the user's perspective, both systems serve the same function: answering programming questions. The competition is direct. What ChatGPT offers is not higher quality but *convenience*: instant responses, natural language interaction, no need to formulate questions precisely or wait for human responders.
+
+Kabir et al. [@kabir2024] examined this quality-convenience tradeoff directly. When they compared ChatGPT answers to accepted Stack Overflow answers for 517 programming questions, ChatGPT was incorrect 52% of the time. Users knew this—yet many still preferred ChatGPT. Why? Style and convenience. ChatGPT answers were perceived as more polite, more comprehensive in explanation, and most importantly, immediately available.
+
+This finding complicates simple narratives about AI quality. Stack Overflow's decline isn't because ChatGPT gives *better* answers—it often doesn't. The decline reflects a preference for convenient, stylistically polished answers over accurate but slower ones. For the ranking framework, this suggests that what gets ranked highly isn't just correctness but a bundle of attributes including speed and style.
+
+### The Contrast: Reddit
+
+Not all platforms declined. Burtch et al. [@burtch2024] found that Reddit's programming communities showed no measurable decline post-ChatGPT. Why?
+
+One hypothesis: social fabric. Reddit communities provide not just answers but belonging, entertainment, and identity. Users participate for social reasons beyond pure information exchange. ChatGPT can provide information but can't provide community membership. The social investment creates switching costs that pure Q&A platforms lack.
+
+This suggests a boundary condition for AI competition: platforms whose value proposition is primarily informational are more vulnerable than platforms whose value proposition includes social or identity components. The ranking framework applies most directly to information exchange; where other values dominate, AI substitution is incomplete.
+
+### Implications for the Data Pipeworks
+
+The Stack Overflow case directly illustrates the feedback loops in the Data Pipeworks:
+
+1. **Training**: ChatGPT trained on data that included Stack Overflow content (Stage 3→4)
+2. **Competition**: ChatGPT competes with Stack Overflow for users (Stage 5)
+3. **Reduced contribution**: Users stop contributing to Stack Overflow (Stage 5→1)
+4. **Future training**: Future AI systems have less new high-quality Q&A data to train on (Stage 1→2→3)
+
+This is the crowding-out dynamic in action. ChatGPT's success in serving user queries reduces incentives for humans to create the very content that makes ChatGPT useful. The long-term implications depend on whether this dynamic reaches equilibrium (some level of human contribution persists) or continues to degradation (contribution falls below sustainable thresholds).
+
+## Training Data ↔ Output Coupling
+
+The framework claims that training data causally affects outputs. This isn't just theoretical—it's empirically demonstrable through several lines of research.
+
+### Membership Inference: Was This Data Used?
+
+Membership inference attacks test whether specific data points were in a model's training set. The intuition: models tend to behave differently on data they've seen versus data they haven't. By analyzing model behavior, attackers can sometimes determine training set membership.
+
+Shokri et al. [@shokri2017] first demonstrated membership inference on smaller models. The technique has since been extended to large language models, though with important caveats about difficulty at scale.
+
+Hayes et al. [@hayes2025] examine membership inference for modern LLMs, finding that:
+
+- Attacks work, but are challenging at scale due to massive training sets
+- Success rates vary by data type and training frequency
+- Even partial success demonstrates the coupling between training data and behavior
+
+The policy relevance is clear: if membership inference works, then training data is not merely "inspired by" in an abstract sense—specific training examples leave detectable traces in model behavior. This has implications for copyright (can we detect if copyrighted work was used?) and for data governance more broadly (can data contributors verify their data's use?).
+
+### Training Data Extraction: What Did the Model Memorize?
+
+More dramatic than membership inference is outright extraction: prompting models to regurgitate training data verbatim.
+
+Carlini et al. [@carlini2021] demonstrated that GPT-2 would reproduce exact sequences from its training data under appropriate prompting. This included personal information, code snippets, and text passages that appeared identifiably in the original training corpus.
+
+Subsequent work [@carlini2023] established scaling laws for memorization:
+
+- Larger models memorize more
+- Data that appears more frequently is more likely to be memorized
+- Certain types of content (highly distinctive sequences) are more extractable
+
+This has direct implications. First, it confirms that training data directly shapes outputs—not in a vague "inspired by" sense but in a literal "can be reproduced" sense. Second, it creates legal and privacy risks: if models can reproduce copyrighted text or personal data, the distinction between "training on" and "copying" becomes blurred. Third, it supports the ranking framework: memorized content is content that ranks very highly in specific contexts.
+
+### Model Collapse: The Feedback Loop Made Visible
+
+Perhaps the most striking evidence of training-output coupling comes from model collapse studies.
+
+Shumailov et al. [@shumailov2024] demonstrated what happens when models are trained recursively on outputs from previous model generations:
+
+1. Train Model A on human data
+2. Generate synthetic data from Model A
+3. Train Model B on that synthetic data
+4. Generate synthetic data from Model B
+5. Train Model C on that synthetic data
+6. ... and so on
+
+The result: quality degrades over generations. The distribution shifts. Rare but important patterns—the tails of the distribution—are progressively lost. Eventually, the models converge on degenerate outputs that bear little resemblance to the original human data.
+
+Alemohammad et al. [@alemohammad2024] formalized this as "Model Autophagy Disorder" (MAD)—models consuming their own outputs, with predictable degradation.
+
+For the Data Pipeworks, model collapse is the feedback loop made visible. When Stage 5 outputs become Stage 3 training data, without sufficient injection of fresh Stage 1 human content, the system destabilizes. The empirical finding validates the theoretical concern: the feedback loop from deployment to training matters, and getting it wrong degrades system quality.
+
+The practical implications are significant. If AI-generated content proliferates on the web, and future AI systems train on that web, model collapse dynamics could affect the entire AI ecosystem. This creates incentives for AI developers to source high-quality human data—and potentially to invest in sustaining the human knowledge creation that feeds their systems.
+
+## Labor Market Exposure
+
+The framework suggests that AI systems could substitute for human information work. What does the evidence show about labor market effects?
+
+### Task-Level Exposure Analysis
+
+Eloundou et al. [@eloundou2023] conducted the most comprehensive assessment of LLM labor market exposure to date. Their methodology:
+
+1. Decompose occupations into constituent tasks (using O*NET database)
+2. Have experts assess which tasks LLMs can perform (with and without complementary tools)
+3. Aggregate task-level exposure to occupation-level measures
+
+The headline finding: approximately 80% of U.S. workers have at least 10% of their tasks exposed to LLMs. About 19% have at least 50% of their tasks exposed.
+
+Exposure is distributed broadly but unevenly:
+
+- Higher-wage workers tend to have greater exposure
+- Information-intensive occupations have greater exposure than physical occupations
+- Exposure varies within occupations based on specific task mix
+
+This challenges the routine-biased technological change pattern that characterized earlier automation. LLMs are capable of many non-routine cognitive tasks: writing, summarizing, coding, analyzing. The historic divide between automatable routine work and non-automatable creative work appears to be breaking down.
+
+Subsequent work by Labaschin et al. [@labaschin2025] extended this to firm-level analysis, finding that exposure varies significantly by firm characteristics. Firms with more information-intensive operations face greater aggregate exposure than firms with physical operations, even within the same industry.
+
+### Measured Productivity Effects
+
+RCTs have measured productivity effects in controlled settings:
+
+Noy and Zhang [@noy2023] randomly assigned writing tasks to workers with and without ChatGPT access. Key findings:
+
+- Productivity increased 35-40% on average
+- Lower-skilled workers saw larger gains than higher-skilled workers
+- Quality (as rated by evaluators) increased
+
+Peng et al. [@peng2023] found similar results for coding with GitHub Copilot:
+
+- Task completion speed increased approximately 55%
+- Effects were substantial across skill levels
+
+These are large effects. A 35-55% productivity increase, if sustained and generalized, would be economically transformative.
+
+Important caveats:
+
+- These are short-term effects in controlled settings
+- Longer-term dynamics (skill atrophy, organizational change) aren't captured
+- Lab tasks may not represent full job complexity
+- Selection effects may limit generalizability
+
+### Early Labor Market Signals
+
+Does productivity increase translate to employment effects? Evidence is preliminary but suggestive.
+
+Hui et al. [@hui2024] analyzed freelance platforms after ChatGPT's release, finding:
+
+- Demand for writing services dropped
+- Effects concentrated in lower-end services
+- Premium writing services showed more resilience
+
+This is consistent with substitution at the lower end of the quality distribution. AI handles commodity writing; specialized expertise retains value.
+
+Felten et al. [@felten2023] found that occupations with higher AI exposure showed differential wage changes, though the patterns are complex and contested.
+
+It's too early for strong conclusions about employment effects. Labor market adjustment takes years. Current evidence shows productivity gains and some substitution for commodity services. Whether this translates to displacement, wage changes, or primarily augmentation remains to be seen.
+
+### What the Evidence Supports
+
+Synthesizing across these studies:
+
+**Strong evidence**: LLM capabilities span many work tasks. Productivity gains in controlled settings are large. Some platform competition effects are already visible.
+
+**Moderate evidence**: Exposure is broad (80%+ of workers affected to some degree). Substitution effects are appearing in commodity services. Model collapse is a real phenomenon under recursive training.
+
+**Preliminary evidence**: Economy-wide labor market effects. Optimal collective responses. Long-term equilibrium outcomes.
+
+The framework's predictions about competition and substitution appear to be borne out in early evidence. The predictions about optimal policy responses remain untested.
+
+## Measurement Challenges
+
+Honest assessment requires acknowledging what we can't easily measure:
+
+### What Platforms Miss
+
+Platform metrics (traffic, posts, engagement) may not capture what we care about:
+
+- Does declining Stack Overflow activity mean less learning, or learning through different channels?
+- Does ChatGPT usage produce the same understanding as working through problems manually?
+- Are proxy metrics capturing the underlying phenomena?
+
+We can measure activity decline but not necessarily knowledge decline.
+
+### What Productivity Metrics Miss
+
+RCT productivity measures have their own limitations:
+
+- Short-term output may not reflect long-term skill development
+- Task decomposition may miss tacit knowledge and judgment
+- Individual productivity may not aggregate to organizational outcomes
+
+A 40% productivity increase on isolated writing tasks might not translate to 40% better outcomes for organizations whose success depends on factors beyond individual task completion.
+
+### What Exposure Metrics Miss
+
+Exposure assessments rely on expert judgment about AI capabilities:
+
+- Experts may be biased (either direction)
+- Capabilities change rapidly, dating assessments
+- Task taxonomies may not capture real work complexity
+
+An occupation "exposed" according to expert judgment may prove resistant for reasons the taxonomy doesn't capture.
+
+### Implications for Uncertainty
+
+These measurement challenges don't invalidate the evidence—they contextualize it. We can be confident that:
+
+- Platform competition is real (Stack Overflow declined, we can measure that)
+- Training data affects outputs (extraction works, we can demonstrate that)
+- Some productivity effects are real (RCTs show gains, we can measure that)
+
+We should be less confident about:
+
+- Magnitudes and long-term trajectories
+- Translation from measured phenomena to broader outcomes
+- Causal mechanisms versus correlations
+
+The framework provides useful predictions that appear directionally correct. The precise magnitudes and dynamics require continued empirical investigation.
+
+## Summary
+
+The empirical evidence supports the core claims of the ranking framework:
+
+**Training data causally affects outputs.** Membership inference, extraction attacks, and model collapse studies demonstrate this isn't merely theoretical—specific training data leaves measurable traces in model behavior.
+
+**AI systems compete with human knowledge platforms.** Stack Overflow's 25% decline post-ChatGPT, concentrated among newer users, shows direct platform competition in action.
+
+**Labor market exposure is broad.** Task-level analyses suggest 80%+ of workers have meaningful exposure. Productivity effects of 35-55% in controlled settings are large.
+
+**Feedback loops are real.** Model collapse demonstrates that training on synthetic data degrades quality—the feedback loop from deployment to training matters.
+
+What remains less certain:
+
+- Long-term equilibrium outcomes
+- Translation from platform/lab effects to economy-wide changes
+- Effectiveness of proposed governance interventions
+
+The framework's predictions about competition, substitution, and data dependence appear confirmed by early evidence. The predictions about optimal collective response await empirical test.
+
+## Further Reading
+
+See Appendix D for a comprehensive reference table of empirical studies organized by topic, including methodology details and evidence strength assessments.

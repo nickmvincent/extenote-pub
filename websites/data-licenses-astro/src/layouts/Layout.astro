@@ -1,0 +1,265 @@
+---
+import '../styles/global.css';
+import NetworkFooter from '../../../../helpers/astro/NetworkFooter.astro';
+
+const currentPath = Astro.url.pathname;
+const navLinks = [
+  { href: '/', label: 'Catalog' },
+  { href: '/memo', label: 'Memo' },
+  { href: '/glossary', label: 'Glossary' },
+  { href: '/contributing', label: 'About' },
+];
+
+const alsoLikeLinks = [
+  { href: 'https://sr.ithaka.org/our-work/generative-ai-licensing-agreement-tracker', label: 'Data Deals Tracker', desc: 'Tracks licensing agreements between AI companies and content providers. Curated by Ithaka S+R.' },
+  { href: 'https://www.mckoolsmith.com/newsroom-ailitigation', label: 'AI Litigation Tracker', desc: 'Comprehensive list of lawsuits involving AI and data rights. Maintained by McKool Smith.' },
+  { href: 'https://exploringai.org/', label: 'ExploringAI.org', desc: 'Research notes and napkin math about AI data flows. Explores the scale and economics of training data.' },
+  { href: 'https://datalevers.org', label: 'DataLevers.org', desc: 'Tools for collective action around data rights. Covers protests, strikes, and bargaining strategies.' },
+];
+---
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>DataLicenses.org</title>
+	</head>
+	<body>
+		<nav class="navbar">
+			<div class="navbar-inner">
+				<a href="/" class="navbar-brand">DATALICENSES.ORG</a>
+				<div class="navbar-links">
+					{navLinks.map(link => (
+						<a
+							href={link.href}
+							class:list={['nav-link', { active: currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href)) }]}
+						>
+							{link.label}
+						</a>
+					))}
+					<a href="/data/initiatives.json" class="nav-link" title="JSON API">API</a>
+					<button id="theme-toggle" class="theme-toggle" title="Toggle light/dark theme" aria-label="Toggle theme">
+						<svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+						<svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+					</button>
+				</div>
+			</div>
+		</nav>
+		<slot />
+
+		<footer class="also-like-footer">
+			<div class="also-like-inner">
+				<span class="also-like-label">You may also like:</span>
+				<div class="also-like-links">
+					{alsoLikeLinks.map(link => (
+						<a href={link.href} target="_blank" rel="noopener" class="also-like-link">
+							{link.label}
+							<span class="also-like-desc">{link.desc}</span>
+						</a>
+					))}
+				</div>
+			</div>
+		</footer>
+
+		<NetworkFooter
+			links={[
+				{ href: 'https://datacounterfactuals.org', label: 'Data Counterfactuals' },
+				{ href: 'https://exploringai.org', label: 'Data Napkin Math' },
+				{ href: 'https://sharedreferences.pages.dev', label: 'Shared References' },
+				{ href: 'https://extenote.pages.dev', label: 'ExteNote Docs' },
+			]}
+		/>
+	<script is:inline>
+		// Theme toggle with system preference and localStorage
+		(function() {
+			const root = document.documentElement;
+			const toggle = document.getElementById('theme-toggle');
+
+			// Check saved preference or system preference
+			function getPreferredTheme() {
+				const saved = localStorage.getItem('theme');
+				if (saved) return saved;
+				return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+			}
+
+			function setTheme(theme) {
+				if (theme === 'light') {
+					root.classList.add('light');
+				} else {
+					root.classList.remove('light');
+				}
+				localStorage.setItem('theme', theme);
+			}
+
+			// Initialize theme
+			setTheme(getPreferredTheme());
+
+			// Toggle handler
+			if (toggle) {
+				toggle.addEventListener('click', () => {
+					const current = root.classList.contains('light') ? 'light' : 'dark';
+					setTheme(current === 'light' ? 'dark' : 'light');
+				});
+			}
+
+			// Listen for system preference changes
+			window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+				if (!localStorage.getItem('theme')) {
+					setTheme(e.matches ? 'light' : 'dark');
+				}
+			});
+		})();
+	</script>
+	</body>
+</html>
+<style is:global>
+	/* Navbar */
+	.navbar {
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		background: color-mix(in srgb, var(--bg) 85%, transparent);
+		backdrop-filter: blur(12px);
+		border-bottom: 1px solid var(--border);
+	}
+	.navbar-inner {
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 0 20px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 52px;
+	}
+	.navbar-brand {
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		color: var(--muted);
+		text-decoration: none;
+	}
+	.navbar-brand:hover {
+		color: var(--text);
+	}
+	.navbar-links {
+		display: flex;
+		gap: 4px;
+		flex-wrap: wrap;
+	}
+	.nav-link {
+		font-size: 12px;
+		color: var(--text);
+		text-decoration: none;
+		padding: 6px 10px;
+		border-radius: 6px;
+		border: 1px solid transparent;
+		transition: all 0.15s;
+	}
+	.nav-link:hover {
+		border-color: var(--accent);
+	}
+	.nav-link.active {
+		background: var(--accent-soft);
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+
+	/* Theme toggle */
+	.theme-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		background: transparent;
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		cursor: pointer;
+		color: var(--muted);
+		transition: all 0.15s;
+	}
+	.theme-toggle:hover {
+		border-color: var(--accent);
+		color: var(--text);
+	}
+	/* Show sun in dark mode, moon in light mode */
+	.icon-moon { display: none; }
+	.icon-sun { display: block; }
+	:root.light .icon-moon { display: block; }
+	:root.light .icon-sun { display: none; }
+
+	/* Also Like Footer */
+	.also-like-footer {
+		margin-top: 3rem;
+		padding: 1.25rem 1.5rem;
+		border-top: 1px solid var(--border);
+		background: color-mix(in srgb, var(--card) 60%, transparent);
+	}
+	.also-like-inner {
+		max-width: 1100px;
+		margin: 0 auto;
+	}
+	.also-like-label {
+		font-size: 12px;
+		color: var(--muted);
+		font-weight: 500;
+		display: block;
+		margin-bottom: 10px;
+	}
+	.also-like-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	.also-like-link {
+		display: inline-flex;
+		flex-direction: column;
+		padding: 8px 12px;
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		text-decoration: none;
+		font-size: 13px;
+		color: var(--accent);
+		transition: border-color 0.15s;
+	}
+	.also-like-link:hover {
+		border-color: var(--accent);
+	}
+	.also-like-desc {
+		font-size: 11px;
+		color: var(--muted);
+		margin-top: 2px;
+	}
+
+	/* Footer - dark theme */
+	.network-footer {
+		margin-top: 0;
+		padding: 1.5rem;
+		border-top: 1px solid var(--border);
+		background: color-mix(in srgb, var(--card) 50%, transparent);
+		text-align: center;
+		font-size: 0.8rem;
+	}
+	.network-footer-content {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+	.network-label {
+		color: var(--muted);
+		margin-right: 0.5rem;
+	}
+	.network-links {
+		display: inline;
+	}
+	.network-links a {
+		color: var(--accent);
+		text-decoration: none;
+		margin: 0 0.5rem;
+	}
+	.network-links a:hover {
+		text-decoration: underline;
+	}
+</style>
