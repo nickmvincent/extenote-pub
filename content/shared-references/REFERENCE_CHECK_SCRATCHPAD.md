@@ -1,7 +1,7 @@
 ---
 title: Reference Check Scratchpad
 type: scratchpad
-visibility: public
+visibility: internal
 created: 2024-12-28
 updated: 2024-12-28
 purpose: Agent and human coordination for reference verification
