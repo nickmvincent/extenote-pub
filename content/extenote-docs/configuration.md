@@ -18,6 +18,7 @@ Extenote uses two directories for configuration:
 - [Deploy Configuration](#deploy-configuration) - Cloudflare, GitHub Pages, etc.
 - [Configuration Defaults](#configuration-defaults) - Default values and fallbacks
 - [Semble Sync Configuration](#semble-sync-configuration) - ATProto integration
+- [Security: Public-Only Mode](#security-public-only-mode) - Preventing private data leaks
 
 ---
 
@@ -54,6 +55,16 @@ Source paths support environment variable substitution with fallback syntax: `${
 |----------|---------|---------|
 | `EXTENOTE_CONTENT_ROOT` | Primary content vault | `../extenote-pub/content` |
 | `EXTENOTE_PRIVATE_ROOT` | Private content vault | `../extenote-priv/content` |
+
+#### Web Server Environment Variables
+
+These variables control the web server behavior:
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `EXTENOTE_PUBLIC_ONLY` | Filter out private content (see [Security: Public-Only Mode](#security-public-only-mode)) | `false` |
+| `EXTENOTE_CACHE_TTL` | Cache duration in milliseconds | `30000` |
+| `EXTENOTE_CACHE_ENABLED` | Enable/disable vault caching | `true` |
 
 ### Source Types
 
@@ -444,3 +455,60 @@ bun run cli -- sync <project> --force
 |----------|-------------|
 | `SEMBLE_APP_PASSWORD` | App password for ATProto authentication |
 | `ATPROTO_APP_PASSWORD` | Alternative env var name (fallback) |
+
+---
+
+## Security: Public-Only Mode
+
+When generating screenshots, demos, or any public-facing content from the web UI, **private content can accidentally leak** if you have both public and private vaults loaded.
+
+### The Problem
+
+The web server loads all configured content (public + private). Screenshots or screen recordings will capture:
+- Private project names and object counts
+- Private file paths in issues/errors
+- Private visibility counts on the dashboard
+- Any private content visible in search results
+
+### The Solution: `EXTENOTE_PUBLIC_ONLY`
+
+Set `EXTENOTE_PUBLIC_ONLY=true` when running the web server for screenshots or demos:
+
+```bash
+EXTENOTE_PUBLIC_ONLY=true bun run web
+```
+
+This filters out at the API level:
+- Objects with `visibility: private`
+- Objects from projects containing "private" in the name
+- Issues referencing filtered objects
+- Private project profiles
+
+### Screenshot Generation
+
+The `extenote-docs-astro` screenshot generator already uses this mode. If you're creating your own screenshots:
+
+```typescript
+// In your screenshot script
+const server = spawn('bun', ['run', 'web'], {
+  env: {
+    ...process.env,
+    EXTENOTE_PUBLIC_ONLY: 'true',
+  },
+})
+```
+
+### Verifying Clean Screenshots
+
+After generating screenshots, verify they're clean:
+1. Check dashboard shows no "private" visibility count
+2. Check no "private-content" or similar projects appear
+3. Check issues page has no private file paths
+4. Check search results show only public content
+
+### If Private Data Leaks
+
+If screenshots with private data were committed/deployed:
+1. **Wipe git history** - Use an orphan branch to remove leaked files from history
+2. **Force push** - Replace the branch with clean content
+3. **Invalidate caches** - GitHub's camo CDN may cache old images; wait for expiry or change URLs
