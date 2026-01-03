@@ -1,0 +1,43 @@
+---
+type: bibtex_entry
+citation_key: wei2022cot
+entry_type: inproceedings
+title: Chain-of-Thought Prompting Elicits Reasoning in Large Language Models
+authors:
+  - Jason Wei
+  - Xuezhi Wang
+  - Dale Schuurmans
+  - Maarten Bosma
+  - Brian Ichter
+  - Fei Xia
+  - Ed H. Chi
+  - Quoc V. Le
+  - Denny Zhou
+year: '2022'
+venue: NeurIPS 2022
+url: https://arxiv.org/abs/2201.11903
+doi: 10.48550/arXiv.2201.11903
+visibility: public
+abstract: >-
+  We explore how generating a chain of thought — a series of intermediate
+  reasoning steps — significantly improves the ability of large language models
+  to perform complex reasoning. In particular, we show how such reasoning
+  abilities emerge naturally in sufficiently large language models via a simple
+  method called chain-of-thought prompting, where a few chain of thought
+  demonstrations are provided as exemplars in prompting. Experiments on three
+  large language models show that chain-of-thought prompting improves
+  performance on a range of arithmetic, commonsense, and symbolic reasoning
+  tasks. The empirical gains can be striking. For instance, prompting a
+  540B-parameter language model with just eight chain of thought exemplars
+  achieves state of the art accuracy on the GSM8K benchmark of math word
+  problems, surpassing even finetuned GPT-3 with a verifier.
+tags:
+  - ml-methods
+  - language-models
+  - prompting
+  - reasoning
+  - emergent-abilities
+cited_in:
+  - ranking-book
+---
+

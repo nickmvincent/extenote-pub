@@ -30,5 +30,7 @@ tags:
   - ml-methods
   - language-models
   - interpretability
+cited_in:
+  - ranking-book
 ---
 

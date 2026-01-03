@@ -5,9 +5,16 @@ entry_type: inproceedings
 title: 'Looking Beyond the Top-1: Transformers Determine Top Tokens in Order'
 authors:
   - Daria Lioubashevski
+  - Tomer Schlank
+  - Gabriel Stanovsky
+  - Ariel Goldstein
 year: '2024'
-venue: NeurIPS
+venue: ICML 2025
+url: https://arxiv.org/abs/2410.20210
+doi: 10.48550/arXiv.2410.20210
 visibility: public
+cited_in:
+  - ranking-book
 check_log:
   checked_at: '2025-12-30T15:40:00.345Z'
   checked_with: 'auto:openalex'

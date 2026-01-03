@@ -266,5 +266,6 @@ tags:
 cited_in:
   - data-leverage-blogs
   - personal-website
+  - ranking-book
 ---
 
