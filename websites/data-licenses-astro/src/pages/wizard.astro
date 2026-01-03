@@ -1,0 +1,1243 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { loadInitiatives } from '../lib/content-loader';
+
+const initiatives = await loadInitiatives();
+
+// Prepare action labels and descriptions for the results
+const actionLabels = {
+  'attach-preference-signal': 'Attach preference signal',
+  'attach-formal-license': 'Attach formal license',
+  'join-licensing-collective': 'Join licensing collective',
+  'add-tollgate': 'Add tollgate',
+  'technical-blocking': 'Technical blocking',
+  'new-infrastructures': 'New infrastructures',
+  'certification': 'Certification',
+};
+
+const statusLabels = {
+  WIP: 'Work in progress',
+  'usable-but-new': 'Usable (new)',
+  'usable-with-some-evidence': 'Usable (some evidence)',
+  'usable-with-strong-evidence': 'Usable (strong evidence)',
+};
+
+const pipelineLabels = {
+  collect: 'Collect/Scrape',
+  train: 'Train',
+  'fine-tune': 'Fine-tune',
+  retrieve: 'Retrieve',
+  generate: 'Generate',
+};
+---
+
+<Layout>
+  <main class="wrap narrow">
+    <header class="page-header">
+      <h1>License & Preference Signal Wizard</h1>
+      <p class="muted">Answer a few questions to find the right data licensing tools for your situation.</p>
+    </header>
+
+    <!-- Progress indicator -->
+    <div class="wizard-progress box" id="progress">
+      <div class="progress-steps">
+        <div class="progress-step active" data-step="1">
+          <span class="step-number">1</span>
+          <span class="step-label">Goals</span>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="2">
+          <span class="step-number">2</span>
+          <span class="step-label">Content</span>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="3">
+          <span class="step-number">3</span>
+          <span class="step-label">Pipeline</span>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="4">
+          <span class="step-number">4</span>
+          <span class="step-label">Approach</span>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="5">
+          <span class="step-number">5</span>
+          <span class="step-label">Results</span>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 20%"></div>
+      </div>
+    </div>
+
+    <!-- Wizard steps container -->
+    <div class="wizard-container" id="wizard">
+
+      <!-- Step 1: Goals -->
+      <section class="wizard-step active" data-step="1">
+        <div class="step-content box">
+          <h2 class="step-title">What are your primary goals?</h2>
+          <p class="step-desc">Select all that apply. This helps us recommend the most relevant tools.</p>
+
+          <div class="option-grid" id="goals">
+            <button class="wizard-option" data-value="express-preference" aria-pressed="false">
+              <span class="option-icon">📢</span>
+              <span class="option-content">
+                <span class="option-label">Express my preferences</span>
+                <span class="option-hint">Tell AI companies how I want my work used</span>
+              </span>
+            </button>
+
+            <button class="wizard-option" data-value="block-scraping" aria-pressed="false">
+              <span class="option-icon">🛡️</span>
+              <span class="option-content">
+                <span class="option-label">Block AI scraping</span>
+                <span class="option-hint">Prevent bots from collecting my content</span>
+              </span>
+            </button>
+
+            <button class="wizard-option" data-value="get-compensated" aria-pressed="false">
+              <span class="option-icon">💰</span>
+              <span class="option-content">
+                <span class="option-label">Get compensated</span>
+                <span class="option-hint">License my work or get paid for AI use</span>
+              </span>
+            </button>
+
+            <button class="wizard-option" data-value="track-usage" aria-pressed="false">
+              <span class="option-icon">📊</span>
+              <span class="option-content">
+                <span class="option-label">Track how my data is used</span>
+                <span class="option-hint">Know when and how AI systems use my content</span>
+              </span>
+            </button>
+
+            <button class="wizard-option" data-value="collective-action" aria-pressed="false">
+              <span class="option-icon">🤝</span>
+              <span class="option-content">
+                <span class="option-label">Join collective action</span>
+                <span class="option-hint">Pool rights with other creators for leverage</span>
+              </span>
+            </button>
+
+            <button class="wizard-option" data-value="verify-compliance" aria-pressed="false">
+              <span class="option-icon">✅</span>
+              <span class="option-content">
+                <span class="option-label">Verify AI compliance</span>
+                <span class="option-hint">Ensure AI companies follow my terms</span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <span></span>
+          <button class="nav-btn primary" id="next-1" disabled>Next: Content Type →</button>
+        </div>
+      </section>
+
+      <!-- Step 2: Content Type -->
+      <section class="wizard-step" data-step="2">
+        <div class="step-content box">
+          <h2 class="step-title">What type of content do you create?</h2>
+          <p class="step-desc">Select all that apply. Different tools work better for different content types.</p>
+
+          <div class="option-grid compact" id="content-types">
+            <button class="wizard-option small" data-value="website" aria-pressed="false">
+              <span class="option-icon">🌐</span>
+              <span class="option-label">Website / Blog</span>
+            </button>
+
+            <button class="wizard-option small" data-value="articles" aria-pressed="false">
+              <span class="option-icon">📰</span>
+              <span class="option-label">News / Articles</span>
+            </button>
+
+            <button class="wizard-option small" data-value="code" aria-pressed="false">
+              <span class="option-icon">💻</span>
+              <span class="option-label">Code / Software</span>
+            </button>
+
+            <button class="wizard-option small" data-value="images" aria-pressed="false">
+              <span class="option-icon">🖼️</span>
+              <span class="option-label">Images / Art</span>
+            </button>
+
+            <button class="wizard-option small" data-value="music" aria-pressed="false">
+              <span class="option-icon">🎵</span>
+              <span class="option-label">Music / Audio</span>
+            </button>
+
+            <button class="wizard-option small" data-value="video" aria-pressed="false">
+              <span class="option-icon">🎬</span>
+              <span class="option-label">Video</span>
+            </button>
+
+            <button class="wizard-option small" data-value="academic" aria-pressed="false">
+              <span class="option-icon">📚</span>
+              <span class="option-label">Academic / Research</span>
+            </button>
+
+            <button class="wizard-option small" data-value="books" aria-pressed="false">
+              <span class="option-icon">📖</span>
+              <span class="option-label">Books / Long-form</span>
+            </button>
+
+            <button class="wizard-option small" data-value="social" aria-pressed="false">
+              <span class="option-icon">📱</span>
+              <span class="option-label">Social Media</span>
+            </button>
+
+            <button class="wizard-option small" data-value="data" aria-pressed="false">
+              <span class="option-icon">🗃️</span>
+              <span class="option-label">Datasets / APIs</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="nav-btn secondary" id="back-2">← Back</button>
+          <button class="nav-btn primary" id="next-2" disabled>Next: Pipeline Stage →</button>
+        </div>
+      </section>
+
+      <!-- Step 3: Pipeline Stage -->
+      <section class="wizard-step" data-step="3">
+        <div class="step-content box">
+          <h2 class="step-title">Which AI pipeline stages concern you most?</h2>
+          <p class="step-desc">AI systems use data at different stages. Select where you want control.</p>
+
+          <div class="pipeline-visual">
+            <div class="pipeline-stages" id="pipeline-stages">
+              <button class="pipeline-stage" data-value="collect" aria-pressed="false">
+                <span class="stage-icon">🕷️</span>
+                <span class="stage-label">Collect / Scrape</span>
+                <span class="stage-desc">Web crawlers gathering content</span>
+              </button>
+
+              <div class="pipeline-arrow">→</div>
+
+              <button class="pipeline-stage" data-value="train" aria-pressed="false">
+                <span class="stage-icon">🧠</span>
+                <span class="stage-label">Train</span>
+                <span class="stage-desc">Pre-training foundation models</span>
+              </button>
+
+              <div class="pipeline-arrow">→</div>
+
+              <button class="pipeline-stage" data-value="fine-tune" aria-pressed="false">
+                <span class="stage-icon">🎯</span>
+                <span class="stage-label">Fine-tune</span>
+                <span class="stage-desc">Adapting models for specific tasks</span>
+              </button>
+
+              <div class="pipeline-arrow">→</div>
+
+              <button class="pipeline-stage" data-value="retrieve" aria-pressed="false">
+                <span class="stage-icon">🔍</span>
+                <span class="stage-label">Retrieve</span>
+                <span class="stage-desc">RAG and search augmentation</span>
+              </button>
+
+              <div class="pipeline-arrow">→</div>
+
+              <button class="pipeline-stage" data-value="generate" aria-pressed="false">
+                <span class="stage-icon">✨</span>
+                <span class="stage-label">Generate</span>
+                <span class="stage-desc">Output and attribution</span>
+              </button>
+            </div>
+          </div>
+
+          <p class="step-hint">Not sure? <button class="link-btn" id="select-all-stages">Select all stages</button></p>
+        </div>
+
+        <div class="step-nav">
+          <button class="nav-btn secondary" id="back-3">← Back</button>
+          <button class="nav-btn primary" id="next-3" disabled>Next: Approach →</button>
+        </div>
+      </section>
+
+      <!-- Step 4: Approach Preferences -->
+      <section class="wizard-step" data-step="4">
+        <div class="step-content box">
+          <h2 class="step-title">What's your preferred approach?</h2>
+          <p class="step-desc">Different tools take different stances on enforcement and complexity.</p>
+
+          <div class="preference-groups">
+            <div class="preference-group">
+              <h3 class="pref-title">Enforcement style</h3>
+              <div class="pref-options" id="enforcement-style">
+                <button class="pref-option" data-value="soft" aria-pressed="false">
+                  <span class="pref-label">🕊️ Soft / Opt-out signals</span>
+                  <span class="pref-hint">Request compliance, rely on good faith</span>
+                </button>
+                <button class="pref-option" data-value="hard" aria-pressed="false">
+                  <span class="pref-label">🔒 Hard / Technical enforcement</span>
+                  <span class="pref-hint">Block access, require authentication</span>
+                </button>
+                <button class="pref-option" data-value="both" aria-pressed="false">
+                  <span class="pref-label">⚖️ Both / Layered approach</span>
+                  <span class="pref-hint">Signals plus technical measures</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="preference-group">
+              <h3 class="pref-title">Technical resources</h3>
+              <div class="pref-options" id="tech-resources">
+                <button class="pref-option" data-value="minimal" aria-pressed="false">
+                  <span class="pref-label">📄 Minimal</span>
+                  <span class="pref-hint">Just need to add a file or header</span>
+                </button>
+                <button class="pref-option" data-value="moderate" aria-pressed="false">
+                  <span class="pref-label">⚙️ Moderate</span>
+                  <span class="pref-hint">Can configure server or use third-party tools</span>
+                </button>
+                <button class="pref-option" data-value="advanced" aria-pressed="false">
+                  <span class="pref-label">🛠️ Advanced</span>
+                  <span class="pref-hint">Full control over infrastructure</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="preference-group">
+              <h3 class="pref-title">Readiness preference</h3>
+              <div class="pref-options" id="readiness">
+                <button class="pref-option" data-value="usable-now" aria-pressed="false">
+                  <span class="pref-label">✅ Usable now</span>
+                  <span class="pref-hint">Only show tools I can use today</span>
+                </button>
+                <button class="pref-option" data-value="include-wip" aria-pressed="false">
+                  <span class="pref-label">🔮 Include emerging</span>
+                  <span class="pref-hint">Show work-in-progress options too</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="nav-btn secondary" id="back-4">← Back</button>
+          <button class="nav-btn primary" id="next-4">See Recommendations →</button>
+        </div>
+      </section>
+
+      <!-- Step 5: Results -->
+      <section class="wizard-step" data-step="5">
+        <div class="step-content">
+          <div class="results-header box">
+            <h2 class="step-title">Your Personalized Recommendations</h2>
+            <p class="step-desc" id="results-summary">Based on your preferences, here are the most relevant tools and initiatives.</p>
+            <div class="results-actions">
+              <button class="nav-btn secondary" id="restart-wizard">↺ Start Over</button>
+              <button class="share-btn" id="share-results">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                Share Results
+              </button>
+            </div>
+          </div>
+
+          <div class="results-grid" id="results">
+            <!-- Populated by JavaScript -->
+          </div>
+
+          <div class="results-footer box">
+            <h3>What's next?</h3>
+            <ul class="next-steps">
+              <li>📖 <a href="/glossary">Read the glossary</a> to understand key terms</li>
+              <li>📋 <a href="/">Browse the full catalog</a> to explore all options</li>
+              <li>📝 <a href="/memo">Read the memo</a> for deeper context on data licensing</li>
+              <li>🤝 <a href="/contributing">Contribute</a> if you know of other initiatives</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Pass initiatives data to client -->
+  <script define:vars={{ initiatives, actionLabels, statusLabels, pipelineLabels }}>
+    window.__WIZARD_DATA__ = {
+      initiatives,
+      actionLabels,
+      statusLabels,
+      pipelineLabels,
+    };
+  </script>
+
+  <script>
+    const { initiatives, actionLabels, statusLabels, pipelineLabels } = window.__WIZARD_DATA__;
+
+    // State
+    const state = {
+      currentStep: 1,
+      goals: [],
+      contentTypes: [],
+      pipelineStages: [],
+      enforcement: null,
+      techResources: null,
+      readiness: null,
+    };
+
+    // DOM helpers
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+    // Step navigation
+    function showStep(stepNum) {
+      state.currentStep = stepNum;
+
+      // Update step visibility
+      $$('.wizard-step').forEach((step) => {
+        step.classList.toggle('active', step.dataset.step === String(stepNum));
+      });
+
+      // Update progress indicator
+      $$('.progress-step').forEach((step) => {
+        const num = Number(step.dataset.step);
+        step.classList.toggle('active', num === stepNum);
+        step.classList.toggle('completed', num < stepNum);
+      });
+
+      // Update progress bar
+      const fill = $('#progress-fill');
+      fill.style.width = `${(stepNum / 5) * 100}%`;
+
+      // If showing results, calculate them
+      if (stepNum === 5) {
+        calculateResults();
+      }
+
+      // Scroll to top of wizard
+      $('#wizard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Toggle handlers for multi-select options
+    function setupMultiSelect(containerId, stateKey) {
+      const container = $(`#${containerId}`);
+      if (!container) return;
+
+      container.addEventListener('click', (e) => {
+        const btn = e.target.closest('.wizard-option, .pipeline-stage');
+        if (!btn) return;
+
+        const pressed = btn.getAttribute('aria-pressed') === 'true';
+        btn.setAttribute('aria-pressed', String(!pressed));
+
+        // Update state
+        const value = btn.dataset.value;
+        if (!pressed) {
+          if (!state[stateKey].includes(value)) {
+            state[stateKey].push(value);
+          }
+        } else {
+          state[stateKey] = state[stateKey].filter((v) => v !== value);
+        }
+
+        updateNavButtons();
+      });
+    }
+
+    // Toggle handlers for single-select options
+    function setupSingleSelect(containerId, stateKey) {
+      const container = $(`#${containerId}`);
+      if (!container) return;
+
+      container.addEventListener('click', (e) => {
+        const btn = e.target.closest('.pref-option');
+        if (!btn) return;
+
+        // Deselect siblings
+        container.querySelectorAll('.pref-option').forEach((b) => {
+          b.setAttribute('aria-pressed', 'false');
+        });
+
+        btn.setAttribute('aria-pressed', 'true');
+        state[stateKey] = btn.dataset.value;
+
+        updateNavButtons();
+      });
+    }
+
+    // Update navigation button states
+    function updateNavButtons() {
+      // Step 1: require at least one goal
+      const next1 = $('#next-1');
+      if (next1) next1.disabled = state.goals.length === 0;
+
+      // Step 2: require at least one content type
+      const next2 = $('#next-2');
+      if (next2) next2.disabled = state.contentTypes.length === 0;
+
+      // Step 3: require at least one pipeline stage
+      const next3 = $('#next-3');
+      if (next3) next3.disabled = state.pipelineStages.length === 0;
+    }
+
+    // Calculate and display results
+    function calculateResults() {
+      const results = [];
+
+      // Map goals to actions
+      const goalToActions = {
+        'express-preference': ['attach-preference-signal', 'attach-formal-license'],
+        'block-scraping': ['technical-blocking'],
+        'get-compensated': ['add-tollgate', 'join-licensing-collective'],
+        'track-usage': ['new-infrastructures', 'attach-preference-signal'],
+        'collective-action': ['join-licensing-collective', 'certification'],
+        'verify-compliance': ['certification', 'new-infrastructures'],
+      };
+
+      // Get relevant actions based on goals
+      const relevantActions = new Set();
+      state.goals.forEach((goal) => {
+        (goalToActions[goal] || []).forEach((a) => relevantActions.add(a));
+      });
+
+      // Score each initiative
+      initiatives.forEach((init) => {
+        let score = 0;
+        const reasons = [];
+
+        // Action match (primary factor)
+        const actions = init.actionsSupported || [];
+        const matchingActions = actions.filter((a) => relevantActions.has(a));
+        if (matchingActions.length > 0) {
+          score += matchingActions.length * 3;
+          reasons.push(`Supports: ${matchingActions.map(a => actionLabels[a] || a).join(', ')}`);
+        } else {
+          return; // Skip if no matching actions
+        }
+
+        // Pipeline stage match
+        const stages = init.pipelineStages || [];
+        const matchingStages = stages.filter((s) => state.pipelineStages.includes(s));
+        if (matchingStages.length > 0) {
+          score += matchingStages.length * 2;
+        }
+
+        // Status/readiness
+        const isUsable = init.status !== 'WIP';
+        if (state.readiness === 'usable-now' && !isUsable) {
+          return; // Skip WIP if user wants usable only
+        }
+        if (isUsable) {
+          score += 2;
+          if (init.status === 'usable-with-some-evidence') score += 1;
+          if (init.status === 'usable-with-strong-evidence') score += 2;
+        }
+
+        // Enforcement style match
+        if (state.enforcement) {
+          const isHard = actions.includes('technical-blocking') || actions.includes('add-tollgate');
+          const isSoft = actions.includes('attach-preference-signal') || actions.includes('attach-formal-license');
+
+          if (state.enforcement === 'soft' && isSoft && !isHard) score += 1;
+          if (state.enforcement === 'hard' && isHard) score += 1;
+          if (state.enforcement === 'both') score += 1;
+        }
+
+        // Technical complexity match
+        if (state.techResources === 'minimal') {
+          // Prefer simple signals
+          if (actions.includes('attach-preference-signal')) score += 1;
+        } else if (state.techResources === 'advanced') {
+          // Can handle anything
+          if (actions.includes('technical-blocking') || actions.includes('new-infrastructures')) score += 1;
+        }
+
+        results.push({
+          ...init,
+          score,
+          reasons,
+          matchingActions,
+        });
+      });
+
+      // Sort by score descending
+      results.sort((a, b) => b.score - a.score);
+
+      // Render results
+      renderResults(results.slice(0, 10)); // Top 10
+    }
+
+    function renderResults(results) {
+      const container = $('#results');
+
+      if (results.length === 0) {
+        container.innerHTML = `
+          <div class="no-results box">
+            <p>No initiatives match your exact criteria. Try adjusting your preferences or <a href="/">browse the full catalog</a>.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Update summary
+      $('#results-summary').textContent = `Found ${results.length} relevant tool${results.length !== 1 ? 's' : ''} based on your preferences.`;
+
+      container.innerHTML = results.map((init, idx) => `
+        <article class="result-card box">
+          <div class="result-rank">#${idx + 1}</div>
+          <div class="result-main">
+            <div class="result-header">
+              <h3 class="result-title">${init.title}</h3>
+              <span class="badge ${init.status}">${statusLabels[init.status] || init.status}</span>
+            </div>
+            <p class="result-summary">${init.summary || ''}</p>
+
+            <div class="result-meta">
+              ${init.matchingActions.map((a) => `<span class="chip type-chip">${actionLabels[a] || a}</span>`).join('')}
+              ${(init.pipelineStages || []).length > 0 ? `<span class="chip muted-chip">Stage: ${init.pipelineStages.map(p => pipelineLabels[p] || p).join(' → ')}</span>` : ''}
+            </div>
+
+            <div class="result-links">
+              ${init.website ? `<a href="${init.website}" target="_blank" rel="noopener" class="result-link">Website ↗</a>` : ''}
+              ${init.spec ? `<a href="${init.spec}" target="_blank" rel="noopener" class="result-link">Spec ↗</a>` : ''}
+              <a href="/#${init.slug}" class="result-link">View in catalog →</a>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // Initialize
+    function init() {
+      // Multi-select handlers
+      setupMultiSelect('goals', 'goals');
+      setupMultiSelect('content-types', 'contentTypes');
+      setupMultiSelect('pipeline-stages', 'pipelineStages');
+
+      // Single-select handlers
+      setupSingleSelect('enforcement-style', 'enforcement');
+      setupSingleSelect('tech-resources', 'techResources');
+      setupSingleSelect('readiness', 'readiness');
+
+      // Navigation buttons
+      $('#next-1')?.addEventListener('click', () => showStep(2));
+      $('#next-2')?.addEventListener('click', () => showStep(3));
+      $('#next-3')?.addEventListener('click', () => showStep(4));
+      $('#next-4')?.addEventListener('click', () => showStep(5));
+
+      $('#back-2')?.addEventListener('click', () => showStep(1));
+      $('#back-3')?.addEventListener('click', () => showStep(2));
+      $('#back-4')?.addEventListener('click', () => showStep(3));
+
+      // Restart button
+      $('#restart-wizard')?.addEventListener('click', () => {
+        // Reset state
+        state.goals = [];
+        state.contentTypes = [];
+        state.pipelineStages = [];
+        state.enforcement = null;
+        state.techResources = null;
+        state.readiness = null;
+
+        // Reset UI
+        $$('.wizard-option, .pipeline-stage, .pref-option').forEach((btn) => {
+          btn.setAttribute('aria-pressed', 'false');
+        });
+
+        updateNavButtons();
+        showStep(1);
+      });
+
+      // Select all stages helper
+      $('#select-all-stages')?.addEventListener('click', () => {
+        $$('#pipeline-stages .pipeline-stage').forEach((btn) => {
+          btn.setAttribute('aria-pressed', 'true');
+          const value = btn.dataset.value;
+          if (!state.pipelineStages.includes(value)) {
+            state.pipelineStages.push(value);
+          }
+        });
+        updateNavButtons();
+      });
+
+      // Share results
+      $('#share-results')?.addEventListener('click', async () => {
+        const params = new URLSearchParams();
+        state.goals.forEach((g) => params.append('goal', g));
+        state.contentTypes.forEach((c) => params.append('content', c));
+        state.pipelineStages.forEach((p) => params.append('stage', p));
+        if (state.enforcement) params.set('enforcement', state.enforcement);
+        if (state.techResources) params.set('tech', state.techResources);
+        if (state.readiness) params.set('readiness', state.readiness);
+        params.set('step', '5');
+
+        const url = `${location.origin}${location.pathname}?${params.toString()}`;
+        try {
+          await navigator.clipboard.writeText(url);
+          const btn = $('#share-results');
+          const origText = btn.innerHTML;
+          btn.innerHTML = '✓ Copied!';
+          setTimeout(() => btn.innerHTML = origText, 2000);
+        } catch (e) {
+          alert('Could not copy link');
+        }
+      });
+
+      // Restore state from URL params
+      const params = new URLSearchParams(location.search);
+
+      params.getAll('goal').forEach((g) => {
+        state.goals.push(g);
+        const btn = $(`#goals [data-value="${g}"]`);
+        if (btn) btn.setAttribute('aria-pressed', 'true');
+      });
+
+      params.getAll('content').forEach((c) => {
+        state.contentTypes.push(c);
+        const btn = $(`#content-types [data-value="${c}"]`);
+        if (btn) btn.setAttribute('aria-pressed', 'true');
+      });
+
+      params.getAll('stage').forEach((s) => {
+        state.pipelineStages.push(s);
+        const btn = $(`#pipeline-stages [data-value="${s}"]`);
+        if (btn) btn.setAttribute('aria-pressed', 'true');
+      });
+
+      if (params.has('enforcement')) {
+        state.enforcement = params.get('enforcement');
+        const btn = $(`#enforcement-style [data-value="${state.enforcement}"]`);
+        if (btn) btn.setAttribute('aria-pressed', 'true');
+      }
+
+      if (params.has('tech')) {
+        state.techResources = params.get('tech');
+        const btn = $(`#tech-resources [data-value="${state.techResources}"]`);
+        if (btn) btn.setAttribute('aria-pressed', 'true');
+      }
+
+      if (params.has('readiness')) {
+        state.readiness = params.get('readiness');
+        const btn = $(`#readiness [data-value="${state.readiness}"]`);
+        if (btn) btn.setAttribute('aria-pressed', 'true');
+      }
+
+      updateNavButtons();
+
+      // If step param, jump to that step
+      if (params.has('step')) {
+        const step = Number(params.get('step'));
+        if (step >= 1 && step <= 5) {
+          showStep(step);
+        }
+      }
+    }
+
+    init();
+  </script>
+</Layout>
+
+<style>
+  /* Wizard-specific styles */
+  .wizard-progress {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .step-label {
+    font-size: 11px;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+
+  .progress-step.active .step-number {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .progress-step.active .step-label {
+    color: var(--accent);
+  }
+
+  .progress-step.completed .step-number {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .progress-connector {
+    width: 24px;
+    height: 2px;
+    background: var(--border);
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+
+  /* Wizard steps */
+  .wizard-step {
+    display: none;
+  }
+
+  .wizard-step.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-content {
+    padding: 24px;
+  }
+
+  .step-title {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .step-desc {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .step-hint {
+    margin: 16px 0 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: inherit;
+    padding: 0;
+  }
+
+  /* Option grid */
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .option-grid.compact {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .wizard-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+
+  .wizard-option:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .wizard-option[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .wizard-option.small {
+    padding: 12px;
+    align-items: center;
+  }
+
+  .wizard-option.small .option-icon {
+    font-size: 20px;
+  }
+
+  .option-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+
+  .option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .option-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .option-hint {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* Pipeline stages */
+  .pipeline-visual {
+    overflow-x: auto;
+    padding: 8px 0;
+  }
+
+  .pipeline-stages {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: max-content;
+  }
+
+  .pipeline-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 120px;
+  }
+
+  .pipeline-stage:hover {
+    border-color: var(--accent);
+  }
+
+  .pipeline-stage[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .stage-icon {
+    font-size: 24px;
+  }
+
+  .stage-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .stage-desc {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .pipeline-arrow {
+    font-size: 20px;
+    color: var(--muted);
+  }
+
+  /* Preference groups */
+  .preference-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .preference-group {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  .preference-group:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .pref-title {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .pref-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .pref-option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .pref-option:hover {
+    border-color: var(--accent);
+  }
+
+  .pref-option[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .pref-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .pref-hint {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Navigation */
+  .step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 0 4px;
+  }
+
+  .nav-btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .nav-btn.primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+  }
+
+  .nav-btn.primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 85%, white);
+  }
+
+  .nav-btn.primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .nav-btn.secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .nav-btn.secondary:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  /* Results */
+  .results-header {
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .results-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .results-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .result-card {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .result-rank {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+    width: 40px;
+  }
+
+  .result-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .result-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .result-summary {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .result-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 4px;
+  }
+
+  .result-link {
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  .results-footer {
+    padding: 20px;
+    margin-top: 24px;
+  }
+
+  .results-footer h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+  }
+
+  .next-steps {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .next-steps li {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .next-steps a {
+    color: var(--accent);
+  }
+
+  .no-results {
+    padding: 40px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .progress-steps {
+      gap: 4px;
+    }
+
+    .step-label {
+      display: none;
+    }
+
+    .progress-connector {
+      width: 16px;
+    }
+
+    .option-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pipeline-stages {
+      flex-direction: column;
+    }
+
+    .pipeline-arrow {
+      transform: rotate(90deg);
+    }
+
+    .pipeline-stage {
+      width: 100%;
+    }
+
+    .pref-options {
+      flex-direction: column;
+    }
+
+    .pref-option {
+      min-width: 0;
+    }
+  }
+</style>
