@@ -18,7 +18,8 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS_ROOT = join(__dirname, "..");
-const EXTENOTE_ROOT = join(DOCS_ROOT, "..", "..", "..", "extenote");
+// Use EXTENOTE_DIR env var to override, defaults to "extenote"
+const EXTENOTE_ROOT = join(DOCS_ROOT, "..", "..", "..", process.env.EXTENOTE_DIR || "extenote");
 const SCREENSHOTS_SRC = join(EXTENOTE_ROOT, "packages", "web", "tests", "screenshots");
 const SCREENSHOTS_DEST = join(DOCS_ROOT, "public", "screenshots");
 
@@ -53,13 +54,17 @@ async function main() {
     return;
   }
 
-  // Start web server
-  console.log("🚀 Starting web server...");
+  // Start web server with PUBLIC_ONLY mode to exclude private content
+  console.log("🚀 Starting web server (PUBLIC_ONLY mode)...");
   const serverProc = spawn({
     cmd: ["bun", "run", "web"],
     cwd: EXTENOTE_ROOT,
     stdout: "ignore",
     stderr: "ignore",
+    env: {
+      ...process.env,
+      EXTENOTE_PUBLIC_ONLY: "true",
+    },
   });
 
   try {
