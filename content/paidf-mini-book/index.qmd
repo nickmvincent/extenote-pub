@@ -16,9 +16,9 @@ This document is organized as such:
 - In "Part 2: A Case Study", we discuss one particular implementation of a Minimum Viable Product (MVP) opt-in flywheel meant to accompany a "public AI interface" (hosted interface software that hits various endpoints for "public AI models") that uses a "friendly wrapper around a Git backend" approach
   - This MVP focuses on collecting "notable chats" (good, bad, or interesting). This data provides immediate value for model evaluation and, at scale, can be used for fine-tuning. Importantly, collecting a list of good and bad chats is also immediately fun, so contributors can get some value before we reach a threshold of data volume needed to construct a full benchmark or dataset. We expect key ideas discussed in this doc, and concretized in this project, to generalize to other data types.
   - We also provide details on how a data retention policy for a concrete Public AI Data Flywheel might work, and more generally discuss the role of the data strategy for a "full stack" public AI application: from model endpoints to OpenWebUI interface to flywheel platform.
-- The book includes some Appendices with additional information, including a [Glossary](appendix5_glossary.qmd) of key terms.
+- The book includes some Appendices with additional information, including a [Glossary](appendix5_glossary.html) of key terms.
 
 ::: {.callout-tip}
 ## New to these concepts?
-If you encounter unfamiliar terms like "flywheel," "pipeworks," or "preference signal," check the [Glossary](appendix5_glossary.qmd) in the Appendices.
+If you encounter unfamiliar terms like "flywheel," "pipeworks," or "preference signal," check the [Glossary](appendix5_glossary.html) in the Appendices.
 :::
