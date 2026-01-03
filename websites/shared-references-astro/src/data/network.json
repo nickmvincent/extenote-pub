@@ -44,7 +44,7 @@
   "discussions": [
     {
       "provider": "github",
-      "url": "https://github.com/nickmvincent/extenote-content-public/discussions/5",
+      "url": "https://github.com/nickmvincent/extenote-pub/discussions/3",
       "label": "GitHub Discussions",
       "description": "Threaded conversations with markdown support, reactions, and notifications."
     },
@@ -55,5 +55,5 @@
       "description": "Long-form posts on the ATProto/Bluesky network."
     }
   ],
-  "generatedAt": "2026-01-02T17:25:05.357Z"
+  "generatedAt": "2026-01-03T03:51:52.266Z"
 }
