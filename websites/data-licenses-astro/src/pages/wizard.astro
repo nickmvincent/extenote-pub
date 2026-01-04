@@ -1,10 +1,29 @@
 ---
+/**
+ * License & Preference Signal Wizard
+ * ===================================
+ * A multi-step wizard to help users find the right data licensing tools.
+ *
+ * To update the wizard options, edit: src/lib/wizard-config.ts
+ * - Add/remove goals, content types, pipeline stages
+ * - Adjust goal-to-action mappings
+ * - Tune scoring weights
+ */
 import Layout from '../layouts/Layout.astro';
 import { loadInitiatives } from '../lib/content-loader';
+import {
+  goals,
+  contentTypes,
+  pipelineStages,
+  preferenceGroups,
+  getGoalToActionsMap,
+  scoringWeights,
+  actionClassifications,
+} from '../lib/wizard-config';
 
 const initiatives = await loadInitiatives();
 
-// Prepare action labels and descriptions for the results
+// Labels used in results display (kept in sync with index.astro)
 const actionLabels = {
   'attach-preference-signal': 'Attach preference signal',
   'attach-formal-license': 'Attach formal license',
@@ -22,12 +41,17 @@ const statusLabels = {
   'usable-with-strong-evidence': 'Usable (strong evidence)',
 };
 
-const pipelineLabels = {
-  collect: 'Collect/Scrape',
-  train: 'Train',
-  'fine-tune': 'Fine-tune',
-  retrieve: 'Retrieve',
-  generate: 'Generate',
+const pipelineLabels = Object.fromEntries(pipelineStages.map((s) => [s.id, s.label]));
+
+// Pass config to client
+const wizardConfig = {
+  goals,
+  contentTypes,
+  pipelineStages,
+  preferenceGroups,
+  goalToActions: getGoalToActionsMap(),
+  scoringWeights,
+  actionClassifications,
 };
 ---
 
@@ -74,135 +98,54 @@ const pipelineLabels = {
     <!-- Wizard steps container -->
     <div class="wizard-container" id="wizard">
 
-      <!-- Step 1: Goals -->
+      <!-- Step 1: Goals (data-driven from config) -->
       <section class="wizard-step active" data-step="1">
         <div class="step-content box">
           <h2 class="step-title">What are your primary goals?</h2>
           <p class="step-desc">Select all that apply. This helps us recommend the most relevant tools.</p>
 
           <div class="option-grid" id="goals">
-            <button class="wizard-option" data-value="express-preference" aria-pressed="false">
-              <span class="option-icon">📢</span>
-              <span class="option-content">
-                <span class="option-label">Express my preferences</span>
-                <span class="option-hint">Tell AI companies how I want my work used</span>
-              </span>
-            </button>
-
-            <button class="wizard-option" data-value="block-scraping" aria-pressed="false">
-              <span class="option-icon">🛡️</span>
-              <span class="option-content">
-                <span class="option-label">Block AI scraping</span>
-                <span class="option-hint">Prevent bots from collecting my content</span>
-              </span>
-            </button>
-
-            <button class="wizard-option" data-value="get-compensated" aria-pressed="false">
-              <span class="option-icon">💰</span>
-              <span class="option-content">
-                <span class="option-label">Get compensated</span>
-                <span class="option-hint">License my work or get paid for AI use</span>
-              </span>
-            </button>
-
-            <button class="wizard-option" data-value="track-usage" aria-pressed="false">
-              <span class="option-icon">📊</span>
-              <span class="option-content">
-                <span class="option-label">Track how my data is used</span>
-                <span class="option-hint">Know when and how AI systems use my content</span>
-              </span>
-            </button>
-
-            <button class="wizard-option" data-value="collective-action" aria-pressed="false">
-              <span class="option-icon">🤝</span>
-              <span class="option-content">
-                <span class="option-label">Join collective action</span>
-                <span class="option-hint">Pool rights with other creators for leverage</span>
-              </span>
-            </button>
-
-            <button class="wizard-option" data-value="verify-compliance" aria-pressed="false">
-              <span class="option-icon">✅</span>
-              <span class="option-content">
-                <span class="option-label">Verify AI compliance</span>
-                <span class="option-hint">Ensure AI companies follow my terms</span>
-              </span>
-            </button>
+            {goals.map((goal) => (
+              <button class="wizard-option" data-value={goal.id} aria-pressed="false">
+                <span class="option-icon">{goal.icon}</span>
+                <span class="option-content">
+                  <span class="option-label">{goal.label}</span>
+                  <span class="option-hint">{goal.hint}</span>
+                </span>
+              </button>
+            ))}
           </div>
         </div>
 
         <div class="step-nav">
           <span></span>
-          <button class="nav-btn primary" id="next-1" disabled>Next: Content Type →</button>
+          <button class="nav-btn primary" id="next-1" disabled>Next: Content Type &rarr;</button>
         </div>
       </section>
 
-      <!-- Step 2: Content Type -->
+      <!-- Step 2: Content Type (data-driven from config) -->
       <section class="wizard-step" data-step="2">
         <div class="step-content box">
           <h2 class="step-title">What type of content do you create?</h2>
           <p class="step-desc">Select all that apply. Different tools work better for different content types.</p>
 
           <div class="option-grid compact" id="content-types">
-            <button class="wizard-option small" data-value="website" aria-pressed="false">
-              <span class="option-icon">🌐</span>
-              <span class="option-label">Website / Blog</span>
-            </button>
-
-            <button class="wizard-option small" data-value="articles" aria-pressed="false">
-              <span class="option-icon">📰</span>
-              <span class="option-label">News / Articles</span>
-            </button>
-
-            <button class="wizard-option small" data-value="code" aria-pressed="false">
-              <span class="option-icon">💻</span>
-              <span class="option-label">Code / Software</span>
-            </button>
-
-            <button class="wizard-option small" data-value="images" aria-pressed="false">
-              <span class="option-icon">🖼️</span>
-              <span class="option-label">Images / Art</span>
-            </button>
-
-            <button class="wizard-option small" data-value="music" aria-pressed="false">
-              <span class="option-icon">🎵</span>
-              <span class="option-label">Music / Audio</span>
-            </button>
-
-            <button class="wizard-option small" data-value="video" aria-pressed="false">
-              <span class="option-icon">🎬</span>
-              <span class="option-label">Video</span>
-            </button>
-
-            <button class="wizard-option small" data-value="academic" aria-pressed="false">
-              <span class="option-icon">📚</span>
-              <span class="option-label">Academic / Research</span>
-            </button>
-
-            <button class="wizard-option small" data-value="books" aria-pressed="false">
-              <span class="option-icon">📖</span>
-              <span class="option-label">Books / Long-form</span>
-            </button>
-
-            <button class="wizard-option small" data-value="social" aria-pressed="false">
-              <span class="option-icon">📱</span>
-              <span class="option-label">Social Media</span>
-            </button>
-
-            <button class="wizard-option small" data-value="data" aria-pressed="false">
-              <span class="option-icon">🗃️</span>
-              <span class="option-label">Datasets / APIs</span>
-            </button>
+            {contentTypes.map((ct) => (
+              <button class="wizard-option small" data-value={ct.id} aria-pressed="false">
+                <span class="option-icon">{ct.icon}</span>
+                <span class="option-label">{ct.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         <div class="step-nav">
-          <button class="nav-btn secondary" id="back-2">← Back</button>
-          <button class="nav-btn primary" id="next-2" disabled>Next: Pipeline Stage →</button>
+          <button class="nav-btn secondary" id="back-2">&larr; Back</button>
+          <button class="nav-btn primary" id="next-2" disabled>Next: Pipeline Stage &rarr;</button>
         </div>
       </section>
 
-      <!-- Step 3: Pipeline Stage -->
+      <!-- Step 3: Pipeline Stage (data-driven from config) -->
       <section class="wizard-step" data-step="3">
         <div class="step-content box">
           <h2 class="step-title">Which AI pipeline stages concern you most?</h2>
@@ -210,43 +153,16 @@ const pipelineLabels = {
 
           <div class="pipeline-visual">
             <div class="pipeline-stages" id="pipeline-stages">
-              <button class="pipeline-stage" data-value="collect" aria-pressed="false">
-                <span class="stage-icon">🕷️</span>
-                <span class="stage-label">Collect / Scrape</span>
-                <span class="stage-desc">Web crawlers gathering content</span>
-              </button>
-
-              <div class="pipeline-arrow">→</div>
-
-              <button class="pipeline-stage" data-value="train" aria-pressed="false">
-                <span class="stage-icon">🧠</span>
-                <span class="stage-label">Train</span>
-                <span class="stage-desc">Pre-training foundation models</span>
-              </button>
-
-              <div class="pipeline-arrow">→</div>
-
-              <button class="pipeline-stage" data-value="fine-tune" aria-pressed="false">
-                <span class="stage-icon">🎯</span>
-                <span class="stage-label">Fine-tune</span>
-                <span class="stage-desc">Adapting models for specific tasks</span>
-              </button>
-
-              <div class="pipeline-arrow">→</div>
-
-              <button class="pipeline-stage" data-value="retrieve" aria-pressed="false">
-                <span class="stage-icon">🔍</span>
-                <span class="stage-label">Retrieve</span>
-                <span class="stage-desc">RAG and search augmentation</span>
-              </button>
-
-              <div class="pipeline-arrow">→</div>
-
-              <button class="pipeline-stage" data-value="generate" aria-pressed="false">
-                <span class="stage-icon">✨</span>
-                <span class="stage-label">Generate</span>
-                <span class="stage-desc">Output and attribution</span>
-              </button>
+              {pipelineStages.map((stage, idx) => (
+                <>
+                  {idx > 0 && <div class="pipeline-arrow">&rarr;</div>}
+                  <button class="pipeline-stage" data-value={stage.id} aria-pressed="false">
+                    <span class="stage-icon">{stage.icon}</span>
+                    <span class="stage-label">{stage.label}</span>
+                    <span class="stage-desc">{stage.description}</span>
+                  </button>
+                </>
+              ))}
             </div>
           </div>
 
@@ -254,73 +170,37 @@ const pipelineLabels = {
         </div>
 
         <div class="step-nav">
-          <button class="nav-btn secondary" id="back-3">← Back</button>
-          <button class="nav-btn primary" id="next-3" disabled>Next: Approach →</button>
+          <button class="nav-btn secondary" id="back-3">&larr; Back</button>
+          <button class="nav-btn primary" id="next-3" disabled>Next: Approach &rarr;</button>
         </div>
       </section>
 
-      <!-- Step 4: Approach Preferences -->
+      <!-- Step 4: Approach Preferences (data-driven from config) -->
       <section class="wizard-step" data-step="4">
         <div class="step-content box">
           <h2 class="step-title">What's your preferred approach?</h2>
           <p class="step-desc">Different tools take different stances on enforcement and complexity.</p>
 
           <div class="preference-groups">
-            <div class="preference-group">
-              <h3 class="pref-title">Enforcement style</h3>
-              <div class="pref-options" id="enforcement-style">
-                <button class="pref-option" data-value="soft" aria-pressed="false">
-                  <span class="pref-label">🕊️ Soft / Opt-out signals</span>
-                  <span class="pref-hint">Request compliance, rely on good faith</span>
-                </button>
-                <button class="pref-option" data-value="hard" aria-pressed="false">
-                  <span class="pref-label">🔒 Hard / Technical enforcement</span>
-                  <span class="pref-hint">Block access, require authentication</span>
-                </button>
-                <button class="pref-option" data-value="both" aria-pressed="false">
-                  <span class="pref-label">⚖️ Both / Layered approach</span>
-                  <span class="pref-hint">Signals plus technical measures</span>
-                </button>
+            {preferenceGroups.map((group) => (
+              <div class="preference-group">
+                <h3 class="pref-title">{group.title}</h3>
+                <div class="pref-options" id={group.id}>
+                  {group.options.map((opt) => (
+                    <button class="pref-option" data-value={opt.id} aria-pressed="false">
+                      <span class="pref-label">{opt.icon} {opt.label}</span>
+                      <span class="pref-hint">{opt.hint}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-
-            <div class="preference-group">
-              <h3 class="pref-title">Technical resources</h3>
-              <div class="pref-options" id="tech-resources">
-                <button class="pref-option" data-value="minimal" aria-pressed="false">
-                  <span class="pref-label">📄 Minimal</span>
-                  <span class="pref-hint">Just need to add a file or header</span>
-                </button>
-                <button class="pref-option" data-value="moderate" aria-pressed="false">
-                  <span class="pref-label">⚙️ Moderate</span>
-                  <span class="pref-hint">Can configure server or use third-party tools</span>
-                </button>
-                <button class="pref-option" data-value="advanced" aria-pressed="false">
-                  <span class="pref-label">🛠️ Advanced</span>
-                  <span class="pref-hint">Full control over infrastructure</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="preference-group">
-              <h3 class="pref-title">Readiness preference</h3>
-              <div class="pref-options" id="readiness">
-                <button class="pref-option" data-value="usable-now" aria-pressed="false">
-                  <span class="pref-label">✅ Usable now</span>
-                  <span class="pref-hint">Only show tools I can use today</span>
-                </button>
-                <button class="pref-option" data-value="include-wip" aria-pressed="false">
-                  <span class="pref-label">🔮 Include emerging</span>
-                  <span class="pref-hint">Show work-in-progress options too</span>
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
         <div class="step-nav">
-          <button class="nav-btn secondary" id="back-4">← Back</button>
-          <button class="nav-btn primary" id="next-4">See Recommendations →</button>
+          <button class="nav-btn secondary" id="back-4">&larr; Back</button>
+          <button class="nav-btn primary" id="next-4">See Recommendations &rarr;</button>
         </div>
       </section>
 
@@ -331,7 +211,7 @@ const pipelineLabels = {
             <h2 class="step-title">Your Personalized Recommendations</h2>
             <p class="step-desc" id="results-summary">Based on your preferences, here are the most relevant tools and initiatives.</p>
             <div class="results-actions">
-              <button class="nav-btn secondary" id="restart-wizard">↺ Start Over</button>
+              <button class="nav-btn secondary" id="restart-wizard">&#8634; Start Over</button>
               <button class="share-btn" id="share-results">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                 Share Results
@@ -346,10 +226,10 @@ const pipelineLabels = {
           <div class="results-footer box">
             <h3>What's next?</h3>
             <ul class="next-steps">
-              <li>📖 <a href="/glossary">Read the glossary</a> to understand key terms</li>
-              <li>📋 <a href="/">Browse the full catalog</a> to explore all options</li>
-              <li>📝 <a href="/memo">Read the memo</a> for deeper context on data licensing</li>
-              <li>🤝 <a href="/contributing">Contribute</a> if you know of other initiatives</li>
+              <li>&#128214; <a href="/glossary">Read the glossary</a> to understand key terms</li>
+              <li>&#128203; <a href="/">Browse the full catalog</a> to explore all options</li>
+              <li>&#128221; <a href="/memo">Read the memo</a> for deeper context on data licensing</li>
+              <li>&#129309; <a href="/contributing">Contribute</a> if you know of other initiatives</li>
             </ul>
           </div>
         </div>
@@ -357,18 +237,20 @@ const pipelineLabels = {
     </div>
   </main>
 
-  <!-- Pass initiatives data to client -->
-  <script define:vars={{ initiatives, actionLabels, statusLabels, pipelineLabels }}>
+  <!-- Pass data to client -->
+  <script define:vars={{ initiatives, actionLabels, statusLabels, pipelineLabels, wizardConfig }}>
     window.__WIZARD_DATA__ = {
       initiatives,
       actionLabels,
       statusLabels,
       pipelineLabels,
+      config: wizardConfig,
     };
   </script>
 
   <script>
-    const { initiatives, actionLabels, statusLabels, pipelineLabels } = window.__WIZARD_DATA__;
+    const { initiatives, actionLabels, statusLabels, pipelineLabels, config } = window.__WIZARD_DATA__;
+    const { goalToActions, scoringWeights, actionClassifications } = config;
 
     // State
     const state = {
@@ -476,21 +358,11 @@ const pipelineLabels = {
       if (next3) next3.disabled = state.pipelineStages.length === 0;
     }
 
-    // Calculate and display results
+    // Calculate and display results using config-driven scoring
     function calculateResults() {
       const results = [];
 
-      // Map goals to actions
-      const goalToActions = {
-        'express-preference': ['attach-preference-signal', 'attach-formal-license'],
-        'block-scraping': ['technical-blocking'],
-        'get-compensated': ['add-tollgate', 'join-licensing-collective'],
-        'track-usage': ['new-infrastructures', 'attach-preference-signal'],
-        'collective-action': ['join-licensing-collective', 'certification'],
-        'verify-compliance': ['certification', 'new-infrastructures'],
-      };
-
-      // Get relevant actions based on goals
+      // Get relevant actions based on goals (using config)
       const relevantActions = new Set();
       state.goals.forEach((goal) => {
         (goalToActions[goal] || []).forEach((a) => relevantActions.add(a));
@@ -505,7 +377,7 @@ const pipelineLabels = {
         const actions = init.actionsSupported || [];
         const matchingActions = actions.filter((a) => relevantActions.has(a));
         if (matchingActions.length > 0) {
-          score += matchingActions.length * 3;
+          score += matchingActions.length * scoringWeights.actionMatch;
           reasons.push(`Supports: ${matchingActions.map(a => actionLabels[a] || a).join(', ')}`);
         } else {
           return; // Skip if no matching actions
@@ -515,7 +387,7 @@ const pipelineLabels = {
         const stages = init.pipelineStages || [];
         const matchingStages = stages.filter((s) => state.pipelineStages.includes(s));
         if (matchingStages.length > 0) {
-          score += matchingStages.length * 2;
+          score += matchingStages.length * scoringWeights.pipelineStageMatch;
         }
 
         // Status/readiness
@@ -524,28 +396,30 @@ const pipelineLabels = {
           return; // Skip WIP if user wants usable only
         }
         if (isUsable) {
-          score += 2;
-          if (init.status === 'usable-with-some-evidence') score += 1;
-          if (init.status === 'usable-with-strong-evidence') score += 2;
+          score += scoringWeights.usableBase;
+          if (init.status === 'usable-with-some-evidence') score += scoringWeights.someEvidenceBonus;
+          if (init.status === 'usable-with-strong-evidence') score += scoringWeights.strongEvidenceBonus;
         }
 
-        // Enforcement style match
+        // Enforcement style match (using config classifications)
         if (state.enforcement) {
-          const isHard = actions.includes('technical-blocking') || actions.includes('add-tollgate');
-          const isSoft = actions.includes('attach-preference-signal') || actions.includes('attach-formal-license');
+          const isHard = actions.some((a) => actionClassifications.hard.includes(a));
+          const isSoft = actions.some((a) => actionClassifications.soft.includes(a));
 
-          if (state.enforcement === 'soft' && isSoft && !isHard) score += 1;
-          if (state.enforcement === 'hard' && isHard) score += 1;
-          if (state.enforcement === 'both') score += 1;
+          if (state.enforcement === 'soft' && isSoft && !isHard) score += scoringWeights.enforcementMatch;
+          if (state.enforcement === 'hard' && isHard) score += scoringWeights.enforcementMatch;
+          if (state.enforcement === 'both') score += scoringWeights.enforcementMatch;
         }
 
-        // Technical complexity match
+        // Technical complexity match (using config classifications)
         if (state.techResources === 'minimal') {
-          // Prefer simple signals
-          if (actions.includes('attach-preference-signal')) score += 1;
+          if (actions.some((a) => actionClassifications.minimalTech.includes(a))) {
+            score += scoringWeights.techResourcesMatch;
+          }
         } else if (state.techResources === 'advanced') {
-          // Can handle anything
-          if (actions.includes('technical-blocking') || actions.includes('new-infrastructures')) score += 1;
+          if (actions.some((a) => actionClassifications.advancedTech.includes(a))) {
+            score += scoringWeights.techResourcesMatch;
+          }
         }
 
         results.push({
@@ -610,9 +484,9 @@ const pipelineLabels = {
       setupMultiSelect('content-types', 'contentTypes');
       setupMultiSelect('pipeline-stages', 'pipelineStages');
 
-      // Single-select handlers
-      setupSingleSelect('enforcement-style', 'enforcement');
-      setupSingleSelect('tech-resources', 'techResources');
+      // Single-select handlers (preference groups from config)
+      setupSingleSelect('enforcement', 'enforcement');
+      setupSingleSelect('techResources', 'techResources');
       setupSingleSelect('readiness', 'readiness');
 
       // Navigation buttons
@@ -702,13 +576,13 @@ const pipelineLabels = {
 
       if (params.has('enforcement')) {
         state.enforcement = params.get('enforcement');
-        const btn = $(`#enforcement-style [data-value="${state.enforcement}"]`);
+        const btn = $(`#enforcement [data-value="${state.enforcement}"]`);
         if (btn) btn.setAttribute('aria-pressed', 'true');
       }
 
       if (params.has('tech')) {
         state.techResources = params.get('tech');
-        const btn = $(`#tech-resources [data-value="${state.techResources}"]`);
+        const btn = $(`#techResources [data-value="${state.techResources}"]`);
         if (btn) btn.setAttribute('aria-pressed', 'true');
       }
 
