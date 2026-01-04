@@ -9,6 +9,11 @@ status: WIP
 website: 'https://datatracker.ietf.org/wg/aipref/about/'
 actionsSupported:
   - attach-preference-signal
+pipelineStages:
+  - collect
+  - train
+  - fine-tune
+  - retrieve
 recentActivity: '2025-08-01T00:00:00.000Z'
 recentActivityNote: Milestone for protocol specifications
 visibility: public

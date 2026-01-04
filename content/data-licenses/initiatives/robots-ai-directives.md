@@ -8,6 +8,8 @@ status: usable-with-some-evidence
 website: 'https://platform.openai.com/docs/bots'
 actionsSupported:
   - attach-preference-signal
+pipelineStages:
+  - collect
 recentActivity: '2025-09-17T00:00:00.000Z'
 visibility: public
 type: data_license_initiative

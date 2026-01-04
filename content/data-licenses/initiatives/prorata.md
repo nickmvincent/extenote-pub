@@ -8,6 +8,10 @@ website: 'https://www.prorata.ai/'
 actionsSupported:
   - join-licensing-collective
   - add-tollgate
+pipelineStages:
+  - train
+  - retrieve
+  - generate
 tags:
   - revenue-share
   - licensing-marketplace

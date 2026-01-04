@@ -5,6 +5,9 @@ status: usable-with-some-evidence
 website: 'https://www.fairlytrained.org/'
 actionsSupported:
   - certification
+pipelineStages:
+  - train
+  - fine-tune
 recentActivity: '2025-09-01T00:00:00.000Z'
 recentActivityNote: Launch target
 visibility: public

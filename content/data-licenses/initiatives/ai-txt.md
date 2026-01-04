@@ -5,6 +5,9 @@ status: WIP
 website: 'https://site.spawning.ai/spawning-ai-txt'
 actionsSupported:
   - attach-preference-signal
+pipelineStages:
+  - collect
+  - train
 recentActivity: '2024-03-24T00:00:00.000Z'
 recentActivityNote: >-
   User guide post

@@ -15,6 +15,8 @@ actionsSupported:
   - technical-blocking
   - add-tollgate
   - attach-preference-signal
+pipelineStages:
+  - collect
 linkWithEvidenceOfUse: 'https://blog.cloudflare.com/control-content-use-for-ai-training/'
 recentActivity: '2025-07-01T00:00:00.000Z'
 recentActivityNote: AI Audit and marketplace features launched

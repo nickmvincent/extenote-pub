@@ -5,6 +5,10 @@ status: WIP
 website: 'https://github.com/creativecommons/cc-signals'
 actionsSupported:
   - attach-preference-signal
+pipelineStages:
+  - collect
+  - train
+  - fine-tune
 recentActivity: '2025-08-27T00:00:00.000Z'
 recentActivityNote: >-
   Response to feedback

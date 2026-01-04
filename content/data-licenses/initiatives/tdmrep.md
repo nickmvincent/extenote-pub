@@ -9,6 +9,9 @@ spec: 'https://www.w3.org/2022/tdmrep/'
 actionsSupported:
   - attach-preference-signal
   - attach-formal-license
+pipelineStages:
+  - collect
+  - train
 jurisdictions:
   - EU
 tags:

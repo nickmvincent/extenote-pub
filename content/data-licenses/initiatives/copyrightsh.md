@@ -5,6 +5,9 @@ status: usable-but-new
 website: 'https://copyright.sh/'
 actionsSupported:
   - attach-formal-license
+pipelineStages:
+  - collect
+  - train
 recentActivity: '2025-09-01T00:00:00.000Z'
 recentActivityNote: Actively onboarding creators
 visibility: public

@@ -11,6 +11,11 @@ linkWithEvidenceOfUse: 'https://techcrunch.com/2024/08/14/really-simple-licensin
 actionsSupported:
   - attach-formal-license
   - attach-preference-signal
+pipelineStages:
+  - collect
+  - train
+  - fine-tune
+  - retrieve
 recentActivity: '2025-09-14T00:00:00.000Z'
 recentActivityNote: Fastly CDN partnership announced
 visibility: public
