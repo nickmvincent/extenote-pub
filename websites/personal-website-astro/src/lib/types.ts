@@ -40,6 +40,7 @@ export interface SiteData {
 	personalInfo: PersonalInfo;
 	scholarly: MarkdownEntry[];
 	editorial: MarkdownEntry[];
+	blogs: MarkdownEntry[];
 	talks: MarkdownEntry[];
 	newsCoverage: MarkdownEntry[];
 	cv: CvData;

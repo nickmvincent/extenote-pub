@@ -36,7 +36,7 @@ export async function getSiteData(options: { force?: boolean } = {}): Promise<Si
 		scholarlyPublication,
 		scholarlyWorkshops,
 		scholarlyOther,
-		editorialBlog,
+		blogPosts,
 		editorialOpeds,
 		talkEvents,
 		talkPodcasts,
@@ -55,7 +55,7 @@ export async function getSiteData(options: { force?: boolean } = {}): Promise<Si
 		loadCollection('scholarly-publication'),
 		loadCollection('scholarly-workshop_paper'),
 		loadCollection('scholarly-other_paper'),
-		loadCollection('editorial-blog'),
+		loadBlogPosts(),
 		loadCollection('editorial-opeds'),
 		loadCollection('talks-events'),
 		loadCollection('talks-podcast'),
@@ -79,7 +79,8 @@ export async function getSiteData(options: { force?: boolean } = {}): Promise<Si
 		other: scholarlyOther
 	});
 
-	const editorial = sortByDateDescending([...editorialBlog, ...editorialOpeds], 'date');
+	const editorial = sortByDateDescending([...editorialOpeds], 'date');
+	const blogs = sortByDateDescending([...blogPosts], 'date');
 	const talks = sortByDateDescending([...talkEvents, ...talkPodcasts], 'date');
 	const sortedNewsCoverage = sortByDateDescending(newsCoverage, 'date');
 
@@ -106,6 +107,7 @@ export async function getSiteData(options: { force?: boolean } = {}): Promise<Si
 		personalInfo,
 		scholarly,
 		editorial,
+		blogs,
 		talks,
 		newsCoverage: sortedNewsCoverage,
 		cv: cvData
@@ -162,21 +164,6 @@ async function loadCollection(collectionName: string): Promise<MarkdownEntry[]> 
 			}
 		}
 
-		// For editorial blogs: load body content from data-leverage-blogs if archive_ref exists
-		if (collectionName.startsWith('editorial-') && metadata.archive_ref) {
-			const archiveData = await loadDataLeverageBlog(metadata.archive_ref as string);
-			if (archiveData) {
-				// Use archive body content (full post), keep local metadata
-				body = archiveData.body;
-				// Optionally merge some metadata from archive
-				metadata = {
-					...metadata,
-					subtitle: archiveData.metadata.subtitle ?? metadata.subtitle,
-					_archive_source: metadata.archive_ref
-				};
-			}
-		}
-
 		results.push({
 			slug: file.replace(/\.md$/, ''),
 			collection: collectionName,
@@ -206,20 +193,50 @@ async function loadBibtexEntry(citationKey: string): Promise<{ metadata: Record<
 }
 
 /**
- * Load a blog post by slug from data-leverage-blogs
+ * Load all blog posts directly from data-leverage-blogs
+ * Maps metadata for personal website display
  */
-async function loadDataLeverageBlog(slug: string): Promise<{ metadata: Record<string, any>; body: string } | null> {
-	const fullPath = path.join(DATA_LEVERAGE_BLOGS_ROOT, `${slug}.md`);
+async function loadBlogPosts(): Promise<MarkdownEntry[]> {
+	let entries: string[] = [];
+
 	try {
-		return await parseMarkdown(fullPath);
+		entries = await readdir(DATA_LEVERAGE_BLOGS_ROOT);
 	} catch (error) {
 		const err = error as NodeJS.ErrnoException;
 		if (err.code === 'ENOENT') {
-			console.warn(`Data leverage blog not found for archive_ref: ${slug}`);
-			return null;
+			return [];
 		}
 		throw error;
 	}
+
+	const results: MarkdownEntry[] = [];
+	for (const file of entries) {
+		if (!file.endsWith('.md')) continue;
+		const fullPath = path.join(DATA_LEVERAGE_BLOGS_ROOT, file);
+		const parsed = await parseMarkdown(fullPath);
+
+		// Skip drafts or non-public posts
+		if (parsed.metadata.visibility && parsed.metadata.visibility !== 'public') {
+			continue;
+		}
+
+		// Map data-leverage-blogs metadata to personal website format
+		const metadata = {
+			...parsed.metadata,
+			type: 'blog_post',
+			venue: 'Data Leverage Newsletter',
+			url: parsed.metadata.original_url || parsed.metadata.url
+		};
+
+		results.push({
+			slug: file.replace(/\.md$/, ''),
+			collection: 'blogs',
+			metadata: normalizeMetadata(metadata),
+			body: parsed.content
+		});
+	}
+
+	return results;
 }
 
 async function loadMarkdownFile(relativePath: string): Promise<MarkdownEntry | null> {

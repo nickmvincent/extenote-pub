@@ -4,14 +4,15 @@ import { getSiteData } from '../lib/contentLoader';
 import { truncateText, formatMonthYear } from '../lib/formatters';
 
 const data = await getSiteData();
-const { personalInfo, scholarly, editorial, talks, newsCoverage } = data;
+const { personalInfo, scholarly, editorial, blogs, talks, newsCoverage } = data;
 
 const peerReviewed = scholarly.filter(
 	(item) => String(item.metadata.publication_type ?? '').toLowerCase() === 'publication'
 );
 const summary = {
 	publications: peerReviewed.slice(0, 4),
-	editorial: editorial.slice(0, 4),
+	editorial: editorial.slice(0, 3),
+	blogs: blogs.slice(0, 3),
 	talks: talks.slice(0, 4),
 	news: newsCoverage.slice(0, 4)
 };
@@ -78,12 +79,8 @@ const allLinks = [
 const workshopAndPreprint = scholarly.filter(
 	(item) => String(item.metadata.publication_type ?? '').toLowerCase() !== 'publication'
 );
-const publishedWriting = editorial.filter(
-	(item) => String(item.metadata.type ?? '').toLowerCase() !== 'blog_post'
-);
-const blogWriting = editorial.filter(
-	(item) => String(item.metadata.type ?? '').toLowerCase() === 'blog_post'
-);
+// Editorial now only contains op-eds (published writing)
+// Blogs are loaded separately from data-leverage-blogs
 
 const publicationLinks = (meta: Record<string, any>) => {
 	const links: { label: string; url: string }[] = [];
@@ -137,7 +134,7 @@ const workshopFilters = buildFilterOptions(
 	workshopAndPreprint,
 	(item) => item.metadata.journal ?? item.metadata.conference ?? undefined
 );
-const editorialFilters = buildFilterOptions(publishedWriting, (item) => item.metadata.venue ?? undefined);
+const editorialFilters = buildFilterOptions(editorial, (item) => item.metadata.venue ?? undefined);
 const talksFilters = buildFilterOptions(talks, (item) => item.metadata.location ?? undefined);
 const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.source ?? undefined);
 ---
@@ -314,23 +311,45 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 				</div>
 			</div>
 			<div>
-				<h3>Editorial</h3>
+				<h3>Writing</h3>
 				<div class="centered-summary">
 					<div class="summary-item">
-						{summary.editorial.map((post) => (
-							<div style="margin-bottom:0.75em;">
-								{truncateText(String(post.metadata.title ?? ''), 50)}, {post.metadata.venue ?? 'N/A'},
-								{formatSummaryDate(post.metadata.date)}
-								{post.metadata.url && (
-									<>
-										 {' '}
-										<a href={post.metadata.url as string} target="_blank" rel="noopener noreferrer">
-											link
-										</a>
-									</>
-								)}
+						{summary.editorial.length > 0 && (
+							<div class="summary-subsection">
+								<span class="summary-label">Op-eds</span>
+								{summary.editorial.map((post) => (
+									<div style="margin-bottom:0.5em;">
+										{truncateText(String(post.metadata.title ?? ''), 45)}, {post.metadata.venue ?? 'N/A'}
+										{post.metadata.url && (
+											<>
+												{' '}
+												<a href={post.metadata.url as string} target="_blank" rel="noopener noreferrer">
+													link
+												</a>
+											</>
+										)}
+									</div>
+								))}
 							</div>
-						))}
+						)}
+						{summary.blogs.length > 0 && (
+							<div class="summary-subsection">
+								<span class="summary-label">Blog</span>
+								{summary.blogs.map((post) => (
+									<div style="margin-bottom:0.5em;">
+										{truncateText(String(post.metadata.title ?? ''), 45)}
+										{post.metadata.url && (
+											<>
+												{' '}
+												<a href={post.metadata.url as string} target="_blank" rel="noopener noreferrer">
+													link
+												</a>
+											</>
+										)}
+									</div>
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
@@ -496,7 +515,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 
 		<section id="writing" class="tab-panel">
 			<h2>Editorial</h2>
-			<p class="section-subtitle">Essays, commentary, and blogs.</p>
+			<p class="section-subtitle">Op-eds, essays, and commentary published in external venues.</p>
 			<div class="row">
 				<div class="col">
 					<h3>Published Writing</h3>
@@ -505,7 +524,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 							<summary>Filter by venue</summary>
 							<div class="filter-chips" data-filter-group="editorial-published">
 								<button type="button" class="chip active" data-filter-value="all">
-									All ({publishedWriting.length})
+									All ({editorial.length})
 								</button>
 								{editorialFilters.map((option) => (
 									<button type="button" class="chip" data-filter-value={option.value}>
@@ -516,7 +535,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 						</details>
 					)}
 					<ul class="entry-list" data-filter-target="editorial-published">
-						{publishedWriting.map((item) => (
+						{editorial.map((item) => (
 							<li
 								class="entry"
 								data-filter-value={(item.metadata.venue ?? 'other').toString().toLowerCase()}
@@ -537,32 +556,43 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 					</ul>
 				</div>
 				<div class="col">
-					<h3>Blog Posts</h3>
-					<p class="blog-summary">
-						{blogWriting.length} posts.
-						{personalInfo.blog_link && (
-							<a href={personalInfo.blog_link as string} target="_blank" rel="noopener noreferrer">
-								View on Substack
-							</a>
-						)}
-					</p>
-					<ul class="entry-list blog-compact">
-						{blogWriting.slice(0, 6).map((item) => (
-							<li class="entry-compact">
-								<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
-									{item.metadata.title}
+					<details class="blog-expandable" open>
+						<summary class="blog-header">
+							<h3>Blog Posts ({blogs.length})</h3>
+						</summary>
+						<p class="blog-summary">
+							{personalInfo.blog_link && (
+								<a href={personalInfo.blog_link as string} target="_blank" rel="noopener noreferrer">
+									View on Substack
 								</a>
-								<span class="entry-meta">{formatSummaryDate(item.metadata.date)}</span>
-							</li>
-						))}
-					</ul>
-					{blogWriting.length > 6 && (
-						<p class="blog-more">
-							<a href={personalInfo.blog_link as string || '#'} target="_blank" rel="noopener noreferrer">
-								View all {blogWriting.length} posts →
-							</a>
+							)}
 						</p>
-					)}
+						<ul class="entry-list blog-compact">
+							{blogs.slice(0, 10).map((item) => (
+								<li class="entry-compact">
+									<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+										{item.metadata.title}
+									</a>
+									<span class="entry-meta">{formatSummaryDate(item.metadata.date)}</span>
+								</li>
+							))}
+						</ul>
+						{blogs.length > 10 && (
+							<details class="blog-show-all">
+								<summary>Show all {blogs.length} posts</summary>
+								<ul class="entry-list blog-compact">
+									{blogs.slice(10).map((item) => (
+										<li class="entry-compact">
+											<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+												{item.metadata.title}
+											</a>
+											<span class="entry-meta">{formatSummaryDate(item.metadata.date)}</span>
+										</li>
+									))}
+								</ul>
+							</details>
+						)}
+					</details>
 				</div>
 			</div>
 		</section>
@@ -1374,6 +1404,25 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	margin: 0.5rem 0 0;
 }
 
+	/* Summary subsections */
+	.summary-subsection {
+		margin-bottom: 0.75rem;
+	}
+
+	.summary-subsection:last-child {
+		margin-bottom: 0;
+	}
+
+	.summary-label {
+		display: block;
+		font-size: 0.75em;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: #8fa;
+		margin-bottom: 0.35rem;
+		font-weight: 600;
+	}
+
 	/* Compact blog entries */
 	.blog-summary {
 		color: #5f6c7b;
@@ -1385,6 +1434,58 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		display: flex;
 		flex-direction: column;
 		gap: 0.35rem;
+	}
+
+	.blog-expandable {
+		background: transparent;
+		border: none;
+	}
+
+	.blog-expandable summary {
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.blog-expandable summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.blog-header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.blog-header h3 {
+		margin: 0;
+	}
+
+	.blog-header::after {
+		content: '▼';
+		font-size: 0.7em;
+		color: #6b7280;
+		transition: transform 0.2s;
+	}
+
+	.blog-expandable[open] .blog-header::after {
+		transform: rotate(180deg);
+	}
+
+	.blog-show-all {
+		margin-top: 0.75rem;
+		padding-top: 0.5rem;
+		border-top: 1px dashed #e2e8f0;
+	}
+
+	.blog-show-all summary {
+		cursor: pointer;
+		color: #2e8b57;
+		font-size: 0.9em;
+		font-weight: 500;
+	}
+
+	.blog-show-all summary:hover {
+		text-decoration: underline;
 	}
 
 	.entry-compact {
@@ -1599,6 +1700,22 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		}
 
 		.blog-more a {
+			color: #4fd1c5;
+		}
+
+		.blog-header::after {
+			color: #a0aec0;
+		}
+
+		.blog-show-all {
+			border-top-color: #2f3b50;
+		}
+
+		.blog-show-all summary {
+			color: #4fd1c5;
+		}
+
+		.summary-label {
 			color: #4fd1c5;
 		}
 	}
