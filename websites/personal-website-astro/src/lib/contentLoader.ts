@@ -99,7 +99,8 @@ export async function getSiteData(options: { force?: boolean } = {}): Promise<Si
 		{
 			scholarly,
 			talks,
-			newsCoverage: sortedNewsCoverage
+			newsCoverage: sortedNewsCoverage,
+			editorial
 		}
 	);
 
@@ -330,6 +331,7 @@ function buildCvData(
 		scholarly: MarkdownEntry[];
 		talks: MarkdownEntry[];
 		newsCoverage: MarkdownEntry[];
+		editorial: MarkdownEntry[];
 	}
 ): CvData {
 	const reviewingSummary = raw.reviews.length ? raw.reviews[0].metadata : null;
@@ -386,6 +388,7 @@ function buildCvData(
 		reviewingSummary,
 		serviceItems: service,
 		talks: supplemental.talks,
-		newsCoverage: supplemental.newsCoverage
+		newsCoverage: supplemental.newsCoverage,
+		editorial: supplemental.editorial
 	};
 }

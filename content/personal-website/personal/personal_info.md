@@ -4,6 +4,7 @@ type: personal_info
 position: Assistant Professor
 department: School of Computing Science
 university: Simon Fraser University
+university_link: 'https://www.sfu.ca/'
 email: nvincent@sfu.ca
 office: '9241 TASC 1, SFU Burnaby'
 research_interests: >-
@@ -14,17 +15,31 @@ cv_link: 'https://www.nickmvincent.com/static/cv.pdf'
 cv_html_link: 'https://www.nickmvincent.com/static/cv.html'
 profile_pic: 'https://www.nickmvincent.com/static/headshot_300kb.jpg'
 current_inst_link: 'https://www.sfu.ca/fas/computing.html'
-ixlab_link: 'https://ixlab.cs.sfu.ca/'
-padcomp_link: 'https://www.padcomp.org/'
-metagov_link: 'https://metagov.org/'
-ddi_link: 'https://digitaldemocracies.org/'
-sfupp_link: 'https://www.sfu.ca/policy-school/people/associate-members.html'
+affiliations:
+  - name: padcomp
+    url: 'https://www.padcomp.org/'
+    role: director
+  - name: Public AI Network
+    url: 'https://publicai.network/'
+    role: member
+  - name: ixLab
+    url: 'https://ixlab.cs.sfu.ca/'
+    role: member
+  - name: Digital Democracies Institute
+    url: 'https://digitaldemocracies.org/'
+    role: associate
+  - name: Metagov
+    url: 'https://metagov.org/'
+    role: associate
+  - name: SFU School of Public Policy
+    url: 'https://www.sfu.ca/policy-school/people/associate-members.html'
+    role: associate
 blog_link: 'https://dataleverage.substack.com/'
 github_link: 'https://github.com/nickmvincent'
 scholar_link: 'https://scholar.google.com/citations?user=IWa_ZMcAAAAJ&hl=en'
 semantic_scholar_link: 'https://www.semanticscholar.org/author/Nicholas-Vincent/2065694473'
 dblp_link: 'https://dblp.org/pid/174/0437.html'
-twitter_link: https://x.com/nickmvincent
+twitter_link: 'https://x.com/nickmvincent'
 bsky_link: 'https://bsky.app/profile/nickmvincent.bsky.social'
 linkedin_link: 'https://www.linkedin.com/in/nicholas-vincent-93594a81/'
 hcisocial_link: 'https://hci.social/@nickmvincent'

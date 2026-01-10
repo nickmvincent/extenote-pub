@@ -34,6 +34,7 @@ export interface CvData {
 	serviceItems: MarkdownEntry[];
 	talks: MarkdownEntry[];
 	newsCoverage: MarkdownEntry[];
+	editorial: MarkdownEntry[];
 }
 
 export interface SiteData {

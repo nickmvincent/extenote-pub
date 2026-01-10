@@ -235,6 +235,31 @@ const mediaLabel = (value: unknown) => {
 			</section>
 		)}
 
+		{cv.editorial.length > 0 && (
+			<section id="editorial">
+				<h2>Editorial & Commentary</h2>
+				<p class="section-note">Op-eds, essays, and commentary published in external venues.</p>
+				{cv.editorial.map((item, index) => (
+					<div class="pub-item">
+						<span class="pub-number">[E{cv.editorial.length - index}]</span>
+						<div class="pub-body">
+							<span class="pub-title">{item.metadata.title}</span>
+							<div class="pub-meta">
+								<span class="pub-venue">
+									{joinWithComma(item.metadata.venue, formatMonthYear(item.metadata.date))}
+								</span>
+								{item.metadata.url && (
+									<span class="inline-note">
+										(<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">Link</a>)
+									</span>
+								)}
+							</div>
+						</div>
+					</div>
+				))}
+			</section>
+		)}
+
 		{cv.grants.length > 0 && (
 			<section id="grants">
 				<h2>Grants</h2>
@@ -553,6 +578,13 @@ const mediaLabel = (value: unknown) => {
 		font-style: italic;
 		font-weight: 600;
 		margin: 0.6em 0 0.3em 1em;
+	}
+
+	.section-note {
+		font-size: 0.9em;
+		font-style: italic;
+		color: #555;
+		margin: -0.4em 0 0.8em 0;
 	}
 
 	.item {

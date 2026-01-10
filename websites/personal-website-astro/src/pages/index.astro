@@ -9,12 +9,23 @@ const { personalInfo, scholarly, editorial, blogs, talks, newsCoverage } = data;
 const peerReviewed = scholarly.filter(
 	(item) => String(item.metadata.publication_type ?? '').toLowerCase() === 'publication'
 );
+
+// Filter for items within the last 6 months
+const sixMonthsAgo = new Date();
+sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+const isRecent = (item: { metadata: { date?: unknown } }) => {
+	const date = item.metadata.date;
+	if (!date) return false;
+	const itemDate = new Date(date as string);
+	return itemDate >= sixMonthsAgo;
+};
+
 const summary = {
-	publications: peerReviewed.slice(0, 4),
-	editorial: editorial.slice(0, 3),
-	blogs: blogs.slice(0, 3),
-	talks: talks.slice(0, 4),
-	news: newsCoverage.slice(0, 4)
+	publications: peerReviewed.filter(isRecent).slice(0, 4),
+	editorial: editorial.filter(isRecent).slice(0, 3),
+	blogs: blogs.filter(isRecent).slice(0, 3),
+	talks: talks.filter(isRecent).slice(0, 4),
+	news: newsCoverage.filter(isRecent).slice(0, 4)
 };
 
 const highlightList = Array.isArray(personalInfo.highlights) ? personalInfo.highlights : [];
@@ -37,6 +48,14 @@ const profilePic =
 
 const formatSummaryDate = (value: unknown) => formatMonthYear(value) || '';
 
+// Helper for proper list formatting: "A, B, and C"
+const listSeparator = (index: number, total: number): string => {
+	if (total === 1) return '';
+	if (index === total - 1) return '';
+	if (index === total - 2) return total === 2 ? ' and ' : ', and ';
+	return ', ';
+};
+
 const getLeadAuthor = (authors: unknown): string => {
 	if (Array.isArray(authors) && authors.length > 0) {
 		const parts = String(authors[0]).trim().split(/\s+/);
@@ -45,23 +64,20 @@ const getLeadAuthor = (authors: unknown): string => {
 	return heroName.split(' ').pop() ?? 'Author';
 };
 
-// All affiliations in one array with primary/secondary distinction
-const allAffiliations = [
-	{ href: personalInfo.current_inst_link, label: 'SFU CS', primary: true },
-	{ href: personalInfo.ixlab_link, label: 'IXLab', primary: true },
-	{ href: personalInfo.padcomp_link, label: 'PADComp', primary: true },
-	{ href: personalInfo.ddi_link, label: 'DDI', primary: false },
-	{ href: personalInfo.metagov_link, label: 'Metagov', primary: false },
-	{ href: personalInfo.sfupp_link, label: 'SFU Policy', primary: false }
-].filter((link) => typeof link.href === 'string' && link.href.length);
+// Parse affiliations from YAML
+type Affiliation = { name: string; url: string; role: string };
+const rawAffiliations = Array.isArray(personalInfo.affiliations)
+	? (personalInfo.affiliations as Affiliation[])
+	: [];
+const directorAffiliation = rawAffiliations.find(a => a.role === 'director');
+const otherAffiliations = rawAffiliations.filter(a => a.role !== 'director');
 
-// Social links with icons
+// Social links with icons (Substack moved to featured links section)
 const socialLinks = [
-	{ href: personalInfo.blog_link, label: 'Substack', icon: 'substack' },
-	{ href: personalInfo.twitter_link, label: 'X', icon: 'x' },
 	{ href: personalInfo.bsky_link, label: 'Bluesky', icon: 'bluesky' },
 	{ href: personalInfo.github_link, label: 'GitHub', icon: 'github' },
-	{ href: personalInfo.linkedin_link, label: 'LinkedIn', icon: 'linkedin' }
+	{ href: personalInfo.linkedin_link, label: 'LinkedIn', icon: 'linkedin' },
+	{ href: personalInfo.twitter_link, label: 'X', icon: 'x' }
 ].filter((link) => typeof link.href === 'string' && link.href.length);
 
 // Paper tracker links (text only)
@@ -147,6 +163,10 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	/>
 
 		<header id="home" class="hero hero-manuscript">
+			<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+				<span class="theme-icon-light">☀️</span>
+				<span class="theme-icon-dark">🌙</span>
+			</button>
 			<div class="hero-intro">
 				<div class="hero-heading">
 					<div class="hero-text">
@@ -217,74 +237,83 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 					</nav>
 				)}
 			</div>
-			<div class="hero-table">
-				<dl class="table-grid">
-					{allAffiliations.length > 0 && (
-						<div class="table-row">
-							<dt class="table-label">Affiliations</dt>
-							<dd class="table-value affiliation-line">
-								{allAffiliations.map((item, index) => (
-									<>
-										{index > 0 && ' · '}
-										<a href={item.href as string} target="_blank" rel="noopener noreferrer" class={item.primary ? 'primary' : 'secondary'}>
-											{item.label}
-										</a>
-									</>
-								))}
-							</dd>
-						</div>
-					)}
-					{socialLinks.length > 0 && (
-						<div class="table-row">
-							<dt class="table-label">Social</dt>
-							<dd class="table-value social-icons">
-								{socialLinks.map((item) => (
-									<a href={item.href as string} target="_blank" rel="noopener noreferrer" title={item.label} class="social-link">
-										{item.icon === 'substack' && (
-											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg>
-										)}
-										{item.icon === 'x' && (
-											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-										)}
-										{item.icon === 'bluesky' && (
-											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8z"/></svg>
-										)}
-										{item.icon === 'github' && (
-											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-										)}
-										{item.icon === 'linkedin' && (
-											<svg viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-										)}
-									</a>
-								))}
-								<button type="button" class="modal-trigger" data-modal="links-modal">all links</button>
-							</dd>
-						</div>
-					)}
-					{paperLinks.length > 0 && (
-						<div class="table-row">
-							<dt class="table-label">Papers</dt>
-							<dd class="table-value">
-								{paperLinks.map((item, index) => (
-									<>
-										{index > 0 && ' · '}
-										<a href={item.href as string} target="_blank" rel="noopener noreferrer">
-											{item.label}
-										</a>
-									</>
-								))}
-							</dd>
-						</div>
-					)}
-					<div class="table-row">
-						<dt class="table-label">Projects</dt>
-						<dd class="table-value">
-							<a href="https://shared-references.pages.dev/projects" target="_blank" rel="noopener noreferrer">extenote network index</a>
-						</dd>
-					</div>
-				</dl>
-			</div>
-	</header>
+		</header>
+
+	<section id="featured-links">
+		<ul class="featured-list">
+			<li>
+				I am based in the{' '}
+				<a href={personalInfo.current_inst_link as string} target="_blank" rel="noopener noreferrer">
+					{personalInfo.department}
+				</a>{' '}
+				at{' '}
+				<a href={personalInfo.university_link as string} target="_blank" rel="noopener noreferrer">
+					{personalInfo.university}
+				</a>
+				{directorAffiliation && (
+					<>
+						{' '}and direct{' '}
+						<a href={directorAffiliation.url} target="_blank" rel="noopener noreferrer">
+							{directorAffiliation.name}
+						</a>
+					</>
+				)}.
+				{otherAffiliations.length > 0 && (
+					<>
+						{' '}I am also associated with{' '}
+						{otherAffiliations.map((aff, i) => (
+							<>
+								<a href={aff.url} target="_blank" rel="noopener noreferrer">{aff.name}</a>
+								{listSeparator(i, otherAffiliations.length)}
+							</>
+						))}.
+					</>
+				)}
+			</li>
+			<li>
+				I share content on{' '}
+				{socialLinks.map((link, i) => (
+					<>
+						<a href={link.href as string} target="_blank" rel="noopener noreferrer">{link.label}</a>
+						{listSeparator(i, socialLinks.length)}
+					</>
+				))}.
+				My papers can be found below or via{' '}
+				{paperLinks.map((link, i) => (
+					<>
+						<a href={link.href as string} target="_blank" rel="noopener noreferrer">{link.label}</a>
+						{listSeparator(i, paperLinks.length)}
+					</>
+				))}.
+			</li>
+			<li>
+				See my newsletter on Substack:{' '}
+				<a href={personalInfo.blog_link as string} target="_blank" rel="noopener noreferrer">
+					Data Leverage Newsletter
+				</a>.
+			</li>
+			<li>
+				See a collection of web projects{' '}
+				<a href="https://shared-references.pages.dev/projects/" target="_blank" rel="noopener noreferrer">
+					here
+				</a>
+				{' '}(e.g.,{' '} the
+				<a href="https://datacounterfactuals.org/" target="_blank" rel="noopener noreferrer">
+					Data Counterfactuals explainer
+				</a>,{' '} the
+				<a href="https://exploringai.org/" target="_blank" rel="noopener noreferrer">
+					Data Napkin math explorer
+				</a>, and the {' '}
+				<a href="https://datalicenses.org" target="_blank" rel="noopener noreferrer">
+					Data License Catalog
+				</a>
+				 — all now managed with{' '}
+				<a href="https://nickmvincent.github.io/extenote/" target="_blank" rel="noopener noreferrer">
+					extenote
+				</a>).
+			</li>
+		</ul>
+	</section>
 
 	<section id="recent-summary">
 		<h2>Recent Content</h2>
@@ -393,25 +422,24 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		</div>
 	</section>
 
-	<section id="status-board">
-		<div class="status-header">
-			<h2>News & Notes</h2>
-		</div>
-		{highlightList.length > 0 ? (
+	{highlightList.length > 0 && (
+		<section id="status-board">
+			<div class="status-header">
+				<h2>News & Notes</h2>
+			</div>
 			<div class="status-grid">
 				{highlightList.map((highlight) => (
 					<article class="status-card" set:html={highlight} />
 				))}
 			</div>
-		) : (
-			<p class="status-empty">No updates right now—check back soon.</p>
-		)}
-	</section>
+		</section>
+	)}
 
 	<section class="tabs">
 		<nav class="section-nav">
 			<a href="#publications" class="active">Publications</a>
 			<a href="#writing">Editorial</a>
+			<a href="#blogs">Blogs</a>
 			<a href="#talks">Talks</a>
 			<a href="#media">Media Coverage</a>
 		</nav>
@@ -516,85 +544,78 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		<section id="writing" class="tab-panel">
 			<h2>Editorial</h2>
 			<p class="section-subtitle">Op-eds, essays, and commentary published in external venues.</p>
-			<div class="row">
-				<div class="col">
-					<h3>Published Writing</h3>
-					{editorialFilters.length > 0 && (
-						<details class="filter-panel">
-							<summary>Filter by venue</summary>
-							<div class="filter-chips" data-filter-group="editorial-published">
-								<button type="button" class="chip active" data-filter-value="all">
-									All ({editorial.length})
-								</button>
-								{editorialFilters.map((option) => (
-									<button type="button" class="chip" data-filter-value={option.value}>
-										{option.label} ({option.count})
-									</button>
-								))}
-							</div>
-						</details>
-					)}
-					<ul class="entry-list" data-filter-target="editorial-published">
-						{editorial.map((item) => (
-							<li
-								class="entry"
-								data-filter-value={(item.metadata.venue ?? 'other').toString().toLowerCase()}
-							>
-								<h3>{item.metadata.title}</h3>
-								<p>
-									{formatSummaryDate(item.metadata.date)} — {item.metadata.venue}
-									{item.metadata.url && (
-										<span class="entry-links">
-											<a class="chip-link" href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
-												link
-											</a>
-										</span>
-									)}
-								</p>
+			{editorialFilters.length > 0 && (
+				<details class="filter-panel">
+					<summary>Filter by venue</summary>
+					<div class="filter-chips" data-filter-group="editorial-published">
+						<button type="button" class="chip active" data-filter-value="all">
+							All ({editorial.length})
+						</button>
+						{editorialFilters.map((option) => (
+							<button type="button" class="chip" data-filter-value={option.value}>
+								{option.label} ({option.count})
+							</button>
+						))}
+					</div>
+				</details>
+			)}
+			<ul class="entry-list" data-filter-target="editorial-published">
+				{editorial.map((item) => (
+					<li
+						class="entry"
+						data-filter-value={(item.metadata.venue ?? 'other').toString().toLowerCase()}
+					>
+						<h3>{item.metadata.title}</h3>
+						<p>
+							{formatSummaryDate(item.metadata.date)} — {item.metadata.venue}
+							{item.metadata.url && (
+								<span class="entry-links">
+									<a class="chip-link" href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+										link
+									</a>
+								</span>
+							)}
+						</p>
+					</li>
+				))}
+			</ul>
+		</section>
+
+		<section id="blogs" class="tab-panel">
+			<h2>Blog</h2>
+			<p class="section-subtitle">
+				{blogs.length} posts on the Data Leverage Newsletter.
+				{personalInfo.blog_link && (
+					<a href={personalInfo.blog_link as string} target="_blank" rel="noopener noreferrer">
+						View on Substack
+					</a>
+				)}
+			</p>
+			<ul class="entry-list blog-compact">
+				{blogs.slice(0, 15).map((item) => (
+					<li class="entry-compact">
+						<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+							{item.metadata.title}
+						</a>
+						<span class="entry-meta">{formatSummaryDate(item.metadata.date)}</span>
+					</li>
+				))}
+			</ul>
+			{blogs.length > 15 && (
+				<details class="blog-show-all">
+					<summary>Show all {blogs.length} posts</summary>
+					<ul class="entry-list blog-compact">
+						{blogs.slice(15).map((item) => (
+							<li class="entry-compact">
+								<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
+									{item.metadata.title}
+								</a>
+								<span class="entry-meta">{formatSummaryDate(item.metadata.date)}</span>
 							</li>
 						))}
 					</ul>
-				</div>
-				<div class="col">
-					<details class="blog-expandable" open>
-						<summary class="blog-header">
-							<h3>Blog Posts ({blogs.length})</h3>
-						</summary>
-						<p class="blog-summary">
-							{personalInfo.blog_link && (
-								<a href={personalInfo.blog_link as string} target="_blank" rel="noopener noreferrer">
-									View on Substack
-								</a>
-							)}
-						</p>
-						<ul class="entry-list blog-compact">
-							{blogs.slice(0, 10).map((item) => (
-								<li class="entry-compact">
-									<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
-										{item.metadata.title}
-									</a>
-									<span class="entry-meta">{formatSummaryDate(item.metadata.date)}</span>
-								</li>
-							))}
-						</ul>
-						{blogs.length > 10 && (
-							<details class="blog-show-all">
-								<summary>Show all {blogs.length} posts</summary>
-								<ul class="entry-list blog-compact">
-									{blogs.slice(10).map((item) => (
-										<li class="entry-compact">
-											<a href={item.metadata.url as string} target="_blank" rel="noopener noreferrer">
-												{item.metadata.title}
-											</a>
-											<span class="entry-meta">{formatSummaryDate(item.metadata.date)}</span>
-										</li>
-									))}
-								</ul>
-							</details>
-						)}
-					</details>
-				</div>
-			</div>
+				</details>
+			)}
 		</section>
 
 		<section id="talks" class="tab-panel">
@@ -749,7 +770,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	</div>
 
 	<script>
-		const tabIds = ['publications', 'writing', 'talks', 'media'];
+		const tabIds = ['publications', 'writing', 'blogs', 'talks', 'media'];
 
 		const activateTab = (targetId) => {
 			const cleaned = targetId.replace('#', '');
@@ -862,6 +883,34 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 			});
 		};
 
+		// Theme toggle
+		const setupThemeToggle = () => {
+			const toggle = document.getElementById('theme-toggle');
+			if (!toggle) return;
+
+			const getPreferredTheme = () => {
+				const stored = localStorage.getItem('theme');
+				if (stored) return stored;
+				return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			};
+
+			const setTheme = (theme) => {
+				document.documentElement.setAttribute('data-theme', theme);
+				localStorage.setItem('theme', theme);
+			};
+
+			// Set initial theme
+			setTheme(getPreferredTheme());
+
+			toggle.addEventListener('click', () => {
+				const current = document.documentElement.getAttribute('data-theme');
+				setTheme(current === 'dark' ? 'light' : 'dark');
+			});
+		};
+
+		// Run theme setup immediately to prevent flash
+		setupThemeToggle();
+
 		document.addEventListener('DOMContentLoaded', () => {
 			activateTab(window.location.hash || tabIds[0]);
 			setupFilters();
@@ -875,6 +924,40 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 </Layout>
 
 <style>
+	/* Pacific Northwest Color Palette - Semantic tokens that swap in dark mode */
+	:root {
+		--color-primary: #0f5132;        /* Headings, primary links - deep pine green */
+		--color-primary-hover: #083d24;  /* Hover states - shadowed forest */
+		--color-secondary: #15803d;      /* Secondary links - forest green */
+		--color-secondary-hover: #166534;
+		--color-text: #1e293b;           /* Body text */
+		--color-text-muted: #64748b;     /* Muted text */
+		--color-bg: #ffffff;             /* Page background */
+		--color-bg-card: #f1f5f9;        /* Card backgrounds */
+		--color-bg-dark: #1e293b;        /* Dark sections (Recent Content) */
+		--color-border: #e2e8f0;         /* Borders */
+		--color-white: #ffffff;
+	}
+
+	:global([data-theme="dark"]) {
+		--color-primary: #059669;        /* Deep emerald */
+		--color-primary-hover: #10b981;  /* Lighter on hover */
+		--color-secondary: #22c55e;      /* Bright forest green */
+		--color-secondary-hover: #4ade80;
+		--color-text: #e2e8f0;
+		--color-text-muted: #94a3b8;
+		--color-bg: #0f172a;
+		--color-bg-card: #1e293b;
+		--color-bg-dark: #0f172a;
+		--color-border: #334155;
+		--color-white: #ffffff;
+	}
+
+	body {
+		background-color: var(--color-bg);
+		color: var(--color-text);
+	}
+
 	header,
 	section,
 	footer {
@@ -891,7 +974,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	h2,
 	h3 {
 		margin: 0.5em 0;
-		color: #2e8b57;
+		color: var(--color-primary);
 	}
 
 	h2 {
@@ -899,10 +982,43 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		margin-top: 0;
 		margin-bottom: 0.75rem;
 		padding-bottom: 0.5rem;
-		border-bottom: 2px solid #e8ebe9;
+		border-bottom: 2px solid var(--color-border);
+	}
+
+	/* Theme toggle button */
+	.theme-toggle {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		background: transparent;
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		padding: 0.4rem 0.6rem;
+		cursor: pointer;
+		font-size: 1rem;
+		line-height: 1;
+		transition: background-color 0.2s, border-color 0.2s;
+	}
+
+	.theme-toggle:hover {
+		background: rgba(15, 81, 50, 0.1);
+		border-color: var(--color-primary);
+	}
+
+	.theme-icon-dark {
+		display: none;
+	}
+
+	:global([data-theme="dark"]) .theme-icon-light {
+		display: none;
+	}
+
+	:global([data-theme="dark"]) .theme-icon-dark {
+		display: inline;
 	}
 
 .hero-manuscript {
+	position: relative;
 	padding-bottom: 1.5rem;
 	border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 	max-width: 1100px;
@@ -965,9 +1081,9 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 .hero-btn {
 	padding: 0.3rem 0.75rem;
 	border-radius: 999px;
-	border: 1px solid #2e8b57;
-	background: #2e8b57;
-	color: #fff;
+	border: 1px solid var(--color-primary);
+	background: var(--color-primary);
+	color: var(--color-white);
 	font-size: 0.85em;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
@@ -976,12 +1092,12 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 }
 
 .hero-btn:hover {
-	background: #256d45;
+	background: var(--color-primary-hover);
 }
 
 .hero-btn.secondary {
 	background: transparent;
-	color: #2e8b57;
+	color: var(--color-primary);
 }
 
 .hero-btn.secondary:hover {
@@ -989,7 +1105,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 }
 
 .hero-btn:focus-visible {
-	outline: 2px solid #2e8b57;
+	outline: 2px solid var(--color-primary);
 	outline-offset: 2px;
 }
 
@@ -1005,17 +1121,17 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 
 .hero-role {
 	margin: 0.35rem 0 0;
-	color: #5e6470;
+	color: var(--color-text-muted);
 }
 
 .hero-research {
 	margin: 0.25rem 0 0;
-	color: #6b7482;
+	color: var(--color-text-muted);
 	font-size: 0.95em;
 }
 
 .hero-manuscript a {
-	color: #2e8b57;
+	color: var(--color-primary);
 	text-decoration: none;
 }
 
@@ -1054,7 +1170,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	font-size: 0.85em;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
-	color: #6b7280;
+	color: var(--color-text-muted);
 }
 
 .table-value {
@@ -1067,7 +1183,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 }
 
 .affiliation-line a.secondary {
-	color: #6b7280;
+	color: var(--color-text-muted);
 }
 
 /* Social icons */
@@ -1081,18 +1197,33 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	color: #2e8b57;
+	color: var(--color-primary);
 	transition: color 0.2s, transform 0.2s;
 }
 
 .social-link:hover {
-	color: #256d45;
+	color: var(--color-primary-hover);
 	transform: scale(1.15);
 }
 
 .social-icon {
 	width: 20px;
 	height: 20px;
+}
+
+.text-link {
+	color: var(--color-primary);
+	text-decoration: none;
+	font-size: 0.9rem;
+	padding: 0.15rem 0.4rem;
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	transition: background-color 0.2s, border-color 0.2s;
+}
+
+.text-link:hover {
+	background-color: var(--color-bg-card);
+	border-color: var(--color-primary);
 }
 
 /* Links cell with expandable */
@@ -1108,7 +1239,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 
 .links-expand summary {
 	cursor: pointer;
-	color: #2e8b57;
+	color: var(--color-primary);
 	font-weight: 500;
 }
 
@@ -1129,12 +1260,12 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 }
 
 .links-list a {
-	color: #5d6b52;
+	color: var(--color-secondary);
 	text-decoration: none;
 }
 
 .links-list a:hover {
-	color: #3d5a3a;
+	color: var(--color-secondary-hover);
 	text-decoration: underline;
 }
 
@@ -1156,15 +1287,51 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 }
 
-	#recent-summary,
-	#status-board {
+	#featured-links {
+		max-width: 900px;
+		margin: 0 auto 1.5rem;
+		padding: 0 1rem;
+	}
+
+	.featured-list {
+		list-style: disc;
+		padding-left: 1.5rem;
+		margin: 0;
+		font-size: 1rem;
+		line-height: 1.6;
+	}
+
+	.featured-list li {
+		margin-bottom: 0.5rem;
+	}
+
+	.featured-list a {
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+
+	.featured-list a:hover {
+		color: var(--color-primary-hover);
+		text-decoration: underline;
+	}
+
+	#recent-summary {
 		text-align: center;
 		width: 100%;
-		background-color: #1a202c;
-		color: #fff;
+		background-color: var(--color-bg-dark);
+		color: var(--color-white);
 		padding: 1.3rem;
 		border-radius: 10px;
 		box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+	}
+
+	#recent-summary h2,
+	#recent-summary h3 {
+		color: var(--color-white);
+	}
+
+	#recent-summary a {
+		color: var(--color-secondary);
 	}
 
 	#recent-summary .grid {
@@ -1186,8 +1353,8 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	#status-board {
-		background: #fdf8f3;
-		color: #1f2933;
+		background: var(--color-bg-card);
+		color: var(--color-text);
 		padding: 2rem;
 		border-radius: 14px;
 		box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12);
@@ -1205,17 +1372,17 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.status-card {
-		background: #fff;
+		background: var(--color-white);
 		border-radius: 10px;
 		padding: 1rem;
-		box-shadow: inset 0 0 0 1px #f0e6da;
+		box-shadow: inset 0 0 0 1px var(--color-border);
 		font-size: 0.95em;
 		line-height: 1.5;
 	}
 
 	.status-empty {
 		margin: 0;
-		color: #5f6c7b;
+		color: var(--color-text-muted);
 	}
 
 	.section-nav {
@@ -1224,7 +1391,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		flex-wrap: wrap;
 		gap: 0.75rem;
 		padding: 1rem 0;
-		border-bottom: 2px solid #ccc;
+		border-bottom: 2px solid var(--color-border);
 		margin-bottom: 1rem;
 	}
 
@@ -1233,19 +1400,19 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		padding: 0.4em 0.9em;
 		border: 1px solid transparent;
 		border-radius: 4px;
-		color: #5d6b52;
+		color: var(--color-secondary);
 	}
 
 	.section-nav a:hover,
 	.section-nav a.active {
-		border-color: #2e8b57;
-		color: #2e8b57;
+		border-color: var(--color-primary);
+		color: var(--color-primary);
 	}
 
 	.tab-panel {
 		display: none;
-		background: #fff;
-		border-left: 4px solid #2e8b57;
+		background: var(--color-white);
+		border-left: 4px solid var(--color-primary);
 		padding: 1.75rem 1.75rem 1rem;
 		margin-bottom: 2.5rem;
 		border-radius: 0 10px 10px 0;
@@ -1264,8 +1431,8 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.filter-panel {
-		background: #f8fafc;
-		border: 1px solid #e2e8f0;
+		background: var(--color-bg-card);
+		border: 1px solid var(--color-text);
 		border-radius: 8px;
 		padding: 0.5rem 0.75rem;
 		margin-bottom: 0.5rem;
@@ -1274,7 +1441,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	.filter-panel summary {
 		cursor: pointer;
 		font-weight: 600;
-		color: #2e8b57;
+		color: var(--color-primary);
 	}
 
 	.filter-panel[open] {
@@ -1282,8 +1449,8 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.chip {
-		border: 1px solid #cbd5e0;
-		background: #fff;
+		border: 1px solid var(--color-border);
+		background: var(--color-white);
 		border-radius: 999px;
 		padding: 0.2em 0.9em;
 		font-size: 0.85em;
@@ -1292,9 +1459,9 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.chip.active {
-		background: #2e8b57;
-		border-color: #2e8b57;
-		color: #fff;
+		background: var(--color-primary);
+		border-color: var(--color-primary);
+		color: var(--color-white);
 	}
 
 	.chip-link {
@@ -1302,23 +1469,23 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		align-items: center;
 		padding: 0.2em 0.8em;
 		border-radius: 999px;
-		border: 1px solid #cbd5e0;
+		border: 1px solid var(--color-border);
 		font-size: 0.85em;
 		text-transform: uppercase;
 		letter-spacing: 0.03em;
 		text-decoration: none;
-		color: #5d6b52;
+		color: var(--color-secondary);
 		margin-right: 0.35rem;
 	}
 
 	.chip-link:hover {
-		background: #3d5a3a;
-		color: #fff;
-		border-color: #3d5a3a;
+		background: var(--color-secondary-hover);
+		color: var(--color-white);
+		border-color: var(--color-secondary-hover);
 	}
 
 	.section-subtitle {
-		color: #5f6c7b;
+		color: var(--color-text-muted);
 		margin-top: -0.35rem;
 		margin-bottom: 1.3rem;
 		font-size: 0.95em;
@@ -1338,19 +1505,19 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		border-radius: 999px;
 		text-decoration: none;
 		font-size: 0.88em;
-		border: 1px solid #2e8b57;
-		color: #2e8b57;
+		border: 1px solid var(--color-primary);
+		color: var(--color-primary);
 		background: transparent;
 	}
 
 	.cta-link:hover {
-		background: #2e8b57;
-		color: #fff;
+		background: var(--color-primary);
+		color: var(--color-white);
 	}
 
 	.cta-link.muted {
 		background: transparent;
-		color: #2e8b57;
+		color: var(--color-primary);
 	}
 
 	.tab-panel {
@@ -1382,15 +1549,15 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	border-bottom: none;
 	margin-bottom: 0.75rem;
 	text-align: left;
-	background: #fafbfa;
-	border-left: 3px solid #d4e5dc;
+	background: var(--color-bg-card);
+	border-left: 3px solid var(--color-border);
 	border-radius: 0 6px 6px 0;
 	transition: border-color 0.2s, background 0.2s;
 }
 
 .entry:hover {
-	border-left-color: #2e8b57;
-	background: #f5f8f6;
+	border-left-color: var(--color-primary);
+	background: var(--color-bg-card);
 }
 
 .entry:last-child {
@@ -1418,14 +1585,14 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		font-size: 0.75em;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: #8fa;
+		color: var(--color-secondary);
 		margin-bottom: 0.35rem;
 		font-weight: 600;
 	}
 
 	/* Compact blog entries */
 	.blog-summary {
-		color: #5f6c7b;
+		color: var(--color-text-muted);
 		margin-bottom: 1rem;
 		font-size: 0.95em;
 	}
@@ -1463,7 +1630,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	.blog-header::after {
 		content: '▼';
 		font-size: 0.7em;
-		color: #6b7280;
+		color: var(--color-text-muted);
 		transition: transform 0.2s;
 	}
 
@@ -1474,12 +1641,12 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	.blog-show-all {
 		margin-top: 0.75rem;
 		padding-top: 0.5rem;
-		border-top: 1px dashed #e2e8f0;
+		border-top: 1px dashed var(--color-text);
 	}
 
 	.blog-show-all summary {
 		cursor: pointer;
-		color: #2e8b57;
+		color: var(--color-primary);
 		font-size: 0.9em;
 		font-weight: 500;
 	}
@@ -1494,13 +1661,13 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		align-items: baseline;
 		gap: 0.75rem;
 		padding: 0.4rem 0.6rem;
-		background: #fafbfa;
+		background: var(--color-bg-card);
 		border-radius: 4px;
 		font-size: 0.9em;
 	}
 
 	.entry-compact a {
-		color: #2e8b57;
+		color: var(--color-primary);
 		text-decoration: none;
 		flex: 1;
 		white-space: nowrap;
@@ -1513,7 +1680,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.entry-meta {
-		color: #6b7280;
+		color: var(--color-text-muted);
 		font-size: 0.85em;
 		white-space: nowrap;
 	}
@@ -1524,7 +1691,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.blog-more a {
-		color: #2e8b57;
+		color: var(--color-primary);
 	}
 
 	.quick-bio {
@@ -1542,7 +1709,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	button:focus,
 	input:focus,
 	select:focus {
-		outline: 2px solid #8b5a2b;
+		outline: 2px solid var(--color-secondary);
 		outline-offset: 2px;
 	}
 
@@ -1571,153 +1738,190 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		}
 	}
 
-	@media (prefers-color-scheme: dark) {
-		body {
-			background-color: #1a202c;
-			color: #e2e8f0;
-		}
+	/* Dark mode styles - applied via data-theme attribute */
+	:global([data-theme="dark"]) body {
+		background-color: var(--color-bg);
+		color: var(--color-text);
+	}
 
-		.section-nav a {
-			color: #63b3ed;
-		}
+	:global([data-theme="dark"]) h1,
+	:global([data-theme="dark"]) h2,
+	:global([data-theme="dark"]) h3 {
+		color: var(--color-primary);
+	}
 
-		.section-nav a:hover {
-			color: #4fd1c5;
-			border-color: #4fd1c5;
-		}
+	:global([data-theme="dark"]) h2 {
+		border-bottom-color: var(--color-border);
+	}
 
-		.chip {
-			background: #1a202c;
-			color: #e2e8f0;
-			border-color: #4a5568;
-		}
+	:global([data-theme="dark"]) .featured-list a {
+		color: var(--color-primary);
+	}
 
-		.chip.active {
-			background: #4fd1c5;
-			color: #1a202c;
-			border-color: #4fd1c5;
-		}
+	:global([data-theme="dark"]) .featured-list a:hover {
+		color: var(--color-primary);
+	}
 
-		.filter-panel {
-			background: #2d3748;
-			border-color: #4a5568;
-		}
+	:global([data-theme="dark"]) .section-nav a {
+		color: var(--color-secondary);
+	}
 
-		#status-board {
-			background: #222b3a;
-			color: #e2e8f0;
-			box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
-		}
+	:global([data-theme="dark"]) .section-nav a:hover {
+		color: var(--color-primary);
+		border-color: var(--color-primary);
+	}
 
-		.status-card {
-			background: #1b2433;
-			box-shadow: inset 0 0 0 1px #2f3b50;
-		}
+	:global([data-theme="dark"]) .chip {
+		background: var(--color-bg);
+		color: var(--color-text);
+		border-color: var(--color-text-muted);
+	}
 
-		.cta-link.ghost {
-			color: #63b3ed;
-			border-color: #63b3ed;
-		}
+	:global([data-theme="dark"]) .chip.active {
+		background: var(--color-primary);
+		color: var(--color-bg);
+		border-color: var(--color-primary);
+	}
 
-		.tab-panel {
-			background: #1b2433;
-			box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
-		}
-		.table-row {
-			border-color: #2f3b50;
-		}
+	:global([data-theme="dark"]) .filter-panel {
+		background: var(--color-bg-card);
+		border-color: var(--color-text-muted);
+	}
 
-		/* Social icons dark mode */
-		.social-link {
-			color: #4fd1c5;
-		}
+	:global([data-theme="dark"]) #status-board {
+		background: var(--color-bg-card);
+		color: var(--color-text);
+		box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+	}
 
-		.social-link:hover {
-			color: #63b3ed;
-		}
+	:global([data-theme="dark"]) .status-card {
+		background: var(--color-bg-card);
+		box-shadow: inset 0 0 0 1px var(--color-border);
+	}
 
-		.affiliation-line a.secondary {
-			color: #a0aec0;
-		}
+	:global([data-theme="dark"]) .cta-link.ghost {
+		color: var(--color-secondary);
+		border-color: var(--color-secondary);
+	}
 
-		.links-expand summary {
-			color: #4fd1c5;
-		}
+	:global([data-theme="dark"]) .tab-panel {
+		background: var(--color-bg-card);
+		box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+	}
 
-		.links-list a {
-			color: #63b3ed;
-		}
+	:global([data-theme="dark"]) .table-row {
+		border-color: var(--color-border);
+	}
 
-		.links-list a:hover {
-			color: #4fd1c5;
-		}
+	/* Social icons dark mode */
+	:global([data-theme="dark"]) .social-link {
+		color: var(--color-primary);
+	}
 
-		/* Entry cards dark mode */
-		.entry {
-			background: #1b2433;
-			border-left-color: #2f3b50;
-		}
+	:global([data-theme="dark"]) .social-link:hover {
+		color: var(--color-secondary);
+	}
 
-		.entry:hover {
-			background: #222b3a;
-			border-left-color: #4fd1c5;
-		}
+	:global([data-theme="dark"]) .text-link {
+		color: var(--color-primary);
+		border-color: var(--color-text-muted);
+	}
 
-		.entry h3 {
-			color: #e2e8f0;
-		}
+	:global([data-theme="dark"]) .text-link:hover {
+		background-color: var(--color-bg-card);
+		border-color: var(--color-primary);
+	}
 
-		.entry p {
-			color: #a0aec0;
-		}
+	:global([data-theme="dark"]) .affiliation-line a.secondary {
+		color: var(--color-text-muted);
+	}
 
-		.chip-link {
-			color: #8fbc8f;
-			border-color: #4a5568;
-		}
+	:global([data-theme="dark"]) .links-expand summary {
+		color: var(--color-primary);
+	}
 
-		.chip-link:hover {
-			background: #6b8e6b;
-			color: #1a202c;
-			border-color: #6b8e6b;
-		}
+	:global([data-theme="dark"]) .links-list a {
+		color: var(--color-secondary);
+	}
 
-		/* Compact blog dark mode */
-		.blog-summary {
-			color: #a0aec0;
-		}
+	:global([data-theme="dark"]) .links-list a:hover {
+		color: var(--color-primary);
+	}
 
-		.entry-compact {
-			background: #1b2433;
-		}
+	/* Entry cards dark mode */
+	:global([data-theme="dark"]) .entry {
+		background: var(--color-bg-card);
+		border-left-color: var(--color-border);
+	}
 
-		.entry-compact a {
-			color: #4fd1c5;
-		}
+	:global([data-theme="dark"]) .entry:hover {
+		background: var(--color-bg-card);
+		border-left-color: var(--color-primary);
+	}
 
-		.entry-meta {
-			color: #718096;
-		}
+	:global([data-theme="dark"]) .entry h3 {
+		color: var(--color-text);
+	}
 
-		.blog-more a {
-			color: #4fd1c5;
-		}
+	:global([data-theme="dark"]) .entry p {
+		color: var(--color-text-muted);
+	}
 
-		.blog-header::after {
-			color: #a0aec0;
-		}
+	:global([data-theme="dark"]) .chip-link {
+		color: var(--color-primary);
+		border-color: var(--color-text-muted);
+	}
 
-		.blog-show-all {
-			border-top-color: #2f3b50;
-		}
+	:global([data-theme="dark"]) .chip-link:hover {
+		background: var(--color-primary-hover);
+		color: var(--color-bg);
+		border-color: var(--color-primary-hover);
+	}
 
-		.blog-show-all summary {
-			color: #4fd1c5;
-		}
+	/* Compact blog dark mode */
+	:global([data-theme="dark"]) .blog-summary {
+		color: var(--color-text-muted);
+	}
 
-		.summary-label {
-			color: #4fd1c5;
-		}
+	:global([data-theme="dark"]) .entry-compact {
+		background: var(--color-bg-card);
+	}
+
+	:global([data-theme="dark"]) .entry-compact a {
+		color: var(--color-primary);
+	}
+
+	:global([data-theme="dark"]) .entry-meta {
+		color: var(--color-text-muted);
+	}
+
+	:global([data-theme="dark"]) .blog-more a {
+		color: var(--color-primary);
+	}
+
+	:global([data-theme="dark"]) .blog-header::after {
+		color: var(--color-text-muted);
+	}
+
+	:global([data-theme="dark"]) .blog-show-all {
+		border-top-color: var(--color-border);
+	}
+
+	:global([data-theme="dark"]) .blog-show-all summary {
+		color: var(--color-primary);
+	}
+
+	:global([data-theme="dark"]) .summary-label {
+		color: var(--color-primary);
+	}
+
+	:global([data-theme="dark"]) .theme-toggle {
+		border-color: var(--color-text-muted);
+	}
+
+	:global([data-theme="dark"]) .theme-toggle:hover {
+		background: rgba(5, 150, 105, 0.15);
+		border-color: var(--color-primary);
 	}
 
 	/* Modal styles */
@@ -1743,7 +1947,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 
 	.modal-content {
 		position: relative;
-		background: #fff;
+		background: var(--color-white);
 		border-radius: 12px;
 		padding: 1.5rem 2rem;
 		max-width: 560px;
@@ -1773,20 +1977,20 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		border: none;
 		font-size: 1.5rem;
 		cursor: pointer;
-		color: #6b7280;
+		color: var(--color-text-muted);
 		line-height: 1;
 		padding: 0.25rem;
 		transition: color 0.2s;
 	}
 
 	.modal-close:hover {
-		color: #1f2933;
+		color: var(--color-text);
 	}
 
 	.modal-content h3 {
 		margin: 0 0 1rem;
 		font-size: 1.25rem;
-		color: #2e8b57;
+		color: var(--color-primary);
 	}
 
 	.modal-content h4 {
@@ -1794,7 +1998,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		font-size: 0.9rem;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: #6b7280;
+		color: var(--color-text-muted);
 	}
 
 	.modal-content p {
@@ -1808,7 +2012,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		flex-wrap: wrap;
 		margin-top: 1rem;
 		padding-top: 1rem;
-		border-top: 1px solid #e2e8f0;
+		border-top: 1px solid var(--color-text);
 	}
 
 	.modal-actions-top {
@@ -1817,7 +2021,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 		padding-top: 0;
 		padding-bottom: 1rem;
 		border-top: none;
-		border-bottom: 1px solid #e2e8f0;
+		border-bottom: 1px solid var(--color-text);
 	}
 
 	.bio-text {
@@ -1837,9 +2041,9 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.copy-bio-btn.copied {
-		background: #2e8b57;
-		color: #fff;
-		border-color: #2e8b57;
+		background: var(--color-primary);
+		color: var(--color-white);
+		border-color: var(--color-primary);
 	}
 
 	.links-modal-grid {
@@ -1859,12 +2063,12 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.links-modal-section .links-list a {
-		color: #5d6b52;
+		color: var(--color-secondary);
 		text-decoration: none;
 	}
 
 	.links-modal-section .links-list a:hover {
-		color: #3d5a3a;
+		color: var(--color-secondary-hover);
 		text-decoration: underline;
 	}
 
@@ -1872,7 +2076,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	.modal-trigger {
 		background: none;
 		border: none;
-		color: #5d6b52;
+		color: var(--color-secondary);
 		cursor: pointer;
 		font-weight: 600;
 		font-size: inherit;
@@ -1881,7 +2085,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	.modal-trigger:hover {
-		color: #3d5a3a;
+		color: var(--color-secondary-hover);
 		text-decoration: underline;
 	}
 
@@ -1890,56 +2094,136 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	}
 
 	/* Dark mode modal */
-	@media (prefers-color-scheme: dark) {
-		.modal-backdrop {
-			background: rgba(0, 0, 0, 0.7);
+	:global([data-theme="dark"]) .modal-backdrop {
+		background: rgba(0, 0, 0, 0.7);
+	}
+
+	:global([data-theme="dark"]) .modal-content {
+		background: var(--color-bg-card);
+		color: var(--color-text);
+	}
+
+	:global([data-theme="dark"]) .modal-close {
+		color: var(--color-text-muted);
+	}
+
+	:global([data-theme="dark"]) .modal-close:hover {
+		color: var(--color-text);
+	}
+
+	:global([data-theme="dark"]) .modal-content h3 {
+		color: var(--color-primary);
+	}
+
+	:global([data-theme="dark"]) .modal-content h4 {
+		color: var(--color-text-muted);
+	}
+
+	:global([data-theme="dark"]) .modal-actions {
+		border-top-color: var(--color-border);
+	}
+
+	:global([data-theme="dark"]) .modal-actions-top {
+		border-bottom-color: var(--color-border);
+	}
+
+	:global([data-theme="dark"]) .links-modal-section .links-list a {
+		color: var(--color-primary);
+	}
+
+	:global([data-theme="dark"]) .links-modal-section .links-list a:hover {
+		color: var(--color-primary);
+	}
+
+	:global([data-theme="dark"]) .modal-trigger {
+		color: var(--color-primary);
+	}
+
+	:global([data-theme="dark"]) .copy-bio-btn.copied {
+		background: var(--color-primary-hover);
+		color: var(--color-bg);
+		border-color: var(--color-primary-hover);
+	}
+
+	/* Reduced motion for accessibility */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
 		}
 
 		.modal-content {
-			background: #1b2433;
-			color: #e2e8f0;
+			animation: none;
 		}
 
-		.modal-close {
-			color: #a0aec0;
+		.social-link:hover {
+			transform: none;
+		}
+	}
+
+	/* Print styles */
+	@media print {
+		body {
+			background: white;
+			color: black;
+			font-size: 12pt;
 		}
 
-		.modal-close:hover {
-			color: #e2e8f0;
+		.theme-toggle,
+		.section-nav,
+		.filter-panel,
+		.modal,
+		.skip-link,
+		footer {
+			display: none !important;
 		}
 
-		.modal-content h3 {
-			color: #4fd1c5;
+		#recent-summary {
+			background: #f0f0f0 !important;
+			color: black !important;
+			box-shadow: none;
+			border: 1px solid #ccc;
 		}
 
-		.modal-content h4 {
-			color: #a0aec0;
+		#recent-summary h2,
+		#recent-summary h3 {
+			color: black !important;
 		}
 
-		.modal-actions {
-			border-top-color: #2f3b50;
+		#recent-summary a {
+			color: #333 !important;
 		}
 
-		.modal-actions-top {
-			border-bottom-color: #2f3b50;
+		.tab-panel {
+			display: block !important;
+			box-shadow: none;
+			border: 1px solid #ccc;
+			page-break-inside: avoid;
 		}
 
-		.links-modal-section .links-list a {
-			color: #8fbc8f;
+		a {
+			color: #333;
+			text-decoration: underline;
 		}
 
-		.links-modal-section .links-list a:hover {
-			color: #a8d4a8;
+		a[href^="http"]::after {
+			content: " (" attr(href) ")";
+			font-size: 0.8em;
+			color: #666;
 		}
 
-		.modal-trigger {
-			color: #8fbc8f;
+		h1, h2, h3 {
+			color: black;
+			page-break-after: avoid;
 		}
 
-		.copy-bio-btn.copied {
-			background: #6b8e6b;
-			color: #1a202c;
-			border-color: #6b8e6b;
+		.entry {
+			background: white;
+			border-left-color: #999;
+			page-break-inside: avoid;
 		}
 	}
 </style>

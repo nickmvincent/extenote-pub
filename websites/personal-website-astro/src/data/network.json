@@ -19,7 +19,7 @@
   "discussions": [
     {
       "provider": "github",
-      "url": "https://github.com/nickmvincent/extenote-content-public/discussions/6",
+      "url": "https://github.com/nickmvincent/extenote-pub/discussions/9",
       "label": "GitHub Discussions",
       "description": "Threaded conversations with markdown support, reactions, and notifications."
     },
@@ -30,5 +30,5 @@
       "description": "Long-form posts on the ATProto/Bluesky network."
     }
   ],
-  "generatedAt": "2026-01-02T23:39:45.441Z"
+  "generatedAt": "2026-01-10T05:23:05.446Z"
 }
