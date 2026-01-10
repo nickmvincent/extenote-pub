@@ -4,11 +4,13 @@ import NetworkFooter from '../../../../helpers/astro/NetworkFooter.astro';
 interface Props {
 	title?: string;
 	description?: string;
+	hideFooter?: boolean;
 }
 
 const {
 	title = 'Personal Website',
-	description = ''
+	description = '',
+	hideFooter = false
 }: Props = Astro.props;
 
 const site = Astro.site ?? null;
@@ -47,11 +49,13 @@ const socialImage = site ? new URL('/favicon.svg', site).href : '/favicon.svg';
 	<body>
 		<a href="#recent-summary" class="skip-link">Skip to main content</a>
 		<slot />
-		<NetworkFooter
-			links={[
-				{ href: 'https://shared-references.pages.dev/projects', label: 'More projects →' },
-			]}
-		/>
+		{!hideFooter && (
+			<NetworkFooter
+				links={[
+					{ href: 'https://shared-references.pages.dev/projects', label: 'More projects →' },
+				]}
+			/>
+		)}
 	</body>
 </html>
 
