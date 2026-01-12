@@ -1,6 +1,6 @@
 ---
 title: Collective Bargaining in the Information Economy
-type: talk
+type: poster presentation
 event: NeurIPS 2025 Position Papers Track
 location: San Diego, CA
 date: '2025-12-02T00:00:00.000Z'

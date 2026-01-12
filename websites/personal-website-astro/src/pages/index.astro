@@ -10,14 +10,14 @@ const peerReviewed = scholarly.filter(
 	(item) => String(item.metadata.publication_type ?? '').toLowerCase() === 'publication'
 );
 
-// Filter for items within the last 6 months
-const sixMonthsAgo = new Date();
-sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+// Filter for items within the last 12 months
+const twelveMonthsAgo = new Date();
+twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 const isRecent = (item: { metadata: { date?: unknown } }) => {
 	const date = item.metadata.date;
 	if (!date) return false;
 	const itemDate = new Date(date as string);
-	return itemDate >= sixMonthsAgo;
+	return itemDate >= twelveMonthsAgo;
 };
 
 const summary = {
@@ -139,7 +139,8 @@ const talkTypes = {
 	'guest lecture': 'Guest Lecture',
 	keynote: 'Keynote',
 	panel: 'Panel',
-	podcast: 'Podcast'
+	podcast: 'Podcast',
+	'poster presentation': 'Poster Presentation'
 };
 
 const peerReviewedFilters = buildFilterOptions(
@@ -294,23 +295,12 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 			</li>
 			<li>
 				See a collection of web projects{' '}
-				<a href="https://shared-references.pages.dev/projects/" target="_blank" rel="noopener noreferrer">
-					here
-				</a>
-				{' '}(e.g.,{' '} the
-				<a href="https://datacounterfactuals.org/" target="_blank" rel="noopener noreferrer">
-					Data Counterfactuals explainer
-				</a>,{' '} the
-				<a href="https://exploringai.org/" target="_blank" rel="noopener noreferrer">
-					Data Napkin math explorer
-				</a>, and the {' '}
-				<a href="https://datalicenses.org" target="_blank" rel="noopener noreferrer">
-					Data License Catalog
-				</a>
-				 — all now managed with{' '}
-				<a href="https://nickmvincent.github.io/extenote/" target="_blank" rel="noopener noreferrer">
-					extenote
-				</a>).
+				<a href="https://shared-references.pages.dev/projects/" target="_blank" rel="noopener noreferrer">here</a>
+				(e.g., the
+				<a href="https://datacounterfactuals.org/" target="_blank" rel="noopener noreferrer">Data Counterfactuals explainer</a>, the
+				<a href="https://exploringai.org/" target="_blank" rel="noopener noreferrer">Data Napkin math explorer</a>, and the
+				<a href="https://datalicenses.org" target="_blank" rel="noopener noreferrer">Data License Catalog</a>—all now managed with{' '}
+				<a href="https://nickmvincent.github.io/extenote/" target="_blank" rel="noopener noreferrer">extenote</a>).
 			</li>
 		</ul>
 	</section>
@@ -324,7 +314,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 					<div class="summary-item">
 						{summary.publications.map((pub) => (
 							<div style="margin-bottom:0.75em;">
-								{truncateText(String(pub.metadata.title ?? ''), 50)}, {getLeadAuthor(pub.metadata.authors)} ...,
+								{truncateText(String(pub.metadata.title ?? ''), 60)}, {getLeadAuthor(pub.metadata.authors)} ...,
 								{pub.metadata.journal ?? pub.metadata.conference ?? 'N/A'}, {formatSummaryDate(pub.metadata.date)}
 								{pub.metadata.url && (
 									<>
@@ -348,7 +338,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 								<span class="summary-label">Op-eds</span>
 								{summary.editorial.map((post) => (
 									<div style="margin-bottom:0.5em;">
-										{truncateText(String(post.metadata.title ?? ''), 45)}, {post.metadata.venue ?? 'N/A'}
+										{truncateText(String(post.metadata.title ?? ''), 55)}, {post.metadata.venue ?? 'N/A'}
 										{post.metadata.url && (
 											<>
 												{' '}
@@ -366,7 +356,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 								<span class="summary-label">Blog</span>
 								{summary.blogs.map((post) => (
 									<div style="margin-bottom:0.5em;">
-										{truncateText(String(post.metadata.title ?? ''), 45)}
+										{truncateText(String(post.metadata.title ?? ''), 55)}
 										{post.metadata.url && (
 											<>
 												{' '}
@@ -388,7 +378,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 					<div class="summary-item">
 						{summary.talks.map((talk) => (
 							<div style="margin-bottom:0.75em;">
-								{truncateText(String(talk.metadata.title ?? ''), 40)}, {talk.metadata.location ?? 'N/A'},
+								{truncateText(String(talk.metadata.title ?? ''), 50)}, {talk.metadata.location ?? 'N/A'},
 								{formatSummaryDate(talk.metadata.date)}
 							</div>
 						))}
@@ -401,7 +391,7 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 					<div class="summary-item">
 						{summary.news.map((item) => (
 							<div style="margin-bottom:0.75em;">
-								{truncateText(String(item.metadata.title ?? ''), 40)},{' '}
+								{truncateText(String(item.metadata.title ?? ''), 50)},{' '}
 								{Array.isArray(item.metadata.authors) && item.metadata.authors.length
 									? item.metadata.authors.join(', ')
 									: '—'}
