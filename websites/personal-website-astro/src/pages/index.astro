@@ -243,55 +243,13 @@ const mediaFilters = buildFilterOptions(newsCoverage, (item) => item.metadata.so
 	<section id="featured-links">
 		<ul class="featured-list">
 			<li>
-				I am based in the{' '}
-				<a href={personalInfo.current_inst_link as string} target="_blank" rel="noopener noreferrer">
-					{personalInfo.department}
-				</a>{' '}
-				at{' '}
-				<a href={personalInfo.university_link as string} target="_blank" rel="noopener noreferrer">
-					{personalInfo.university}
-				</a>
-				{directorAffiliation && (
-					<>
-						{' '}and direct{' '}
-						<a href={directorAffiliation.url} target="_blank" rel="noopener noreferrer">
-							{directorAffiliation.name}
-						</a>
-					</>
-				)}.
-				{otherAffiliations.length > 0 && (
-					<>
-						{' '}I am also associated with{' '}
-						{otherAffiliations.map((aff, i) => (
-							<>
-								<a href={aff.url} target="_blank" rel="noopener noreferrer">{aff.name}</a>
-								{listSeparator(i, otherAffiliations.length)}
-							</>
-						))}.
-					</>
-				)}
+				I am based in the <a href={personalInfo.current_inst_link as string} target="_blank" rel="noopener noreferrer">{personalInfo.department}</a> at <a href={personalInfo.university_link as string} target="_blank" rel="noopener noreferrer">{personalInfo.university}</a>{directorAffiliation && <> and direct <a href={directorAffiliation.url} target="_blank" rel="noopener noreferrer">{directorAffiliation.name}</a></>}.{otherAffiliations.length > 0 && <> I am also associated with {otherAffiliations.map((aff, i) => <><a href={aff.url} target="_blank" rel="noopener noreferrer">{aff.name}</a>{listSeparator(i, otherAffiliations.length)}</>)}.</>}
 			</li>
 			<li>
-				I share content on{' '}
-				{socialLinks.map((link, i) => (
-					<>
-						<a href={link.href as string} target="_blank" rel="noopener noreferrer">{link.label}</a>
-						{listSeparator(i, socialLinks.length)}
-					</>
-				))}.
-				My papers can be found below or via{' '}
-				{paperLinks.map((link, i) => (
-					<>
-						<a href={link.href as string} target="_blank" rel="noopener noreferrer">{link.label}</a>
-						{listSeparator(i, paperLinks.length)}
-					</>
-				))}.
+				I share content on {socialLinks.map((link, i) => <><a href={link.href as string} target="_blank" rel="noopener noreferrer">{link.label}</a>{listSeparator(i, socialLinks.length)}</>)}. My papers can be found below or via {paperLinks.map((link, i) => <><a href={link.href as string} target="_blank" rel="noopener noreferrer">{link.label}</a>{listSeparator(i, paperLinks.length)}</>)}.
 			</li>
 			<li>
-				See my newsletter on Substack:{' '}
-				<a href={personalInfo.blog_link as string} target="_blank" rel="noopener noreferrer">
-					Data Leverage Newsletter
-				</a>.
+				See my newsletter on Substack: <a href={personalInfo.blog_link as string} target="_blank" rel="noopener noreferrer">Data Leverage Newsletter</a>.
 			</li>
 			<li>
 				See a collection of web projects{' '}
