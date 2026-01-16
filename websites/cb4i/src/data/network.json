@@ -1,22 +1,11 @@
 {
-  "projectName": "data-licenses",
-  "projectTitle": "Data Licenses",
+  "projectName": "cb4i",
+  "projectTitle": "Cb4i",
   "links": {
-    "website": "https://datalicenses.org"
+    "website": "https://cb4i.org"
   },
-  "relatedProjects": [
-    {
-      "name": "shared-references",
-      "title": "Shared References",
-      "website": "https://shared-references.pages.dev"
-    }
-  ],
+  "relatedProjects": [],
   "allProjects": [
-    {
-      "name": "cb4i",
-      "title": "Cb4i",
-      "website": "https://cb4i.org"
-    },
     {
       "name": "courses",
       "title": "Courses",
@@ -31,6 +20,11 @@
       "name": "data-leverage-blogs",
       "title": "Data Leverage Blogs",
       "website": "https://data-leverage-blogs-quarto.pages.dev"
+    },
+    {
+      "name": "data-licenses",
+      "title": "Data Licenses",
+      "website": "https://datalicenses.org"
     },
     {
       "name": "data-napkin-math",
@@ -66,16 +60,16 @@
   "discussions": [
     {
       "provider": "github",
-      "url": "https://github.com/nickmvincent/extenote-pub/discussions/5",
+      "url": "https://github.com/nickmvincent/extenote-pub/discussions/2",
       "label": "GitHub Discussions",
       "description": "Threaded conversations with markdown support, reactions, and notifications."
     },
     {
       "provider": "whitewind",
-      "url": "https://whtwnd.com/nickmvincent.bsky.social/mjlht883",
+      "url": "https://whtwnd.com/nickmvincent.bsky.social/mjxpebez",
       "label": "WhiteWind",
       "description": "Long-form posts on the ATProto/Bluesky network."
     }
   ],
-  "generatedAt": "2026-01-16T16:51:53.375Z"
+  "generatedAt": "2026-01-16T16:48:25.148Z"
 }

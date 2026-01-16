@@ -1,16 +1,11 @@
 {
-  "projectName": "data-licenses",
-  "projectTitle": "Data Licenses",
+  "projectName": "extenote-docs",
+  "projectTitle": "Extenote Docs",
   "links": {
-    "website": "https://datalicenses.org"
+    "github": "https://github.com/nickmvincent/extenote",
+    "website": "https://nickmvincent.github.io/extenote"
   },
-  "relatedProjects": [
-    {
-      "name": "shared-references",
-      "title": "Shared References",
-      "website": "https://shared-references.pages.dev"
-    }
-  ],
+  "relatedProjects": [],
   "allProjects": [
     {
       "name": "cb4i",
@@ -33,14 +28,14 @@
       "website": "https://data-leverage-blogs-quarto.pages.dev"
     },
     {
+      "name": "data-licenses",
+      "title": "Data Licenses",
+      "website": "https://datalicenses.org"
+    },
+    {
       "name": "data-napkin-math",
       "title": "Data Napkin Math",
       "website": "https://exploringai.org"
-    },
-    {
-      "name": "extenote-docs",
-      "title": "Extenote Docs",
-      "website": "https://nickmvincent.github.io/extenote"
     },
     {
       "name": "paidf-mini-book",
@@ -63,19 +58,6 @@
       "website": "https://shared-references.pages.dev"
     }
   ],
-  "discussions": [
-    {
-      "provider": "github",
-      "url": "https://github.com/nickmvincent/extenote-pub/discussions/5",
-      "label": "GitHub Discussions",
-      "description": "Threaded conversations with markdown support, reactions, and notifications."
-    },
-    {
-      "provider": "whitewind",
-      "url": "https://whtwnd.com/nickmvincent.bsky.social/mjlht883",
-      "label": "WhiteWind",
-      "description": "Long-form posts on the ATProto/Bluesky network."
-    }
-  ],
-  "generatedAt": "2026-01-16T16:51:53.375Z"
+  "discussions": [],
+  "generatedAt": "2026-01-16T16:48:32.463Z"
 }

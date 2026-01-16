@@ -1,11 +1,13 @@
 ---
 import '../styles/global.css';
 import NetworkFooter from '../../../../helpers/astro/NetworkFooter.astro';
+import networkData from '../data/network.json';
 
 const currentPath = Astro.url.pathname;
 const navLinks = [
   { href: '/', label: 'Overview' },
 ];
+const networkLinks = networkData.allProjects.map(p => ({ href: p.website, label: p.title }));
 ---
 <!doctype html>
 <html lang="en">
@@ -39,15 +41,7 @@ const navLinks = [
     </nav>
     <slot />
 
-    <NetworkFooter
-      links={[
-        { href: 'https://datacounterfactuals.org', label: 'Data Counterfactuals' },
-        { href: 'https://datalicenses.org', label: 'Data Licenses' },
-        { href: 'https://exploringai.org', label: 'Data Napkin Math' },
-        { href: 'https://sharedreferences.pages.dev', label: 'Shared References' },
-        { href: 'https://extenote.pages.dev', label: 'ExteNote Docs' },
-      ]}
-    />
+    <NetworkFooter links={networkLinks} />
   <script is:inline>
     // Theme toggle with system preference and localStorage
     (function() {

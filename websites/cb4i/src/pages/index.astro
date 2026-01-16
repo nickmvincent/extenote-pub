@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
+import networkData from '../data/network.json';
 
 // Load content from markdown file
 const contentPath = path.resolve('../../content/cb4i/paper.md');
@@ -17,6 +18,9 @@ const {
 
 // Helper to get affiliation name by id
 const getAffiliation = (id: number) => affiliations.find((a: any) => a.id === id)?.name || '';
+
+// Get shared-references URL from network data
+const sharedRefsUrl = networkData.allProjects.find(p => p.name === 'shared-references')?.website || 'https://shared-references.pages.dev';
 ---
 
 <Layout>
@@ -178,11 +182,11 @@ const getAffiliation = (id: number) => affiliations.find((a: any) => a.id === id
     {references && references.length > 0 && (
       <section class="card references">
         <h2>Related Work</h2>
-        <p class="muted">These papers provide technical and conceptual foundations for CBI. Browse all references at <a href="https://sharedreferences.pages.dev" target="_blank">Shared References</a>.</p>
+        <p class="muted">These papers provide technical and conceptual foundations for CBI. Browse all references at <a href={sharedRefsUrl} target="_blank">Shared References</a>.</p>
         <ul class="ref-list">
           {references.map((ref: any) => (
             <li>
-              <a href={`https://sharedreferences.pages.dev/reference/${ref.key}`} target="_blank">{ref.label}</a>
+              <a href={`${sharedRefsUrl}/reference/${ref.key}`} target="_blank">{ref.label}</a>
               <code>{ref.key}</code>
             </li>
           ))}

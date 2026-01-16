@@ -2,7 +2,13 @@
 import Layout from "../layouts/Base.astro";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
+import networkData from "../data/network.json";
+
 const base = import.meta.env.BASE_URL;
+
+// Helper to get project URL from network data
+const getProjectUrl = (name: string, fallback: string) =>
+  networkData.allProjects.find(p => p.name === name)?.website || fallback;
 ---
 
 <Layout
@@ -595,19 +601,19 @@ bun run web</code></pre>
     <h2>Example: Data Leverage Network</h2>
     <p class="network-subtitle">A set of interconnected sites managed with ExteNote</p>
     <div class="network-grid">
-      <a href="https://datalicenses.org" target="_blank" class="network-site">
+      <a href={getProjectUrl('data-licenses', 'https://datalicenses.org')} target="_blank" class="network-site">
         <h3>Data Licenses</h3>
         <p>Catalog of data licensing initiatives</p>
       </a>
-      <a href="https://datacounterfactuals.org" target="_blank" class="network-site">
+      <a href={getProjectUrl('data-counterfactuals', 'https://datacounterfactuals.org')} target="_blank" class="network-site">
         <h3>Data Counterfactuals</h3>
         <p>Training data counterfactual explorer</p>
       </a>
-      <a href="https://exploringai.org" target="_blank" class="network-site">
+      <a href={getProjectUrl('data-napkin-math', 'https://exploringai.org')} target="_blank" class="network-site">
         <h3>Data Napkin Math</h3>
         <p>Quick AI data calculations</p>
       </a>
-      <a href="https://sharedreferences.pages.dev" target="_blank" class="network-site">
+      <a href={getProjectUrl('shared-references', 'https://shared-references.pages.dev')} target="_blank" class="network-site">
         <h3>Shared References</h3>
         <p>Verified bibliography with 400+ entries</p>
       </a>

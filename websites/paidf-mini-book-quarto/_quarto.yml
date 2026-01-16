@@ -45,6 +45,6 @@ format:
     theme: cosmo
     page-footer:
       center: |
-        Related Projects: [Data Licenses](https://datalicenses.org) · [Data Counterfactuals](https://datacounterfactuals.org) · [Data Napkin Math](https://exploringai.org) · [Shared References](https://sharedreferences.pages.dev)
+        Related Projects: [Data Licenses](https://datalicenses.org) · [Data Counterfactuals](https://datacounterfactuals.org) · [Data Napkin Math](https://exploringai.org) · [Shared References](https://shared-references.pages.dev)
   pdf:
     documentclass: scrreprt
