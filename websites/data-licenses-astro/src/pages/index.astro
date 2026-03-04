@@ -1,39 +1,36 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { loadInitiatives } from '../lib/content-loader';
-import { formatCitation } from '../lib/content-loader';
+import { formatCitation, loadInitiatives } from '../lib/content-loader';
 
-const items = (await loadInitiatives()).sort((a, b) => {
-  // Group by whether recentActivity exists, then by date desc, then by title
-  const aHas = Boolean(a.recentActivity);
-  const bHas = Boolean(b.recentActivity);
-  if (aHas !== bHas) return aHas ? -1 : 1; // items with recentActivity first
+function sortByActivityThenTitle(a, b) {
+  const aHasActivity = Boolean(a.recentActivity);
+  const bHasActivity = Boolean(b.recentActivity);
+  if (aHasActivity !== bHasActivity) return aHasActivity ? -1 : 1;
 
-  if (aHas && bHas) {
-    const aTime = new Date(a.recentActivity).getTime();
-    const bTime = new Date(b.recentActivity).getTime();
-    if (aTime !== bTime) return bTime - aTime; // newer first
+  if (aHasActivity && bHasActivity) {
+    const aTimestamp = new Date(a.recentActivity).getTime();
+    const bTimestamp = new Date(b.recentActivity).getTime();
+    if (aTimestamp !== bTimestamp) return bTimestamp - aTimestamp;
   }
 
   return a.title.localeCompare(b.title);
-});
+}
+
+const items = (await loadInitiatives()).sort(sortByActivityThenTitle);
 
 // Lookup maps for relations
 const bySlug = Object.fromEntries(items.map((i) => [i.slug, i]));
 const byId = Object.fromEntries(items.map((i) => [i.id, i]));
 
-function formatDate(d) {
-  try {
-    const dt = new Date(d);
-    return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
-  } catch (e) {
-    return String(d);
-  }
+function formatDate(value) {
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
 }
 
-const statusOrder = ['WIP', 'usable-but-new', 'usable-with-some-evidence', 'usable-with-strong-evidence'];
-const statuses = statusOrder.filter((s) => items.some((i) => i.status === s));
-const actionLabels = {
+const STATUS_ORDER = ['WIP', 'usable-but-new', 'usable-with-some-evidence', 'usable-with-strong-evidence'];
+const statuses = STATUS_ORDER.filter((status) => items.some((item) => item.status === status));
+const ACTION_LABELS = {
   'attach-preference-signal': 'Attach preference signal',
   'attach-formal-license': 'Attach formal license',
   'join-licensing-collective': 'Join licensing collective',
@@ -42,7 +39,7 @@ const actionLabels = {
   'new-infrastructures': 'New infrastructures',
   'certification': 'Certification',
 };
-const actionDescriptions = {
+const ACTION_DESCRIPTIONS = {
   'attach-preference-signal': 'Express reuse preferences via machine-readable signals like robots.txt or ai.txt. Crawlers and AI agents can read these to understand permitted uses.',
   'attach-formal-license': 'Publish structured license terms that machines can parse. Enables automated compliance checking and clear legal boundaries for data reuse.',
   'join-licensing-collective': 'Pool rights with other creators through a collective or agency. Provides negotiating power and streamlined licensing for AI companies.',
@@ -52,16 +49,16 @@ const actionDescriptions = {
   'certification': 'Verify that AI models or processes meet specific data use criteria. Provides third-party validation of ethical training practices.',
 };
 const actions = Array.from(new Set(items.flatMap((i) => i.actionsSupported || [])))
-  .sort((a, b) => (actionLabels[a] || a).localeCompare(actionLabels[b] || b));
+  .sort((a, b) => (ACTION_LABELS[a] || a).localeCompare(ACTION_LABELS[b] || b));
 
 // Status labels and descriptions (used for legend and badges)
-const statusLabels = {
+const STATUS_LABELS = {
   WIP: 'Work in progress',
   'usable-but-new': 'Usable (new)',
   'usable-with-some-evidence': 'Usable (some evidence)',
   'usable-with-strong-evidence': 'Usable (strong evidence)',
 };
-const statusDescriptions = {
+const STATUS_DESCRIPTIONS = {
   WIP: 'Under active development; details may change.',
   'usable-but-new': 'Can be used today but limited or no third-party evidence.',
   'usable-with-some-evidence': 'Usable with some independent adoption or deployments reported.',
@@ -69,7 +66,7 @@ const statusDescriptions = {
 };
 
 // Standardized pipeline stage labels
-const pipelineLabels = {
+const PIPELINE_LABELS = {
   collect: 'Collect/Scrape',
   train: 'Train',
   'fine-tune': 'Fine-tune',
@@ -102,21 +99,21 @@ const pipelineLabels = {
       <div class="guide-flow" id="guide-flow">
         <!-- Goal selection - always visible -->
         <div class="guide-goals">
-          <button class="guide-option" data-goal="signal" data-actions="attach-preference-signal,attach-formal-license" aria-pressed="false">
+          <button type="button" class="guide-option" data-goal="signal" data-actions="attach-preference-signal,attach-formal-license" aria-pressed="false">
             <span class="option-emoji">📢</span>
             <span class="option-text">
               <span class="option-title">Express my preferences</span>
               <span class="option-desc">Tell AI companies how I want my work used</span>
             </span>
           </button>
-          <button class="guide-option" data-goal="block" data-actions="technical-blocking" aria-pressed="false">
+          <button type="button" class="guide-option" data-goal="block" data-actions="technical-blocking" aria-pressed="false">
             <span class="option-emoji">🛡️</span>
             <span class="option-text">
               <span class="option-title">Block AI scraping</span>
               <span class="option-desc">Prevent bots from collecting my content</span>
             </span>
           </button>
-          <button class="guide-option" data-goal="paid" data-actions="add-tollgate,join-licensing-collective,certification" aria-pressed="false">
+          <button type="button" class="guide-option" data-goal="paid" data-actions="add-tollgate,join-licensing-collective,certification" aria-pressed="false">
             <span class="option-emoji">💰</span>
             <span class="option-text">
               <span class="option-title">Get compensated</span>
@@ -202,10 +199,10 @@ const pipelineLabels = {
           <input id="q" type="search" placeholder="Search initiatives…" />
         </div>
         <div class="quick-filters">
-          <button id="usable" class="filter-pill" aria-pressed="false">Usable today</button>
+          <button type="button" id="usable" class="filter-pill" aria-pressed="false">Usable today</button>
           <select id="status" class="filter-select">
             <option value="all">All statuses</option>
-            {statuses.map((s) => <option value={s}>{statusLabels[s] || s}</option>)}
+            {statuses.map((s) => <option value={s}>{STATUS_LABELS[s] || s}</option>)}
           </select>
           <select id="sort" class="filter-select">
             <option value="recent">Recent first</option>
@@ -220,12 +217,12 @@ const pipelineLabels = {
         <span class="filter-label">Filter by action:</span>
         <div id="actions" class="action-pills">
           {actions.map((a) => (
-            <button class="action-pill" data-action={a} title={actionDescriptions[a] || ''} aria-pressed="false">
-              {actionLabels[a] || a}
+            <button type="button" class="action-pill" data-action={a} title={ACTION_DESCRIPTIONS[a] || ''} aria-pressed="false">
+              {ACTION_LABELS[a] || a}
             </button>
           ))}
         </div>
-        <button id="copylink" class="share-btn" title="Copy link to this view">
+        <button type="button" id="copylink" class="share-btn" title="Copy link to this view">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
           <span>Share</span>
         </button>
@@ -260,7 +257,7 @@ const pipelineLabels = {
           {/* Primary: Title + Status */}
           <div class="card-header">
             <h2 class="card-title">{i.title}</h2>
-            <span class={`badge ${i.status}`} title={statusDescriptions[i.status] || ''}>{statusLabels[i.status] || i.status}</span>
+            <span class={`badge ${i.status}`} title={STATUS_DESCRIPTIONS[i.status] || ''}>{STATUS_LABELS[i.status] || i.status}</span>
           </div>
 
           {/* Summary */}
@@ -278,8 +275,8 @@ const pipelineLabels = {
 
           {/* Primary action chip - show type prefix for clarity */}
           <div class="meta">
-            {(i.actionsSupported || []).slice(0, 2).map((a) => <span class="chip type-chip" title={actionDescriptions[a] || ''}><span class="chip-label">Type:</span> {actionLabels[a] || a}</span>)}
-            {(i.pipelineStages || []).length > 0 && <span class="chip muted-chip"><span class="chip-label">Stage:</span> {(i.pipelineStages || []).map(p => pipelineLabels[p] || p).join(' → ')}</span>}
+            {(i.actionsSupported || []).slice(0, 2).map((a) => <span class="chip type-chip" title={ACTION_DESCRIPTIONS[a] || ''}><span class="chip-label">Type:</span> {ACTION_LABELS[a] || a}</span>)}
+            {(i.pipelineStages || []).length > 0 && <span class="chip muted-chip"><span class="chip-label">Stage:</span> {(i.pipelineStages || []).map(p => PIPELINE_LABELS[p] || p).join(' -> ')}</span>}
           </div>
 
           {/* Expandable details section */}
@@ -348,7 +345,7 @@ const pipelineLabels = {
                           <div class="snippet-head">
                             <span class="chip">{s.title}</span>
                             {s.sourceUrl && <a href={s.sourceUrl} target="_blank" rel="noopener" title="Source">Source</a>}
-                            <button class="copy" data-code={encodeURIComponent(s.code || '')}>Copy</button>
+                            <button type="button" class="copy" data-code={encodeURIComponent(s.code || '')}>Copy</button>
                           </div>
                           <pre class="code"><code>{s.code}</code></pre>
                         </div>
@@ -363,231 +360,282 @@ const pipelineLabels = {
       )})}
     </section>
 
-    
-
-
-    <p id="empty" class="muted" style="display:none;">No results match your filters. <button id="clear">Clear filters</button></p>
+    <p id="empty" class="muted" hidden>No results match your filters. <button id="clear" type="button">Clear filters</button></p>
   </main>
 
   <script>
-    const $ = (s) => document.querySelector(s);
-    const $$ = (s) => Array.from(document.querySelectorAll(s));
+    (() => {
+      const queryAll = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+      const queryOne = (selector, root = document) => root.querySelector(selector);
+      const setPressed = (el, pressed) => el.setAttribute('aria-pressed', String(pressed));
 
-    // Creator Guide Flow - toggles filter the main card list
-    let activeGoal = null;
-    const guideHint = $('#guide-hint');
+      const searchInput = queryOne('#q');
+      const statusSelect = queryOne('#status');
+      const actionsContainer = queryOne('#actions');
+      const usableToggle = queryOne('#usable');
+      const sortSelect = queryOne('#sort');
+      const countText = queryOne('#count');
+      const emptyState = queryOne('#empty');
+      const cardsContainer = queryOne('#cards');
+      const copyLinkButton = queryOne('#copylink');
+      const clearButton = queryOne('#clear');
+      const guideHint = queryOne('#guide-hint');
+      const guideButtons = queryAll('.guide-option');
 
-    function updateGoalButtons() {
-      $$('.guide-option').forEach(btn => {
-        const isActive = btn.dataset.goal === activeGoal;
-        btn.setAttribute('aria-pressed', String(isActive));
-      });
-      if (activeGoal && guideHint) {
-        guideHint.textContent = 'Filtering by goal. Click again to show all.';
-      } else if (guideHint) {
-        guideHint.textContent = 'Click a goal to filter, click again to clear';
+      const requiredElements = [
+        searchInput,
+        statusSelect,
+        actionsContainer,
+        usableToggle,
+        sortSelect,
+        countText,
+        emptyState,
+        cardsContainer,
+        copyLinkButton,
+      ];
+      if (requiredElements.some((el) => !el)) return;
+
+      let activeGoal = null;
+
+      const actionPills = () => queryAll('.action-pill', actionsContainer);
+      const cards = () => queryAll('.card', cardsContainer);
+
+      function getSelectedActions() {
+        return actionPills()
+          .filter((pill) => pill.getAttribute('aria-pressed') === 'true')
+          .map((pill) => (pill.dataset.action || '').toLowerCase())
+          .filter(Boolean);
       }
-    }
 
-    $$('.guide-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const goal = btn.dataset.goal;
+      function clearActionPills() {
+        actionPills().forEach((pill) => setPressed(pill, false));
+      }
+
+      function updateGoalButtons() {
+        guideButtons.forEach((button) => {
+          setPressed(button, button.dataset.goal === activeGoal);
+        });
+
+        if (!guideHint) return;
+        guideHint.textContent = activeGoal
+          ? 'Filtering by goal. Click again to show all.'
+          : 'Click a goal to filter, click again to clear';
+      }
+
+      function toggleGoalFilter(button) {
+        const goal = button.dataset.goal;
+        if (!goal) return;
+
         if (activeGoal === goal) {
-          // Toggle off
           activeGoal = null;
-          // Clear action pills
-          $$('#actions .action-pill').forEach(el => el.setAttribute('aria-pressed', 'false'));
-        } else {
-          // Set new goal and apply its actions
-          activeGoal = goal;
-          const actionTypes = (btn.dataset.actions || '').split(',');
-          // Set matching action pills
-          $$('#actions .action-pill').forEach(el => {
-            const match = actionTypes.includes(el.dataset.action);
-            el.setAttribute('aria-pressed', String(match));
-          });
+          clearActionPills();
+          return;
         }
+
+        activeGoal = goal;
+        const matchedActions = new Set(
+          (button.dataset.actions || '')
+            .split(',')
+            .map((action) => action.trim())
+            .filter(Boolean)
+        );
+        actionPills().forEach((pill) => {
+          setPressed(pill, matchedActions.has(pill.dataset.action || ''));
+        });
+      }
+
+      function compareCards(a, b, sortMode) {
+        const aTitle = a.dataset.title || '';
+        const bTitle = b.dataset.title || '';
+
+        if (sortMode === 'alpha') return aTitle.localeCompare(bTitle);
+        if (sortMode === 'usable') {
+          const aUsable = a.dataset.usable === 'true' ? 1 : 0;
+          const bUsable = b.dataset.usable === 'true' ? 1 : 0;
+          if (aUsable !== bUsable) return bUsable - aUsable;
+          return aTitle.localeCompare(bTitle);
+        }
+
+        const aActivity = Number(a.dataset.activity || 0);
+        const bActivity = Number(b.dataset.activity || 0);
+        if (aActivity !== bActivity) return bActivity - aActivity;
+        return aTitle.localeCompare(bTitle);
+      }
+
+      function syncUrl(rawQuery, statusValue, selectedActions, onlyUsable, sortMode) {
+        const params = new URLSearchParams();
+        if (rawQuery) params.set('q', rawQuery);
+        if (statusValue && statusValue !== 'all') params.set('status', statusValue);
+        selectedActions.forEach((action) => params.append('actions', action));
+        if (onlyUsable) params.set('usable', 'true');
+        if (sortMode && sortMode !== 'recent') params.set('sort', sortMode);
+
+        const qs = params.toString();
+        const nextUrl = qs ? `?${qs}` : location.pathname;
+        history.replaceState(null, '', nextUrl);
+      }
+
+      function applyFilters() {
+        const rawQuery = (searchInput.value || '').trim();
+        const query = rawQuery.toLowerCase();
+        const statusValue = statusSelect.value;
+        const selectedActions = getSelectedActions();
+        const onlyUsable = usableToggle.getAttribute('aria-pressed') === 'true';
+        const sortMode = sortSelect.value || 'recent';
+
+        let visibleCount = 0;
+        const visibleCards = [];
+
+        cards().forEach((card) => {
+          let matches = true;
+
+          if (query) {
+            const searchable = `${card.dataset.title || ''} ${card.dataset.summary || ''} ${card.dataset.tags || ''}`;
+            matches = searchable.includes(query);
+          }
+
+          if (matches && statusValue !== 'all') matches = card.dataset.status === statusValue;
+          if (matches && selectedActions.length > 0) {
+            const cardActions = (card.dataset.actions || '').split(' ').filter(Boolean);
+            matches = selectedActions.some((action) => cardActions.includes(action));
+          }
+          if (matches && onlyUsable) matches = card.dataset.usable === 'true';
+
+          card.hidden = !matches;
+          if (!matches) return;
+
+          visibleCount += 1;
+          visibleCards.push(card);
+        });
+
+        countText.textContent = String(visibleCount);
+        emptyState.hidden = visibleCount !== 0;
+
+        visibleCards.sort((a, b) => compareCards(a, b, sortMode));
+        visibleCards.forEach((card) => cardsContainer.appendChild(card));
+
+        syncUrl(rawQuery, statusValue, selectedActions, onlyUsable, sortMode);
+      }
+
+      function clearFilters() {
+        searchInput.value = '';
+        statusSelect.value = 'all';
+        clearActionPills();
+        setPressed(usableToggle, false);
+        sortSelect.value = 'recent';
+        activeGoal = null;
+        updateGoalButtons();
+        applyFilters();
+      }
+
+      guideButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          toggleGoalFilter(button);
+          updateGoalButtons();
+          applyFilters();
+        });
+      });
+
+      searchInput.addEventListener('input', applyFilters);
+      statusSelect.addEventListener('change', applyFilters);
+      sortSelect.addEventListener('change', applyFilters);
+
+      actionsContainer.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const pill = target.closest('.action-pill');
+        if (!(pill instanceof HTMLElement)) return;
+
+        const pressed = pill.getAttribute('aria-pressed') === 'true';
+        setPressed(pill, !pressed);
+        activeGoal = null;
         updateGoalButtons();
         applyFilters();
       });
-    });
 
-    const q = $('#q');
-    const status = $('#status');
-    const actionsContainer = $('#actions');
-    const usable = $('#usable');
-    const sort = $('#sort');
-    const count = $('#count');
-    const empty = $('#empty');
-    const copylink = $('#copylink');
-    const clearBtn = $('#clear');
-
-    function getSelectedActions() {
-      return $$('#actions .action-pill[aria-pressed="true"]').map(el => el.dataset.action.toLowerCase());
-    }
-
-    function applyFilters() {
-      const qv = (q.value || '').trim().toLowerCase();
-      const stat = status.value;
-      const selectedActions = getSelectedActions();
-      const onlyUsable = usable.getAttribute('aria-pressed') === 'true';
-      const sortMode = sort.value;
-
-      const cards = $$('#cards .card');
-
-      let shown = 0;
-      cards.forEach((el) => {
-        let ok = true;
-        if (qv) {
-          const hay = `${el.dataset.title} ${el.dataset.summary} ${el.dataset.tags}`;
-          ok = hay.includes(qv);
-        }
-        if (ok && stat !== 'all') ok = el.dataset.status === stat;
-        if (ok && selectedActions.length) {
-          const acts = (el.dataset.actions || '').split(' ');
-          ok = selectedActions.some((a) => acts.includes(a));
-        }
-        if (ok && onlyUsable) ok = el.dataset.usable === 'true';
-
-        el.style.display = ok ? '' : 'none';
-        if (ok) shown++;
-      });
-      count.textContent = String(shown);
-      empty.style.display = shown === 0 ? '' : 'none';
-
-      // Sort visible cards
-      const visible = cards.filter((el) => el.style.display !== 'none');
-      visible.sort((a, b) => {
-        if (sortMode === 'alpha') {
-          return (a.dataset.title || '').localeCompare(b.dataset.title || '');
-        }
-        if (sortMode === 'usable') {
-          const au = a.dataset.usable === 'true' ? 1 : 0;
-          const bu = b.dataset.usable === 'true' ? 1 : 0;
-          if (au !== bu) return bu - au;
-          return (a.dataset.title || '').localeCompare(b.dataset.title || '');
-        }
-        // default and explicit 'recent'
-        if (sortMode === 'recent' || !sortMode) {
-          const at = Number(a.dataset.activity || 0);
-          const bt = Number(b.dataset.activity || 0);
-          if (at !== bt) return bt - at;
-          return (a.dataset.title || '').localeCompare(b.dataset.title || '');
-        }
-        return 0;
-      });
-      // Re-append in new order
-      const container = $('#cards');
-      visible.forEach((el) => container.appendChild(el));
-
-      // Update URL params for shareable views
-      const params = new URLSearchParams();
-      if (qv) params.set('q', qv);
-      if (stat && stat !== 'all') params.set('status', stat);
-      selectedActions.forEach((a) => params.append('actions', a));
-      if (onlyUsable) params.set('usable', 'true');
-      if (sortMode) params.set('sort', sortMode);
-      const qs = params.toString();
-      const nextUrl = qs ? `?${qs}` : location.pathname;
-      history.replaceState(null, '', nextUrl);
-    }
-
-    q.addEventListener('input', applyFilters);
-    status.addEventListener('change', applyFilters);
-    sort.addEventListener('change', applyFilters);
-
-    // Action pill toggle handler
-    actionsContainer.addEventListener('click', (e) => {
-      const pill = e.target.closest('.action-pill');
-      if (!pill) return;
-      const pressed = pill.getAttribute('aria-pressed') === 'true';
-      pill.setAttribute('aria-pressed', String(!pressed));
-      applyFilters();
-    });
-
-    // Usable today toggle
-    usable.addEventListener('click', () => {
-      const next = usable.getAttribute('aria-pressed') !== 'true';
-      usable.setAttribute('aria-pressed', String(next));
-      applyFilters();
-    });
-
-    // Share button
-    copylink.addEventListener('click', async () => {
-      const textSpan = copylink.querySelector('span');
-      try {
-        await navigator.clipboard.writeText(location.href);
-        textSpan.textContent = 'Copied!';
-        setTimeout(() => (textSpan.textContent = 'Share'), 1800);
-      } catch (e) {
-        alert('Could not copy link');
-      }
-    });
-
-    // Clear filters
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        q.value = '';
-        status.value = 'all';
-        $$('#actions .action-pill').forEach(el => el.setAttribute('aria-pressed', 'false'));
-        usable.setAttribute('aria-pressed', 'false');
-        sort.value = 'recent';
+      usableToggle.addEventListener('click', () => {
+        const nextPressed = usableToggle.getAttribute('aria-pressed') !== 'true';
+        setPressed(usableToggle, nextPressed);
         applyFilters();
       });
-    }
 
-    // Copy snippet button handler
-    document.addEventListener('click', async (e) => {
-      const btn = e.target.closest('.copy');
-      if (!btn) return;
-      const code = decodeURIComponent(btn.getAttribute('data-code') || '');
-      try {
-        await navigator.clipboard.writeText(code);
-        btn.textContent = 'Copied';
-        setTimeout(() => (btn.textContent = 'Copy'), 1200);
-      } catch {}
-    });
+      copyLinkButton.addEventListener('click', async () => {
+        const textSpan = queryOne('span', copyLinkButton);
+        if (!textSpan) return;
 
-    // Initialize from URL params (basic deep-link support)
-    const params = new URLSearchParams(location.search);
-    if (params.has('q')) q.value = params.get('q');
-    if (params.has('status')) {
-      const val = params.get('status');
-      const has = Array.from(status.options).some((o) => o.value === val);
-      if (has) status.value = val;
-    }
-    if (params.has('action') || params.has('actions')) {
-      const preselect = new Set([...params.getAll('action'), ...params.getAll('actions')]);
-      $$('#actions .action-pill').forEach((el) => {
-        if (preselect.has(el.dataset.action)) {
-          el.setAttribute('aria-pressed', 'true');
+        try {
+          await navigator.clipboard.writeText(location.href);
+          textSpan.textContent = 'Copied!';
+        } catch {
+          textSpan.textContent = 'Copy failed';
         }
-      });
-    }
-    if (params.get('usable') === 'true') {
-      usable.setAttribute('aria-pressed', 'true');
-    }
-    if (params.has('sort')) {
-      const val = params.get('sort');
-      if (Array.from(sort.options).some((o) => o.value === val)) sort.value = val;
-    }
-    applyFilters();
-  </script>
 
-  <style>
-    .references {
-      margin-top: 0.75rem;
-    }
-    .references-title {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-    .references-list {
-      margin: 0;
-      padding-left: 1.25rem;
-    }
-    .references-list li {
-      margin: 0.15rem 0;
-    }
-  </style>
+        setTimeout(() => {
+          textSpan.textContent = 'Share';
+        }, 1800);
+      });
+
+      if (clearButton) {
+        clearButton.addEventListener('click', clearFilters);
+      }
+
+      document.addEventListener('click', async (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const button = target.closest('.copy');
+        if (!(button instanceof HTMLButtonElement)) return;
+
+        const code = decodeURIComponent(button.getAttribute('data-code') || '');
+        try {
+          await navigator.clipboard.writeText(code);
+          button.textContent = 'Copied';
+        } catch {
+          button.textContent = 'Copy failed';
+        }
+
+        setTimeout(() => {
+          button.textContent = 'Copy';
+        }, 1200);
+      });
+
+      function initializeFromUrl() {
+        const params = new URLSearchParams(location.search);
+
+        const queryValue = params.get('q');
+        if (queryValue) searchInput.value = queryValue;
+
+        const statusValue = params.get('status');
+        if (statusValue) {
+          const hasStatus = Array.from(statusSelect.options).some((option) => option.value === statusValue);
+          if (hasStatus) statusSelect.value = statusValue;
+        }
+
+        const preselectedActions = new Set([
+          ...params.getAll('action'),
+          ...params.getAll('actions'),
+        ]);
+        if (preselectedActions.size > 0) {
+          actionPills().forEach((pill) => {
+            setPressed(pill, preselectedActions.has(pill.dataset.action || ''));
+          });
+        }
+
+        if (params.get('usable') === 'true') {
+          setPressed(usableToggle, true);
+        }
+
+        const sortValue = params.get('sort');
+        if (sortValue) {
+          const hasSortOption = Array.from(sortSelect.options).some((option) => option.value === sortValue);
+          if (hasSortOption) sortSelect.value = sortValue;
+        }
+      }
+
+      initializeFromUrl();
+      updateGoalButtons();
+      applyFilters();
+    })();
+  </script>
 </Layout>
