@@ -330,6 +330,12 @@ def main() -> int:
         default=[],
         help="Sync only a specific post URL (can be passed multiple times).",
     )
+    parser.add_argument(
+        "--refresh-url",
+        action="append",
+        default=[],
+        help="Force-refresh a specific post URL even if updated_at has not advanced.",
+    )
     args = parser.parse_args()
 
     cwd = Path.cwd()
@@ -351,6 +357,7 @@ def main() -> int:
         target_urls = set(args.url)
     else:
         target_urls = set(local_by_url.keys()) | archive_urls | feed_urls
+    refresh_urls = set(args.refresh_url)
 
     if not target_urls:
         print("[info] No candidate Substack URLs found.")
@@ -417,6 +424,10 @@ def main() -> int:
         else:
             needs_sync = False
             reason = "unchanged"
+
+        if (canonical in refresh_urls) or (url in refresh_urls):
+            needs_sync = True
+            reason = "refresh-url"
 
         # Keep an existing frontmatter block exactly if present.
         existing_frontmatter = ""

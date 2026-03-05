@@ -1,5 +1,5 @@
 {
-  "last_run_utc": "2026-03-05T00:06:51Z",
+  "last_run_utc": "2026-03-05T14:25:31Z",
   "posts": {
     "https://dataleverage.substack.com/p/a-harbinger-of-the-future-of-content": {
       "file": "2023-08-25-a-harbinger-of-the-future-of-content.md",
@@ -27,9 +27,9 @@
     },
     "https://dataleverage.substack.com/p/algorithmic-collective-action-with": {
       "file": "2025-07-20-algorithmic-collective-action-with-two-collectives.md",
-      "last_synced_at_utc": "2026-03-05T00:06:49Z",
-      "last_synced_body_hash": "a8cb43b9c482dfd1c86ad5a55aa508f92fa51e815c6ba864a3f401d0ef51a3bf",
-      "last_synced_file_hash": "df2a2abd7e4f7be4f1006b13498ec5626181e2ff71abd7cd075e5f435230c612",
+      "last_synced_at_utc": "2026-03-05T14:25:28Z",
+      "last_synced_body_hash": "65fb8b1aca9c58895f70a8094e6a302ff6410b78fe38ca670413f637a346c66b",
+      "last_synced_file_hash": "7beda47dcaeb900d9c0c333e5d5357c5d951fdb55be613812f5f09dd3f91b621",
       "last_synced_updated_at": "2025-06-20T18:30:05.198Z",
       "post_id": 166419096
     },
@@ -107,9 +107,9 @@
     },
     "https://dataleverage.substack.com/p/how-collective-bargaining-for-information": {
       "file": "2025-10-11-how-collective-bargaining-hci-public-ai-fit-together.md",
-      "last_synced_at_utc": "2026-03-05T00:06:50Z",
-      "last_synced_body_hash": "5b6fbfa4b940742f0c58b5915c89e32664301bb9bfd39fe34d68ae5e0450549a",
-      "last_synced_file_hash": "843c0d4debe52a925e89854383e4302a8fb30345c7186e198de0e01683e4da62",
+      "last_synced_at_utc": "2026-03-05T14:25:29Z",
+      "last_synced_body_hash": "79934160f94c4782a0b193fe1cbb573ea7f5991651408524840f9d2d1be373ac",
+      "last_synced_file_hash": "504c6fe9d9a33e816a52d71d42ef377af4400cf5fef923872fd7c59255e406b7",
       "last_synced_updated_at": "2025-11-18T21:40:07.344Z",
       "post_id": 165472694
     },
@@ -227,9 +227,9 @@
     },
     "https://dataleverage.substack.com/p/which-datasets-should-we-assume-are": {
       "file": "2025-09-24-which-datasets-should-we-assume-are-in-models.md",
-      "last_synced_at_utc": "2026-03-05T00:06:51Z",
-      "last_synced_body_hash": "d88590fddacf7cb420be4629cb27745a4083b6abbfc672cd49881652b534052b",
-      "last_synced_file_hash": "04232765d6663456d9090da47eae772be375b0411b7661cbf5ee64e56e548133",
+      "last_synced_at_utc": "2026-03-05T14:25:31Z",
+      "last_synced_body_hash": "6a81da83e4039537e603e5d28ece1f635c25239e56233037392842da7aa9a294",
+      "last_synced_file_hash": "d2f7ae8921e9edec47861c75c49e8a408ddcbda24785656f14712a90888dae86",
       "last_synced_updated_at": "2025-09-24T17:10:45.573Z",
       "post_id": 139604998
     },
