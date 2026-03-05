@@ -1,5 +1,6 @@
 .quarto/
-posts/
+posts
+posts.local-backup-*
 docs/
 
 /.quarto/
