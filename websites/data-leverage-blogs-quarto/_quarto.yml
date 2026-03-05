@@ -1,6 +1,12 @@
 project:
   type: website
   output-dir: docs
+  render:
+    - index.qmd
+    - archive.qmd
+    - discussions.qmd
+    - posts/*.md
+    - posts/*.qmd
 website:
   title: Data Leverage Blog
   navbar:
