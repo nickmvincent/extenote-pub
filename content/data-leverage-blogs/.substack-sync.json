@@ -1,5 +1,5 @@
 {
-  "last_run_utc": "2026-03-05T14:25:31Z",
+  "last_run_utc": "2026-03-11T19:03:08Z",
   "posts": {
     "https://dataleverage.substack.com/p/a-harbinger-of-the-future-of-content": {
       "file": "2023-08-25-a-harbinger-of-the-future-of-content.md",
@@ -224,6 +224,14 @@
       "last_synced_file_hash": "7382f679a328d5cf02152ed71fff7f8e3785c4a8c31787338e1a28145b35bc91",
       "last_synced_updated_at": "2025-05-30T19:05:24.306Z",
       "post_id": 150407555
+    },
+    "https://dataleverage.substack.com/p/two-natural-allies-of-a-data-transparency": {
+      "file": "2026-03-09-two-natural-allies-of-a-data-transparency.md",
+      "last_synced_at_utc": "2026-03-11T19:03:08Z",
+      "last_synced_body_hash": "f063e31d64a065780a8a257c57c398ae8973b4d50de29eb71dfa8351c1f2e0e0",
+      "last_synced_file_hash": "4fb3115c7b53d2bcca9b4906a8579a05c2c40aef8da311636a41dd34f3be9c0f",
+      "last_synced_updated_at": "2026-03-09T18:55:05.275Z",
+      "post_id": 190292186
     },
     "https://dataleverage.substack.com/p/which-datasets-should-we-assume-are": {
       "file": "2025-09-24-which-datasets-should-we-assume-are-in-models.md",
