@@ -5,14 +5,16 @@ type: readme
 
 This repository is organized to keep public content and the web shells that render it side-by-side:
 
-- `content/` – the canonical source for public Markdown vaults, demos, and assets (e.g., `data-licenses`, `data-napkin-math`, `personal-website` seed content).
-- `websites/` – Astro (or other) front-ends such as `personal-website-astro` that read from `content/`.
+- `content/` – the canonical source for public Markdown vaults, demos, and assets that still live in this repo (for example, `extenote-docs` and `shared-references`).
+- `websites/` – Astro (or other) front-ends such as `shared-references-astro` that read from `content/`.
 
 ### Wiring content into apps
 
 - Each site defaults to loading from `../../content/<name>`, but you can override via env vars (e.g., `PERSONAL_CONTENT_PATH`) when developing elsewhere.
 - When adding a new site, create the corresponding vault under `content/` so code and artifacts live in a single repo.
 - Verified 2025-12-28: all Astro sites load content directly from `../../content` (no symlinks required).
+
+The personal website now lives in a separate repo.
 
 ### Usage notes
 
